@@ -513,7 +513,36 @@
       "recovery": "tools/live2d-authoring/build/current-release/changli-0.7.4-recovery-20261011-201354.zip",
       "sourceCommit": "1e2fa68e3af401942d000b9f3d6801656d33b1ef",
       "remoteAssetsVerified": true
+    },
+    {
+      "version": "0.7.5",
+      "tag": "v0.7.5",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.5",
+      "localDelivery": "deliveries/20261011-desktop-0.7.5",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.5-x64-setup.exe",
+          "bytes": 44099383,
+          "sha256": "7D021C1FEFE3A7E6C0D22507B3C972715F93E4526C031195A4068070CB56BCFD",
+          "localPath": "deliveries/20261011-desktop-0.7.5/changli-companion-0.7.5-x64-setup.exe"
+        },
+        {
+          "file": "changli-companion.exe",
+          "bytes": 53461504,
+          "sha256": "A21D4B21816F0D76D4EB7159C9F6AB4443334B59633947C57DDCFD9831525733",
+          "localPath": "deliveries/20261011-desktop-0.7.5/changli-companion.exe"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git",
+        "checkpoint": null,
+        "sourceTagCommit": null,
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": false
     }
   ],
-  "githubArchiveVerified": true
+  "githubArchiveVerified": false
 }

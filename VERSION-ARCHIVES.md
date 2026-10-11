@@ -2,12 +2,13 @@
 
 每个版本独立保留，旧版本不覆盖。Release中的程序、安装包和SHA256清单对应各自版本。
 
-已核对全部15个独立Release的程序、安装包及远端SHA256摘要。
+既有15个独立Release已核对远端SHA256；0.7.5已独立保存，正在上传。
 
 历史源码标签从当时保存的源码检查点恢复，恢复日期不是原开发提交日期，也没有重新构建或重新验收旧版本。0.6.3只有二进制存档；其archive标签只含归档说明，不提供伪造的旧源码。0.6.8使用本版源码检查点，运行模型从使用同一已验证v71原生源的0.6.9恢复包提取，来源单独记录。
 
 | 版本 | 独立Release | 源码情况 | 本地程序目录 |
 | --- | --- | --- | --- |
+| 0.7.5 | [v0.7.5](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.5) | 原Git标签 | `deliveries/20261011-desktop-0.7.5` |
 | 0.7.4 | [v0.7.4](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.4) | 原Git标签 | `deliveries/20261011-desktop-0.7.4` |
 | 0.7.3 | [v0.7.3](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.3) | 原Git标签 | `deliveries/20261011-desktop-0.7.3` |
 | 0.7.2 | [v0.7.2](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.2) | 已保存源码检查点 | `deliveries/20261011-desktop-0.7.2` |

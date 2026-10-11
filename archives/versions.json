@@ -541,6 +541,66 @@
       },
       "remoteAssetsVerified": true,
       "sourceCommit": "444e891d18452b08b9d80992bd1555b5aebd6a14"
+    },
+    {
+      "version": "0.7.6",
+      "tag": "v0.7.6",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.6",
+      "localDelivery": "deliveries/20261012-desktop-0.7.6",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.6-x64-setup.exe",
+          "bytes": 44100189,
+          "sha256": "98F27B37C3012362FC81714EF7B39B1E25C6E1AD163CB4549696687AFEF54A86",
+          "localPath": "deliveries/20261012-desktop-0.7.6/changli-companion-0.7.6-x64-setup.exe"
+        },
+        {
+          "file": "changli-companion.exe",
+          "bytes": 53461504,
+          "sha256": "320FE9F3079B5FD0A7B9D072476A2055FEA8BA9048913C29E4B25DA435869797",
+          "localPath": "deliveries/20261012-desktop-0.7.6/changli-companion.exe"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "sourceCommit": "cac6010930a40f630c6edd1db67780b3d94513eb",
+      "remoteAssetsVerified": true,
+      "webglRendered": true,
+      "windowsDesktopVerified": false
+    },
+    {
+      "version": "0.7.7",
+      "tag": "v0.7.7",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.7",
+      "localDelivery": "deliveries/20261012-desktop-0.7.7",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 53464064,
+          "sha256": "E6B790965AFCD703FC067D38CD269D4AFD4004D4DFFE536DDAE06DD9DA2F7712",
+          "localPath": "deliveries/20261012-desktop-0.7.7/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.7-x64-setup.exe",
+          "bytes": 44109195,
+          "sha256": "D2FA3F5C17136A47B8E4792EDD738A2CD3FB76CDC1A3C15DD6468B4DD5EF70ED",
+          "localPath": "deliveries/20261012-desktop-0.7.7/changli-companion-0.7.7-x64-setup.exe"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "sourceCommit": "913bfcc7191917d10ab1b9969741a4ac3656db39",
+      "remoteAssetsVerified": true,
+      "webglRendered": true,
+      "windowsDesktopVerified": false
     }
   ],
   "githubArchiveVerified": true

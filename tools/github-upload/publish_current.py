@@ -29,6 +29,15 @@ def gh(*args):
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
+def release_for_tag():
+    # Drafts do not have a public tag URL yet. Inspect owned releases by tag,
+    # so an interrupted upload resumes without making a second draft.
+    rows = json.loads(gh('api', 'repos/' + REPO + '/releases?per_page=100'))
+    matches = [r for r in rows if r['tag_name'] == TAG]
+    if len(matches) > 1:
+        raise ValueError('Ambiguous release drafts')
+    return matches[0] if matches else None
+
 def main():
     if gh('api', 'user', '--jq', '.login').casefold() != OWNER.casefold():
         raise ValueError('Unexpected GitHub account')
@@ -49,27 +58,37 @@ def main():
     head = command(['git', 'rev-parse', 'HEAD']).stdout.strip()
     if gh('api', 'repos/' + REPO + '/commits/main', '--jq', '.sha') != head:
         raise ValueError('Remote source differs')
-    existing = command([str(GH), 'api', 'repos/' + REPO + '/releases/tags/' + TAG], check=False)
-    if existing.returncode:
+    release = release_for_tag()
+    if not release:
         print(gh('release', 'create', TAG,
-                 *[str(DELIVERY / item['file']) for item in artifacts],
-                 str(DELIVERY / 'SHA256.json'), '--repo', REPO, '--target', head,
+                 '--draft', '--repo', REPO, '--target', head,
                  '--title', '离火长明 ' + VERSION + ' 工程版', '--prerelease',
                  '--notes-file', str(ROOT / ('tools/github-upload/release-notes-' + VERSION + '.md'))))
-    release = json.loads(gh('api', 'repos/' + REPO + '/releases/tags/' + TAG))
+        release = release_for_tag()
+    if release['draft']:
+        target = command(['git', 'rev-parse', release['target_commitish']]).stdout.strip()
+        target_package = json.loads(command(['git', 'show', target + ':package.json']).stdout)
+        if target_package['version'] != VERSION or command(['git', 'diff', target, head, '--',
+                'src', 'src-tauri', 'public', 'package.json', 'package-lock.json', 'index.html']).stdout.strip():
+            raise ValueError('Draft source does not match the saved application')
     assets = {item['name']: item for item in release['assets']}
     checks = artifacts + [{'file': 'SHA256.json', 'bytes': (DELIVERY / 'SHA256.json').stat().st_size,
                           'sha256': sha(DELIVERY / 'SHA256.json')}]
     for item in checks:
         asset = assets.get(item['file'])
         if not asset:
+            print('Uploading missing asset:', item['file'], flush=True)
             gh('release', 'upload', TAG, str(DELIVERY / item['file']), '--repo', REPO)
-            release = json.loads(gh('api', 'repos/' + REPO + '/releases/tags/' + TAG))
+            release = release_for_tag()
             asset = next(a for a in release['assets'] if a['name'] == item['file'])
         if asset['size'] != item['bytes'] or asset.get('digest', '').upper() != 'SHA256:' + item['sha256']:
             raise ValueError('Remote checksum mismatch: ' + item['file'])
+    if release['draft']:
+        gh('release', 'edit', TAG, '--repo', REPO, '--draft=false')
+        release = release_for_tag()
+    source_commit = gh('api', 'repos/' + REPO + '/commits/' + TAG, '--jq', '.sha')
     result = {'uploaded': True, 'private': True, 'repository': meta['url'],
-              'commit': head, 'release': release['html_url'],
+              'commit': source_commit, 'release': release['html_url'],
               'prerelease': release['prerelease'], 'assets': checks}
     local = ROOT / 'tools/github-upload/local'
     local.mkdir(exist_ok=True)

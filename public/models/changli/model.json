@@ -2,7 +2,7 @@
   "schema": 2,
   "name": "Changli",
   "display_name": "长离",
-  "version": "0.12.5",
+  "version": "0.12.7",
   "input_mode": "keyboard_mouse",
   "renderer": {
     "preferred": "live2d",
@@ -315,11 +315,25 @@
               0.11,
               0
             ]
+          },
+          "ArtMesh20": {
+            "bounds": [
+              0.1622,
+              0,
+              0.03994,
+              0.243
+            ],
+            "shift": [
+              0,
+              0
+            ],
+            "erase": true
           }
         },
         "depthPixels": 18,
         "keyboardMesh": "ArtMesh56",
-        "keyboardAsset": "assets/keyboard-four-zones.svg"
+        "keyboardAsset": "assets/keyboard-four-zones.svg",
+        "jawAsset": "assets/jaw-underpaint-v077.svg"
       }
     }
   },
@@ -328,7 +342,7 @@
     1254,
     1254
   ],
-  "art_status": "v71原生Live2D；0.7.5运行资源：四区键盘、睁眼开心、闭眼困倦、随脸矢量效果；未重新导出CMO3",
+  "art_status": "v71 native Live2D; 0.7.7 runtime jaw corner and foreground hand-edge repair; no new CMO3 export",
   "assets": {
     "base": "assets/changli-cutout.png"
   },

@@ -10,6 +10,7 @@ export interface RuntimeOffsetRig {
   depthPixels?: number;
   keyboardMesh?: string;
   keyboardAsset?: string;
+  jawAsset?: string;
   mousePixels: number;
   mouseRegion?: MouseRegion;
   handOrder?: HandDrawOrder;

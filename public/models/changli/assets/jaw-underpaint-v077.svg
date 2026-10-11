@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 2048 2048">
+  <!-- Small jaw underpaint; original portrait and native textures preserved. -->
+  <g transform="translate(12 687.3)">
+    <path d="M650 817 L799 817 L801 839 Q780 858 756 869 Q730 877 700 875 Q673 877 650 874 Z" fill="#fff0e8"/>
+    <path d="M650 874 Q673 877 700 875 Q730 877 756 869 Q780 858 801 839" fill="none" stroke="#914f4b" stroke-width="2.8" stroke-linecap="round"/>
+  </g>
+</svg>

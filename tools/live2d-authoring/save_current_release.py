@@ -22,11 +22,14 @@ def main():
         raise ValueError('Commit intended source first')
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode('utf-8').split('\0')
     files = [ROOT / p for p in tracked if p]
-    files += [ROOT / 'PROGRESS-CHECKPOINT-20261011.md']
-    for directory in (ROOT / ('deliveries/20261011-desktop-' + VERSION),
-                      HERE / ('build/expressive-' + VERSION + '-20261011'),
-                      HERE / ('build/interactions-' + VERSION + '-20261011'),
-                      HERE / ('build/installer-' + VERSION + '-20261011')):
+    progress = sorted(ROOT.glob('PROGRESS-CHECKPOINT-*.md'))[-1]
+    files += [progress]
+    deliveries = list((ROOT / 'deliveries').glob('*-desktop-' + VERSION))
+    if len(deliveries) != 1:
+        raise ValueError('Expected one independent current delivery')
+    evidence = [p for kind in ('expressive', 'interactions', 'installer')
+                for p in (HERE / 'build').glob(kind + '-' + VERSION + '-*') if p.is_dir()]
+    for directory in deliveries + evidence:
         files += [p for p in directory.glob('*') if p.is_file() and p.suffix in ('.json', '.png', '.exe')
                   and p.name != 'changli-companion-fullscreen-test.exe']
     previous = HERE / 'build/desktop-integration-20261006/CURRENT-RELEASE-RECOVERY.json'
@@ -46,7 +49,7 @@ def main():
             manifest['files'].append({'path': rel, 'bytes': p.stat().st_size, 'sha256': sha(p)})
             out.write(p, rel)
         out.writestr('RECOVERY-MANIFEST.json', json.dumps(manifest, ensure_ascii=False, indent=2))
-        out.writestr('恢复说明.txt', '解压后先读取DELIVERY-' + VERSION + '.md与PROGRESS-CHECKPOINT-20261011.md。\n'
+        out.writestr('恢复说明.txt', '解压后先读取DELIVERY-' + VERSION + '.md与' + progress.name + '。\n'
                      '当前可运行桌宠与已验证v71原生源已保存；未晋升的原生工作源在上一份恢复包中，不冒充发布模型。\n'
                      '依赖安装npm ci，开发npm run desktop，打包npm run package:windows。\n')
     with zipfile.ZipFile(archive) as check:

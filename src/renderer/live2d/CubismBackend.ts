@@ -105,7 +105,7 @@ export class CubismBackend implements Live2DBackend {
     if (check.manifest.Layout) {
       this.modelMatrix.setupFromLayout(new Map(Object.entries(check.manifest.Layout)));
     }
-    this.renderer = new MouseRegionRenderer(canvas.width, canvas.height, this.rig?.mouseRegion, this.rig?.handOrder, this.rig?.contours, this.rig?.flameMesh);
+    this.renderer = new MouseRegionRenderer(canvas.width, canvas.height, this.rig?.mouseRegion, this.rig?.handOrder, this.rig?.contours, this.rig?.flameMesh, this.rig?.skinPatches);
     this.renderer.initialize(this.model);
     this.renderer.startUp(gl);
     this.renderer.setIsPremultipliedAlpha(true);
@@ -252,6 +252,7 @@ export class CubismBackend implements Live2DBackend {
     const mouse = this.offsets.getMouseOffset();
     this.renderer.setMouseMotion(mouse.x, mouse.y);
     this.renderer.setFlameMotion(this.parameters.get('__gesture.flamePhase') || 0, this.parameters.get('__gesture.flameStrength') || 0);
+    this.renderer.setMouthCoverage(this.faceEffects?.mouthCoverage() || 0);
     this.renderer.drawModel(SHADER_URL);
     this.faceEffects?.draw(this.model, matrix, canvas, this.expressionName, now,
       (this.parameters.get('__gesture.flameStrength') || 0) > 0);

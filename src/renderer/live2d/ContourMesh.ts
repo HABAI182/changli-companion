@@ -1,6 +1,38 @@
 export interface MeshGeometry { positions: Float32Array; uvs: Float32Array; indices: Uint16Array }
 export type Contours = Record<string, [number, number][]>;
+export type SkinPatches = Record<string, { bounds: [number, number, number, number]; shift: [number, number] }>;
 type Vertex = [number, number, number, number];
+
+// A blank skin sample from the same native texture replaces the baked mouth
+// beneath the separate animated mouth. Split in UV space so only this small
+// rectangle changes, and the repair follows native face deformation exactly.
+export function skinPatchMesh(source: Float32Array, uv: Float32Array, indices: Uint16Array,
+  patch: SkinPatches[string]): MeshGeometry {
+  const us=Array.from(uv).filter((_,i)=>i%2===0),vs=Array.from(uv).filter((_,i)=>i%2===1);
+  const minU=Math.min(...us),maxU=Math.max(...us),minV=Math.min(...vs),maxV=Math.max(...vs);
+  const local=(v: Vertex)=>[(v[2]-minU)/(maxU-minU),(maxV-v[3])/(maxV-minV)];
+  const [x,y,w,h]=patch.bounds, outline=[[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
+  const positions:number[]=[],uvs:number[]=[],triangles:number[]=[];
+  const emit=(poly:Vertex[], repair:boolean)=>{
+    if(poly.length<3)return;const start=positions.length/2;
+    for(const p of poly){positions.push(p[0],p[1]);uvs.push(p[2]+(repair?patch.shift[0]*(maxU-minU):0),p[3]-(repair?patch.shift[1]*(maxV-minV):0));}
+    for(let i=1;i<poly.length-1;i++)triangles.push(start,start+i,start+i+1);
+  };
+  for(let n=0;n<indices.length;n+=3){
+    let poly=Array.from(indices.slice(n,n+3),i=>[source[i*2],source[i*2+1],uv[i*2],uv[i*2+1]] as Vertex);
+    for(let e=0;e<4&&poly.length;e++){
+      const a=outline[e],b=outline[(e+1)%4],inside:Vertex[]=[],outside:Vertex[]=[];
+      const dist=(v:Vertex)=>{const p=local(v);return(b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0]);};
+      for(let i=0;i<poly.length;i++){
+        const p=poly[i],q=poly[(i+1)%poly.length],dp=dist(p),dq=dist(q);(dp>=0?inside:outside).push(p);
+        if((dp>=0)!==(dq>=0)){const t=dp/(dp-dq),v=p.map((v,k)=>v+(q[k]-v)*t) as Vertex;inside.push(v);outside.push(v);}
+      }
+      emit(outside,false);poly=inside;
+    }
+    emit(poly,true);
+  }
+  return {positions:new Float32Array(positions),uvs:new Float32Array(uvs),indices:new Uint16Array(triangles)};
+}
 
 // Cut the existing triangles in UV space. This removes the sleeve's stray top
 // corners at all authored pressure poses while preserving surviving texels.

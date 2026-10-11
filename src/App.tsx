@@ -622,6 +622,7 @@ export function App() {
                 </button>
               ))}
           </div>
+          <div className="pet-motion-grid" aria-label="小动作">
           {model.animations
             .filter((a) => model.renderer.live2d.motionMap[a.id])
             .map((a) => (
@@ -639,6 +640,7 @@ export function App() {
                 <span>{a.name}</span>
               </button>
             ))}
+          </div>
           <div className="pet-menu-navigation">
             <button aria-label="桌宠设置" onClick={() => navigate('settings')}>
               设置

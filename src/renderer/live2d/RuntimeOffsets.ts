@@ -1,6 +1,6 @@
 import type { MouseRegion } from './MouseRegionRenderer';
 import type { HandDrawOrder } from './HandDrawOrder';
-import type { Contours } from './ContourMesh';
+import type { Contours, SkinPatches } from './ContourMesh';
 import type { CubismModel } from '../../../vendor/live2d/src/model/cubismmodel';
 
 export interface RuntimeOffsetRig {
@@ -18,6 +18,7 @@ export interface RuntimeOffsetRig {
   tail?: { ids: string[]; anchorY: number; stretch: number };
   phoenix?: {ids: string[]; anchor: [number, number]};
   faceEffects?: boolean;
+  skinPatches?: SkinPatches;
 }
 
 // Small procedural translations of the real model's authored hand meshes.

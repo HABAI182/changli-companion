@@ -771,8 +771,10 @@ export function App() {
                   显示旧版分层逻辑测试稿（非目标美术）
                 </label>
                 <div className="event-buttons">
-                  <button onClick={() => signal('keyboard_left')}>左键区 Q / A / Z</button>
-                  <button onClick={() => signal('keyboard_right')}>右键区 Y / H / N</button>
+                  <button onClick={() => signal('keyboard_left', 0, -1)}>左后区 数字 / Q～T</button>
+                  <button onClick={() => signal('keyboard_left', 0, 1)}>左前区 A～G / Z～B</button>
+                  <button onClick={() => signal('keyboard_right', 0, -1)}>右后区 数字 / Y～P</button>
+                  <button onClick={() => signal('keyboard_right', 0, 1)}>右前区 H～L / N～M</button>
                   {(
                     [
                       'key',

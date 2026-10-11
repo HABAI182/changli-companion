@@ -41,6 +41,7 @@ export interface IdleParameters {
   headTurn: number;
   keyboardReach?: number;
   keyboardDepth?: number;
+  keyboardLanding?: number;
   mouseHandX?: number;
   mouseHandY?: number;
   dragSway?: number;
@@ -155,6 +156,8 @@ export class PresentationRuntime {
   private responses: ResponseDeck;
   private keyboardReach = 0;
   private keyboardDepth = 0;
+  private keyboardLanding = 0;
+  private landingTarget = 0;
   private depthTarget = 0;
   private handUpdatedAt: number;
   private keyboardTarget = 0;
@@ -214,6 +217,7 @@ export class PresentationRuntime {
     if (['keyboard_left', 'keyboard_right', 'key', 'space', 'enter', 'backspace'].includes(signal)) {
       this.keyboardTarget = signal === 'space' ? 0 : signal === 'keyboard_left' ? -1 : 1;
       this.depthTarget = signal === 'space' ? 1 : Math.max(-1, Math.min(1, y));
+      this.landingTarget = signal === 'space' ? 0 : 1;
       this.reachUntil = now + 310;
       if (now - this.keyBurst.startedAt > 6000) this.keyBurst = { count: 0, startedAt: now };
       if (++this.keyBurst.count >= 12 && now - this.lastAutomaticSpeechAt >= 25000) {
@@ -353,6 +357,7 @@ export class PresentationRuntime {
     const keyboardTarget = now < this.reachUntil ? this.keyboardTarget : 0;
     this.keyboardReach += (keyboardTarget - this.keyboardReach) * handBlend;
     this.keyboardDepth += ((now < this.reachUntil ? this.depthTarget : 0) - this.keyboardDepth) * handBlend;
+    this.keyboardLanding += ((now < this.reachUntil ? this.landingTarget : 0) - this.keyboardLanding) * handBlend;
     const mouseActive = base === 'keyboard_mouse' && now < this.mouseUntil;
     for (const axis of ['x', 'y'] as const) {
       const target = mouseActive ? this.gaze[axis] : 0;
@@ -450,6 +455,7 @@ export class PresentationRuntime {
         headTurn: factor ? this.ambientPose.turn * factor : 0,
         keyboardReach: this.keyboardReach * factor,
         keyboardDepth: this.keyboardDepth * factor,
+        keyboardLanding: this.keyboardLanding * factor,
         mouseHandX: base === 'keyboard_mouse' ? this.mouseHand.x * factor : 0,
         mouseHandY: base === 'keyboard_mouse' ? this.mouseHand.y * factor : 0,
         dragSway: dragSway * factor,

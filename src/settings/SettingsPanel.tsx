@@ -221,7 +221,7 @@ export function SettingsPanel(p: Props) {
             <Row
               title="输入模式"
               description={
-                s.inputMode === 'keyboard_mouse' ? '左手随键盘左右区移动，右手响应鼠标' : '左手随键盘左右区移动，空格回中间；不响应鼠标'
+                s.inputMode === 'keyboard_mouse' ? '左手跟随键盘四区，前后移动较轻；右手响应鼠标' : '左手跟随键盘四区，空格单独落点；不响应鼠标'
               }
             >
               <select

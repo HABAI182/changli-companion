@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "local-windows",
+  "description": "Only packaged local companion windows can receive events and drag the pet.",
+  "windows": ["pet", "panel-*"],
+  "permissions": ["core:default", "core:window:allow-set-position"]
+}

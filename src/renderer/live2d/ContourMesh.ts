@@ -1,6 +1,6 @@
 export interface MeshGeometry { positions: Float32Array; uvs: Float32Array; indices: Uint16Array }
 export type Contours = Record<string, [number, number][]>;
-export type SkinPatches = Record<string, { bounds: [number, number, number, number]; shift: [number, number] }>;
+export type SkinPatches = Record<string, { bounds: [number, number, number, number]; shift: [number, number]; erase?: boolean }>;
 type Vertex = [number, number, number, number];
 
 // A blank skin sample from the same native texture replaces the baked mouth
@@ -29,7 +29,7 @@ export function skinPatchMesh(source: Float32Array, uv: Float32Array, indices: U
       }
       emit(outside,false);poly=inside;
     }
-    emit(poly,true);
+    if (!patch.erase) emit(poly,true);
   }
   return {positions:new Float32Array(positions),uvs:new Float32Array(uvs),indices:new Uint16Array(triangles)};
 }

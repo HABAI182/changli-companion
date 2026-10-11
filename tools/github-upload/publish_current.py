@@ -4,6 +4,7 @@ Uses gh's credential store without exposing tokens. No force push, visibility
 changes or replacement of existing binaries. Requires a clean committed source.
 """
 import hashlib
+import argparse
 import json
 import subprocess
 from pathlib import Path
@@ -12,7 +13,10 @@ ROOT = Path(__file__).resolve().parents[2]
 GH = ROOT / 'tools/github-upload/bin/gh/bin/gh.exe'
 OWNER = 'HABAI182'
 REPO = OWNER + '/changli-companion'
-VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
+CURRENT_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
+parser = argparse.ArgumentParser()
+parser.add_argument('--version', help='Publish an already tagged independent historical build')
+VERSION = parser.parse_args().version or CURRENT_VERSION
 TAG = 'v' + VERSION
 DELIVERIES = sorted((ROOT / 'deliveries').glob('*-desktop-' + VERSION))
 if len(DELIVERIES) != 1:
@@ -58,17 +62,20 @@ def main():
     head = command(['git', 'rev-parse', 'HEAD']).stdout.strip()
     if gh('api', 'repos/' + REPO + '/commits/main', '--jq', '.sha') != head:
         raise ValueError('Remote source differs')
+    source = head if VERSION == CURRENT_VERSION else command(['git', 'rev-parse', TAG]).stdout.strip()
+    if json.loads(command(['git', 'show', source + ':package.json']).stdout)['version'] != VERSION:
+        raise ValueError('Historical tag must point to its exact version source')
     release = release_for_tag()
     if not release:
         print(gh('release', 'create', TAG,
-                 '--draft', '--repo', REPO, '--target', head,
+                 '--draft', '--repo', REPO, '--target', source,
                  '--title', '离火长明 ' + VERSION + ' 工程版', '--prerelease',
                  '--notes-file', str(ROOT / ('tools/github-upload/release-notes-' + VERSION + '.md'))))
         release = release_for_tag()
     if release['draft']:
         target = command(['git', 'rev-parse', release['target_commitish']]).stdout.strip()
         target_package = json.loads(command(['git', 'show', target + ':package.json']).stdout)
-        if target_package['version'] != VERSION or command(['git', 'diff', target, head, '--',
+        if target_package['version'] != VERSION or command(['git', 'diff', target, source, '--',
                 'src', 'src-tauri', 'public', 'package.json', 'package-lock.json', 'index.html']).stdout.strip():
             raise ValueError('Draft source does not match the saved application')
     assets = {item['name']: item for item in release['assets']}

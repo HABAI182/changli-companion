@@ -7,6 +7,7 @@ export interface MouseRegion {
 }
 import { partitionMouseMesh } from './MouseMesh';
 import { handDrawOrder, type HandDrawOrder } from './HandDrawOrder';
+import { jawRepairMesh } from './JawRepair';
 import { contourMesh, flameMesh, skinPatchMesh, type SkinPatches, type Contours, type MeshGeometry } from './ContourMesh';
 
 // The mouse and cable share a native foreground quad with the keyboard/body.
@@ -22,6 +23,8 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   private flame = {phase: 0, strength: 0};
   private mouthCoverage = 0;
   private keyboard?: {mesh: string; texture: number};
+  private jawTexture?: number;
+  setJawTexture(texture: number) { this.jawTexture = texture; }
   setKeyboard(mesh: string, texture: number) { this.keyboard={mesh,texture}; }
   setMouthCoverage(value: number) { this.mouthCoverage = value; }
   private contourInfo: Record<string, {nativeVertices: number; renderedVertices: number}> = {};
@@ -29,11 +32,12 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
     private contours?: Contours, private flameId?: string, private skinPatches?: SkinPatches) {super(width,height);}
   setFlameMotion(phase: number, strength: number) { this.flame = {phase, strength}; }
   getContourSnapshot() { return {...this.contourInfo}; }
-  private drawGeometry(model: Readonly<CubismModel>, index: number, g: MeshGeometry) {
+  private drawGeometry(model: Readonly<CubismModel>, index: number, g: MeshGeometry, texture?: number) {
     const getters: Record<string, unknown> = {
       getDrawableVertexPositions:g.positions,getDrawableVertices:g.positions,
       getDrawableVertexUvs:g.uvs,getDrawableVertexIndices:g.indices,
       getDrawableVertexCount:g.positions.length/2,getDrawableVertexIndexCount:g.indices.length,
+      ...(texture === undefined ? {} : {getDrawableTextureIndex:texture}),
     };
     const proxy = new Proxy(model as CubismModel, { get(target, property) {
       const original = Reflect.get(target, property);
@@ -65,6 +69,11 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   public override drawMeshWebGL(model: Readonly<CubismModel>,index:number):void {
     const id = model.getModel().drawables.ids[index];
     if (!this.isGeneratingMask()) {
+      if (id === 'ArtMesh29' && this.jawTexture !== undefined) {
+        super.drawMeshWebGL(model, index);
+        const patch = jawRepairMesh(model.getDrawableVertexPositions(index), model.getDrawableVertexUvs(index), model.getDrawableVertexIndices(index));
+        this.drawGeometry(model, index, patch, this.jawTexture); return;
+      }
       if(id===this.keyboard?.mesh) {
         const v=model.getDrawableVertexPositions(index),xs=[],ys=[];
         for(let i=0;i<v.length;i+=2){xs.push(v[i]);ys.push(v[i+1]);}
@@ -87,7 +96,7 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
         }});
         super.drawMeshWebGL(proxy,index);return;
       }
-      if (this.skinPatches?.[id]) {
+      if (this.skinPatches?.[id] && id !== this.region?.mesh) {
         const g=skinPatchMesh(model.getDrawableVertexPositions(index),model.getDrawableVertexUvs(index),model.getDrawableVertexIndices(index),this.skinPatches[id]);
         this.drawGeometry(model,index,g);return;
       }
@@ -110,8 +119,10 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
     if(!this.original||source.some((v,i)=>v!==this.original![i])) {
       this.original=source.slice();this.target=index;
       const info=model.getModel().canvasinfo;
-      this.geometry=partitionMouseMesh(source,model.getDrawableVertexUvs(index),
-        model.getDrawableVertexIndices(index),this.region.outline,model.getPixelsPerUnit(),
+      const patch=this.skinPatches?.[id];
+      const cleaned=patch ? skinPatchMesh(source,model.getDrawableVertexUvs(index),model.getDrawableVertexIndices(index),patch) : null;
+      this.geometry=partitionMouseMesh(cleaned?.positions ?? source,cleaned?.uvs ?? model.getDrawableVertexUvs(index),
+        cleaned?.indices ?? model.getDrawableVertexIndices(index),this.region.outline,model.getPixelsPerUnit(),
         [info.CanvasOriginX,info.CanvasOriginY]);
       const getters: Record<string,(index:number)=>unknown>={
         getDrawableVertexPositions:()=>this.geometry!.positions,

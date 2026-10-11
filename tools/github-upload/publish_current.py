@@ -14,7 +14,10 @@ OWNER = 'HABAI182'
 REPO = OWNER + '/changli-companion'
 VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
 TAG = 'v' + VERSION
-DELIVERY = ROOT / ('deliveries/20261011-desktop-' + VERSION)
+DELIVERIES = sorted((ROOT / 'deliveries').glob('*-desktop-' + VERSION))
+if len(DELIVERIES) != 1:
+    raise ValueError('Each version requires exactly one independent delivery directory')
+DELIVERY = DELIVERIES[0]
 
 def command(args, check=True):
     return subprocess.run(args, cwd=ROOT, text=True, encoding='utf-8',

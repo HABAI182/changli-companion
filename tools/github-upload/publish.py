@@ -62,7 +62,11 @@ try:
     got=next((v for v in refreshed['assets'] if v['name']==a['file']),None)
   if not got or got['size']!=a['bytes']:raise ValueError('Remote asset missing or wrong size: '+a['file'])
   if got.get('digest') and got['digest'].upper()!='SHA256:'+a['sha256']:raise ValueError('Remote digest mismatch: '+a['file'])
- gh('release','upload','v0.7.3',str(upload/'SHA256.json'),'--repo',REPO,'--clobber')
+ checksum_asset=next((a for a in published['assets'] if a['name']=='SHA256.json'),None)
+ if checksum_asset:
+  if checksum_asset.get('digest','').upper()!='SHA256:'+sha(upload/'SHA256.json'):raise ValueError('Existing checksum manifest differs; preserve old release and use a new version')
+ else:
+  gh('release','upload','v0.7.3',str(upload/'SHA256.json'),'--repo',REPO)
  published=json.loads(gh('api','repos/'+REPO+'/releases/tags/v0.7.3'))
  checksums=next((a for a in published['assets'] if a['name']=='SHA256.json'),None)
  if not checksums or checksums.get('digest','').upper()!='SHA256:'+sha(upload/'SHA256.json'):raise ValueError('Release checksum manifest mismatch')

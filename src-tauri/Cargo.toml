@@ -1,6 +1,6 @@
 [package]
 name = "changli-companion"
-version = "0.7.4"
+version = "0.7.5"
 description = "离火长明 — 可替换占位素材的本地桌面伴侣原型"
 authors = ["Changli Companion contributors"]
 edition = "2021"

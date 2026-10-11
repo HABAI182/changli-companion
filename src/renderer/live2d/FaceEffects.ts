@@ -21,7 +21,7 @@ export class FaceEffects {
     if (this.faceIndex >= 0) this.reference = model.getDrawableVertexPositions(this.faceIndex).slice();
   }
   snapshot() { return Object.fromEntries(this.weights); }
-  mouthCoverage() { return Math.min(1, [...this.weights].reduce((s,[id,w])=>s+(['laugh','pout','angry','wronged','shy','proud','blush'].includes(id)?w:0),0)); }
+  mouthCoverage() { return Math.min(1, [...this.weights].reduce((s,[id,w])=>s+(['smile','sleepy','laugh','pout','angry','wronged','shy','proud','blush'].includes(id)?w:0),0)); }
   draw(model: CubismModel, matrix: CubismMatrix44, source: HTMLCanvasElement, expression: string, now: number, moving: boolean) {
     if (this.canvas.width !== source.width || this.canvas.height !== source.height) {
       this.canvas.width = source.width; this.canvas.height = source.height;
@@ -60,12 +60,28 @@ export class FaceEffects {
       if(id==='laugh'){
         c.fillStyle='#a9515b';c.beginPath();c.moveTo(559,786);c.quadraticCurveTo(578,797,597,787);c.bezierCurveTo(594,822,564,821,559,786);c.fill();c.stroke();
         c.save();c.clip();c.fillStyle='#f3a4a3';c.beginPath();c.ellipse(578,813,14,7,0,0,7);c.fill();c.restore();
-      }else if(['shy','proud','blush'].includes(id)){
+      }else if(['smile','shy','proud','blush'].includes(id)){
         c.beginPath();c.moveTo(565,793);c.quadraticCurveTo(579,805,590,792);c.stroke();
       }else if(id==='pout'){
         c.beginPath();c.moveTo(570,795);c.quadraticCurveTo(582,793,587,797);c.quadraticCurveTo(583,802,573,800);c.stroke();
       }else if(['wronged','angry'].includes(id)){
         c.beginPath();c.moveTo(566,801);c.quadraticCurveTo(578,790,589,800);c.stroke();
+      }
+      if(id==='smile') {
+        c.fillStyle='rgba(241,142,149,.22)';
+        for(const [x,y] of [[394,755],[783,802]]){c.beginPath();c.ellipse(x,y,34,15,.13,0,7);c.fill();}
+      }
+      if(id==='sleepy') {
+        // One small closed mouth, a rounded droplet and a softly floating Z trail.
+        c.strokeStyle='#c66d70';c.lineWidth=2.8;c.beginPath();c.moveTo(568,797);c.quadraticCurveTo(578,801,586,796);c.stroke();
+        c.fillStyle='#a4dced';c.strokeStyle='#80b9d1';c.lineWidth=1.7;
+        c.beginPath();c.moveTo(585,797);c.bezierCurveTo(580,808,579,823,588,824);c.bezierCurveTo(599,822,591,807,585,797);c.fill();c.stroke();
+        c.fillStyle='#ffffffdd';c.beginPath();c.ellipse(586,815,1.8,4,-.2,0,7);c.fill();
+        const float=Math.sin(t*1.7)*5;
+        c.fillStyle='#94736f';c.strokeStyle='#fff5e9';c.lineWidth=5;
+        c.font='800 60px "Comic Sans MS", "Segoe Print", cursive';c.strokeText('z',918,373+float);c.fillText('z',918,373+float);
+        c.font='800 44px "Comic Sans MS", "Segoe Print", cursive';c.strokeText('z',977,338+float*.8);c.fillText('z',977,338+float*.8);
+        c.font='800 29px "Comic Sans MS", "Segoe Print", cursive';c.strokeText('z',1023,310+float*.6);c.fillText('z',1023,310+float*.6);
       }
       if (['blush','shy'].includes(id)) {
         for (const [x,y] of [[394,755],[783,802]]) {
@@ -80,6 +96,12 @@ export class FaceEffects {
         for(const [x,y] of [[407,750],[769,806]]){const drop=6+Math.sin(t*3)*2;c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x-12,y+drop+18,x+13,y+drop+18,x,y);c.fill();c.stroke();c.fillStyle='rgba(255,255,255,.9)';c.beginPath();c.ellipse(x-3,y+8,2,4,0,0,7);c.fill();c.fillStyle='rgba(153,213,249,.7)';}
       }
       if(id==='angry'){
+        // Two flickering flames stay outside the cheeks; reduced motion pauses them.
+        for(const [x,y,s] of [[273,687,.85],[865,835,.65]]){
+          c.save();c.translate(x,y);c.scale(s,s);const sway=Math.sin(t*6)*5;
+          c.fillStyle='#f17b5a';c.beginPath();c.moveTo(0,25);c.bezierCurveTo(-28,12,-25,-9,-12,-24);c.quadraticCurveTo(-15,-1,-3,1);c.quadraticCurveTo(10,-16,8+sway,-38);c.bezierCurveTo(38,-5,28,24,0,25);c.fill();
+          c.fillStyle='#ffe29c';c.beginPath();c.moveTo(0,23);c.quadraticCurveTo(-16,8,-5,-7);c.quadraticCurveTo(-3,7,6,0);c.quadraticCurveTo(22,19,0,23);c.fill();c.restore();
+        }
         c.strokeStyle='#cf6864';c.lineWidth=5;c.lineCap='round';
         for(const [x,y,sx,sy] of [[917,445,-1,-1],[921,449,1,-1],[917,453,-1,1],[921,457,1,1]]){
           c.beginPath();c.moveTo(x+sx*13,y);c.quadraticCurveTo(x,y,x,y+sy*13);c.stroke();

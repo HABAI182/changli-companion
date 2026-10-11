@@ -82,6 +82,17 @@ pub fn initialize(app: &tauri::AppHandle) -> Result<Model, Box<dyn std::error::E
     let bundled: serde_json::Value =
         serde_json::from_str(include_str!("../../public/models/changli/model.json"))?;
     let mut regions_changed = false;
+    // Retired player actions cannot remain active in saved shortcut slots.
+    if let Some(slots)=saved["shortcuts"].as_array_mut() {
+        for slot in slots {
+            if slot["action"]["type"]=="animation" &&
+                matches!(slot["action"]["id"].as_str(),Some("wave" | "sleep")) {
+                slot["enabled"]=false.into();
+                slot["action"]=serde_json::json!({"type":"expression","id":"default"});
+                regions_changed=true;
+            }
+        }
+    }
     for region in ["left_vkeys", "right_vkeys"] {
         if let Some(defaults) = bundled["key_bindings"][region].as_array() {
             for key in defaults {
@@ -112,6 +123,20 @@ pub fn key_region(vk: u32) -> &'static str {
         Some(k) if k.right_vkeys.contains(&vk) => "keyboard_right",
         Some(k) if k.fallback == "keyboard_left" => "keyboard_left",
         _ => "keyboard_right",
+    }
+}
+// Physical layout, identical to frontend keyDepth; no typed-text conversion.
+pub fn key_depth(vk: u32) -> f64 {
+    if [65,83,68,70,71,72,74,75,76,90,88,67,86,66,78,77,
+        16,17,18,20,32,37,38,39,40,160,161,162,163,164,165,186,188,190,191,222,
+        96,97,98,99,100,101,102,110].contains(&vk) { 1.0 } else { -1.0 }
+}
+#[cfg(test)]
+mod depth_tests {
+    #[test]
+    fn full_rows_share_depth_and_modifiers_and_space_are_near() {
+        for vk in [0x51,0x54,0x59,0x50,0x31,0x30,0x70,0x7b,0x08] { assert_eq!(super::key_depth(vk),-1.0); }
+        for vk in [0x41,0x47,0x48,0x4c,0x5a,0x42,0x4e,0x4d,0x20,0xa0,0xa1] { assert_eq!(super::key_depth(vk),1.0); }
     }
 }
 pub fn save_shortcuts(app: &tauri::AppHandle, slots: &[Binding]) -> Result<(), String> {

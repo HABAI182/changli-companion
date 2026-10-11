@@ -68,7 +68,7 @@ export function validateModel(candidate: unknown): candidate is Model {
     Array.isArray(m.expressions) &&
     m.expressions.length >= 16 &&
     Array.isArray(m.animations) &&
-    m.animations.length >= 5 &&
+    m.animations.length >= 3 &&
     Array.isArray(m.shortcuts) &&
     m.shortcuts.length === 25 &&
     new Set(m.shortcuts.map((s) => s.id)).size === 25 &&
@@ -87,6 +87,14 @@ export function resource(path: string) {
 }
 export function keyRegion(code: number): ModelState {
   return model.key_bindings.left_vkeys.includes(code) ? 'keyboard_left' : 'keyboard_right';
+}
+
+// Physical front rows (home/bottom/modifiers) versus rear rows (Q/numbers/F).
+// Positive means near Changli, whose keyboard faces away from the viewer.
+export function keyDepth(code: number): number {
+  return [65,83,68,70,71,72,74,75,76,90,88,67,86,66,78,77,
+    16,17,18,20,32,37,38,39,40,160,161,162,163,164,165,186,188,190,191,222,
+    96,97,98,99,100,101,102,110].includes(code) ? 1 : -1;
 }
 
 // Share Windows virtual-key zones with the browser, including number row and

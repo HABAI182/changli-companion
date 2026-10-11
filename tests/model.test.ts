@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { browserVirtualKey, keyRegion, model, resource, validateModel } from '../src/model';
+import { browserVirtualKey, keyRegion, keyDepth, model, resource, validateModel } from '../src/model';
 import {
   canRenderLayers,
   layerManifest,
@@ -41,12 +41,19 @@ describe('模型输入配置', () => {
     expect(() => resource('../secret')).toThrow();
     expect(() => resource('https://example.com/a.png')).toThrow();
   });
-  it('v2 配置含 25 个隔离动作槽与 5 个播放器定义', () => {
+  it('保留 25 个隔离动作槽，仅开放三段小动作', () => {
     expect(validateModel(model)).toBe(true);
     expect(model.shortcuts).toHaveLength(25);
     expect(model.shortcuts.filter((s) => s.enabled)).toHaveLength(8);
-    expect(model.animations).toHaveLength(5);
+    expect(model.animations).toHaveLength(3);
+    expect(model.animations.some(a => ['wave','sleep'].includes(a.id))).toBe(false);
     expect(validateModel({ ...model, shortcuts: model.shortcuts.slice(1) })).toBe(false);
+  });
+  it('前后区覆盖整行而非只识别个别键，空格在前缘', () => {
+    for(const code of ['KeyQ','KeyT','KeyY','KeyP','Digit1','Digit0','F1','F12','Backspace'])
+      expect(keyDepth(browserVirtualKey(code)),code).toBe(-1);
+    for(const code of ['KeyA','KeyG','KeyH','KeyL','KeyZ','KeyB','KeyN','KeyM','Space','ShiftLeft','ShiftRight'])
+      expect(keyDepth(browserVirtualKey(code)),code).toBe(1);
   });
   it('正式分层缺素材时稳定回退为原造型预览', () => {
     expect(validateLayerManifest(layerManifest)).toBe(true);

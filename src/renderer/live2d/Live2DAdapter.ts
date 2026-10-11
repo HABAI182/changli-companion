@@ -94,6 +94,7 @@ export class Live2DAdapter {
       if (p[semantic]) this.backend.setParameter(p[semantic], value);
     for (const [name, value] of Object.entries({
       keyboardReach: snapshot.idle.keyboardReach || 0,
+      keyboardDepth: snapshot.idle.keyboardDepth || 0,
       mouseX: snapshot.idle.mouseHandX || 0, mouseY: snapshot.idle.mouseHandY || 0,
       headX: snapshot.idle.headX || 0, headY: snapshot.idle.headY || 0,
       headShape: snapshot.idle.headShape || 0, headRotation: snapshot.idle.headRotation || 0,

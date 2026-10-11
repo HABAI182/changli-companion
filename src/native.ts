@@ -5,7 +5,7 @@ import { PhysicalPosition } from '@tauri-apps/api/dpi';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { native } from './storage';
 import type { Settings, Signal } from './domain';
-import { browserVirtualKey, keyRegion } from './model';
+import { browserVirtualKey, keyRegion, keyDepth } from './model';
 import type { KeyDisplay } from './overlay/keyOverlay';
 export type Panel = 'focus' | 'todos' | 'settings';
 export const openPanel = (panel: Panel) => invoke('open_panel', { panel });
@@ -115,7 +115,7 @@ export async function subscribeInput(
         special ||
           (keyRegion(browserVirtualKey(e.code)) as Signal),
         0,
-        0,
+        keyDepth(browserVirtualKey(e.code)),
         { label: browserKeyLabel(e.code), phase: 'down' },
       );
     }

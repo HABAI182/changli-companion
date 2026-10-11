@@ -245,23 +245,23 @@ it('有模型和后端时才加载，语义参数来自 manifest 并能释放', 
         'mouth.open': 'ActualMouthOpen',
         'eye.left.open': 'ActualEyeLeft',
       },
-      motionMap: { wave: 'ActualWave' },
-      expressionMap: { smile: 'ActualSmile' },
+      motionMap: { shy: 'ActualShy' },
+      expressionMap: { shy: 'ActualShyFace' },
     },
     backend,
   );
   expect(await adapter.init({} as HTMLCanvasElement)).toBe('ready');
   const pet = new PresentationRuntime(0, () => 0);
   pet.expression('smile', 'toggle', true);
-  pet.play('wave', 100);
+  pet.play('shy', 100);
   adapter.update(
     pet.snapshot(200, { motion: 'full', inputMode: 'keyboard_mouse', autoSleepMinutes: 0 }),
   );
   expect(backend.setParameter).toHaveBeenCalledWith('ActualGazeX', 0);
   expect(backend.setParameter).toHaveBeenCalledWith('ActualEyeLeft', 1);
   expect(backend.setParameter).toHaveBeenCalledWith('ActualMouthOpen', 0);
-  expect(backend.startMotion).toHaveBeenCalledWith('ActualWave');
-  expect(backend.setExpression).toHaveBeenCalledWith('ActualSmile');
+  expect(backend.startMotion).toHaveBeenCalledWith('ActualShy');
+  expect(backend.setExpression).toHaveBeenCalledWith('ActualShyFace');
   adapter.resize(360, 320);
   adapter.dispose();
   expect(backend.dispose).toHaveBeenCalledOnce();

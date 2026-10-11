@@ -1,0 +1,33 @@
+{
+  "version": "0.6.0",
+  "tag": "v0.6.0",
+  "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.6.0",
+  "localDelivery": "deliveries/20261007-desktop-0.6.0",
+  "artifacts": [
+    {
+      "file": "changli-companion.exe",
+      "localPath": "deliveries/20261007-desktop-0.6.0/changli-companion.exe",
+      "bytes": 69131776,
+      "sha256": "61EFA76C44A6751CE62B0EF158FC48B3E6FB8BEEC8FAE4888B376D61585305BC"
+    },
+    {
+      "file": "changli-companion-0.6.0-x64-setup.exe",
+      "localPath": "deliveries/20261007-desktop-0.6.0/离火长明_0.6.0_x64-setup.exe",
+      "bytes": 57696190,
+      "sha256": "B76BC902F852630B87454C5F67DF4F759EC4E5F8619481FEDAAC175C1CBD676C"
+    }
+  ],
+  "historicalValidationRepeated": false,
+  "formalArtComplete": false,
+  "source": {
+    "status": "saved-checkpoint",
+    "checkpoint": "tools/live2d-authoring/build/desktop-integration-20261006/implementation-checkpoint-20261007-195344.zip",
+    "checkpointSha256": "1AE803F8D685FA75C75BF86F83879FD99347C6B4EA721740B8131A5F7A2151DD",
+    "resourceRecovery": "tools/live2d-authoring/build/desktop-integration-20261006/current-release-recovery-20261007-195511.zip",
+    "resourceRecoveryVersion": "0.6.0",
+    "resourceRecoverySha256": "1B6E4C126DBF2725B931977DF85A5948BF779B84E1EA3EBDEE537236E1EAFAA9",
+    "nativeSourceSha256": "6FB93424DF543E1EC81FE6F90511B62DB1EFFD75D6E5DCE147FA46375148013E",
+    "modelEntry": "live-reference-repair-v54-candidate/ChangliReferenceRepairV54-physics.model3.json",
+    "historicalBinaryRebuildVerified": false
+  }
+}

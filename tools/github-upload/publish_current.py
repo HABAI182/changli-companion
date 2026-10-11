@@ -52,7 +52,7 @@ def main():
                  *[str(DELIVERY / item['file']) for item in artifacts],
                  str(DELIVERY / 'SHA256.json'), '--repo', REPO, '--target', head,
                  '--title', '离火长明 ' + VERSION + ' 工程版', '--prerelease',
-                 '--notes-file', str(ROOT / 'tools/github-upload/release-notes-' + VERSION + '.md')))
+                 '--notes-file', str(ROOT / ('tools/github-upload/release-notes-' + VERSION + '.md'))))
     release = json.loads(gh('api', 'repos/' + REPO + '/releases/tags/' + TAG))
     assets = {item['name']: item for item in release['assets']}
     checks = artifacts + [{'file': 'SHA256.json', 'bytes': (DELIVERY / 'SHA256.json').stat().st_size,

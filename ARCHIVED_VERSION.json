@@ -1,0 +1,26 @@
+{
+  "version": "0.6.3",
+  "tag": "archive-v0.6.3",
+  "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/archive-v0.6.3",
+  "localDelivery": "deliveries/20261008-desktop-0.6.3",
+  "artifacts": [
+    {
+      "file": "changli-companion.exe",
+      "localPath": "deliveries/20261008-desktop-0.6.3/changli-companion.exe",
+      "bytes": 31848960,
+      "sha256": "342FD9AA99591F415523DC68054C3990501C93BC6FCBC8EE5DC142F32EFCDEAC"
+    },
+    {
+      "file": "changli-companion-0.6.3-x64-setup.exe",
+      "localPath": "deliveries/20261008-desktop-0.6.3/离火长明_0.6.3_x64-setup.exe",
+      "bytes": 23359915,
+      "sha256": "C2AD1F18EE265592C34FDAA6A6E19313C71E3FEDC533E74665B883507A517E34"
+    }
+  ],
+  "historicalValidationRepeated": false,
+  "formalArtComplete": false,
+  "source": {
+    "status": "binary-only",
+    "reason": "No exact saved 0.6.3 source checkpoint found; no replacement with newer source."
+  }
+}

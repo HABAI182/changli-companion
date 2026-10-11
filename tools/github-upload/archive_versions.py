@@ -104,6 +104,8 @@ def render(document):
     rows = ['# 长离桌宠版本留档', '', '每个版本独立保留，旧版本不覆盖。Release中的程序、安装包和SHA256清单对应各自版本。', '',
             '历史源码标签从当时保存的源码检查点恢复，恢复日期不是原开发提交日期，也没有重新构建或重新验收旧版本。0.6.3只有二进制存档；其archive标签只含归档说明，不提供伪造的旧源码。0.6.8使用本版源码检查点，运行模型从使用同一已验证v71原生源的0.6.9恢复包提取，来源单独记录。', '',
             '| 版本 | 独立Release | 源码情况 | 本地程序目录 |', '| --- | --- | --- | --- |']
+    if document.get('githubArchiveVerified'):
+        rows[4:4] = ['已核对全部' + str(len(document['versions'])) + '个独立Release的程序、安装包及远端SHA256摘要。', '']
     for row in reversed(document['versions']):
         status = row['source']['status']
         source = '原Git标签' if status == 'original-git-tag' or row['version'] == '0.7.3' else '已保存源码检查点' if status == 'saved-checkpoint' else '**仅二进制；源码缺失**'
@@ -111,6 +113,25 @@ def render(document):
     rows += ['', '机器可读索引：[archives/versions.json](archives/versions.json)。大体积原生源与完整恢复包保留现有本地副本，不为索引重复复制。', '',
              '以后发布必须使用新版本号和独立目录；旧tag不移动、Release附件不覆盖、不删除旧版本。源码与美术的未完成状态以各版交付记录为准。', '']
     (ROOT / 'VERSION-ARCHIVES.md').write_text('\n'.join(rows), encoding='utf-8')
+
+def finalize():
+    document = json.loads(INDEX.read_text(encoding='utf-8'))
+    complete = json.loads((LOCAL / 'complete.json').read_text(encoding='utf-8'))
+    if not complete['pass'] or complete['versionsVerified'] != len(document['versions']):
+        raise ValueError('Not all independent releases have been verified')
+    for row in document['versions']:
+        proof = json.loads((LOCAL / row['version'] / 'published.json').read_text(encoding='utf-8'))
+        if not proof['immutableAssetsVerified'] or proof['commit'] != row['sourceCommit'] or proof['tag'] != row['tag']:
+            raise ValueError('Incomplete publication evidence: ' + row['version'])
+        expected = {a['file']: a['sha256'] for a in row['artifacts']}
+        verified = {a['file']: a['sha256'] for a in proof['assets']}
+        if len(verified) != 3 or 'SHA256.json' not in verified or not all(verified.get(name) == digest for name, digest in expected.items()):
+            raise ValueError('Publication digest evidence differs')
+        row['remoteAssetsVerified'] = True
+    document['githubArchiveVerified'] = True
+    write(INDEX, document)
+    render(document)
+    print('All independent version archives recorded as verified', flush=True)
 
 def source_files(row):
     source = row['source']
@@ -205,6 +226,14 @@ def publish():
         raise ValueError('Unexpected origin')
     document = json.loads(INDEX.read_text(encoding='utf-8'))
     tags = [row['tag'] for row in document['versions']]
+    for row in document['versions']:
+        commit = cmd(['git', 'rev-parse', row['tag'] + '^{commit}']).stdout.strip()
+        if commit != row['sourceCommit']:
+            raise ValueError('Source tag differs from inventory; do not publish')
+        if row['version'] not in ('0.7.3', '0.7.4'):
+            saved = json.loads(cmd(['git', 'show', row['tag'] + ':ARCHIVED_VERSION.json']).stdout)
+            if saved['source'] != row['source'] or saved['artifacts'] != row['artifacts']:
+                raise ValueError('Saved version metadata changed; use a new version')
     cmd(['git', 'push', 'origin', *['refs/tags/' + tag for tag in tags]])
     for row in document['versions']:
         version, tag = row['version'], row['tag']
@@ -259,9 +288,10 @@ def publish():
                 raise ValueError('Staging cleanup path escaped')
             p.unlink()
     write(LOCAL / 'complete.json', {'repository': REPO, 'versionsVerified': len(tags), 'tags': tags, 'pass': True})
+    finalize()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=['inventory', 'restore-tags', 'publish'])
+    parser.add_argument('operation', choices=['inventory', 'restore-tags', 'publish', 'finalize'])
     args = parser.parse_args()
-    {'inventory': inventory, 'restore-tags': restore_tags, 'publish': publish}[args.operation]()
+    {'inventory': inventory, 'restore-tags': restore_tags, 'publish': publish, 'finalize': finalize}[args.operation]()

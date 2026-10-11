@@ -96,10 +96,11 @@ export class FaceEffects {
         for(const [x,y] of [[407,750],[769,806]]){const drop=6+Math.sin(t*3)*2;c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x-12,y+drop+18,x+13,y+drop+18,x,y);c.fill();c.stroke();c.fillStyle='rgba(255,255,255,.9)';c.beginPath();c.ellipse(x-3,y+8,2,4,0,0,7);c.fill();c.fillStyle='rgba(153,213,249,.7)';}
       }
       if(id==='angry'){
-        // Two flickering flames stay outside the cheeks; reduced motion pauses them.
-        for(const [x,y,s] of [[273,687,.85],[865,835,.65]]){
+        // Flame silhouettes outside the hair remain legible at small desktop sizes.
+        // Reduced motion pauses their flicker; the accents still identify anger.
+        for(const [x,y,s] of [[180,490,1.65],[1075,570,1.45]]){
           c.save();c.translate(x,y);c.scale(s,s);const sway=Math.sin(t*6)*5;
-          c.fillStyle='#f17b5a';c.beginPath();c.moveTo(0,25);c.bezierCurveTo(-28,12,-25,-9,-12,-24);c.quadraticCurveTo(-15,-1,-3,1);c.quadraticCurveTo(10,-16,8+sway,-38);c.bezierCurveTo(38,-5,28,24,0,25);c.fill();
+          c.fillStyle='#f17b5a';c.strokeStyle='#b95751';c.lineWidth=2.5;c.beginPath();c.moveTo(0,25);c.bezierCurveTo(-28,12,-25,-9,-12,-24);c.quadraticCurveTo(-15,-1,-3,1);c.quadraticCurveTo(10,-16,8+sway,-38);c.bezierCurveTo(38,-5,28,24,0,25);c.fill();c.stroke();
           c.fillStyle='#ffe29c';c.beginPath();c.moveTo(0,23);c.quadraticCurveTo(-16,8,-5,-7);c.quadraticCurveTo(-3,7,6,0);c.quadraticCurveTo(22,19,0,23);c.fill();c.restore();
         }
         c.strokeStyle='#cf6864';c.lineWidth=5;c.lineCap='round';

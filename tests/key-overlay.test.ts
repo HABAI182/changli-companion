@@ -1,0 +1,52 @@
+import { expect, it } from 'vitest';
+import { initialData, parseData } from '../src/domain';
+import { browserKeyLabel } from '../src/native';
+import { KEY_BADGE_MS, nextKeyBadge, visibleKeyBadge } from '../src/overlay/keyOverlay';
+
+it('当前物理键显示名不推断输入文字', () => {
+  expect(browserKeyLabel('KeyZ')).toBe('Z');
+  expect(browserKeyLabel('Digit9')).toBe('9');
+  expect(browserKeyLabel('Enter')).toBe('Enter');
+  expect(browserKeyLabel('Backspace')).toBe('Backspace');
+  expect(browserKeyLabel('Space')).toBe('Space');
+  expect(browserKeyLabel('ArrowUp')).toBe('↑');
+  expect(browserKeyLabel('F12')).toBe('F12');
+});
+it('高频按键替换单个浮层，旧计时不能提前淘汰新键', () => {
+  const first = nextKeyBadge({ label: 'A', phase: 'down' }, 100)!;
+  const second = nextKeyBadge({ label: 'Z', phase: 'down' }, 120, first)!;
+  expect(second).toEqual({ label: 'Z', id: first.id + 1, expiresAt: 120 + KEY_BADGE_MS });
+  expect(visibleKeyBadge(second, first.expiresAt)).toBe(second);
+  expect(visibleKeyBadge(second, second.expiresAt)).toBeUndefined();
+  expect(nextKeyBadge({ label: 'long password', phase: 'down' }, 130, second)).toBe(second);
+});
+it('浮层标签不进入持久化数据，旧设置会补上开关', () => {
+  const data = initialData();
+  const badge = nextKeyBadge({ label: 'Z', phase: 'down' }, 100);
+  expect(JSON.stringify(data)).not.toContain('"label":"Z"');
+  expect(badge?.label).toBe('Z');
+  const old = JSON.parse(JSON.stringify(data));
+  delete old.settings.keyOverlayEnabled;
+  delete old.settings.autoSleepMinutes;
+  delete old.settings.hoverHideEnabled;
+  delete old.settings.hoverHideDelayMs;
+  delete old.settings.hoverHideOpacity;
+  delete old.settings.gamepadEnabled;
+  delete old.settings.sfxEnabled;
+  delete old.settings.sfxVolume;
+  delete old.settings.voiceEnabled;
+  delete old.settings.voiceVolume;
+  delete old.settings.keyboardSfxEnabled;
+  const migrated = parseData(JSON.stringify(old)).settings;
+  expect(migrated.keyOverlayEnabled).toBe(true);
+  expect(migrated.autoSleepMinutes).toBe(0);
+  expect(migrated.hoverHideEnabled).toBe(false);
+  expect(migrated.hoverHideDelayMs).toBe(500);
+  expect(migrated.hoverHideOpacity).toBe(0.4);
+  expect(migrated.gamepadEnabled).toBe(false);
+  expect(migrated.sfxEnabled).toBe(false);
+  expect(migrated.sfxVolume).toBe(0.35);
+  expect(migrated.voiceEnabled).toBe(false);
+  expect(migrated.voiceVolume).toBe(0.5);
+  expect(migrated.keyboardSfxEnabled).toBe(false);
+});

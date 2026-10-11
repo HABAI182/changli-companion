@@ -1,0 +1,39 @@
+{
+  "Version": 3,
+  "Meta": {
+    "Duration": 1.2,
+    "Fps": 30,
+    "Loop": false,
+    "AreBeziersRestricted": true,
+    "CurveCount": 1,
+    "TotalSegmentCount": 4,
+    "TotalPointCount": 5,
+    "UserDataCount": 0,
+    "TotalUserDataSize": 0,
+    "FadeInTime": 0.05,
+    "FadeOutTime": 0.05
+  },
+  "Curves": [
+    {
+      "Target": "Parameter",
+      "Id": "ParamAngleX",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.15,
+        30,
+        0,
+        0.45,
+        -30,
+        0,
+        0.8,
+        0,
+        0,
+        1.2,
+        0
+      ]
+    }
+  ],
+  "UserData": []
+}

@@ -1,0 +1,260 @@
+{
+	"Version": 3,
+	"Parameters": [
+		{
+			"Id": "ParamAngleX",
+			"GroupId": "",
+			"Name": "角度 X"
+		},
+		{
+			"Id": "ParamAngleY",
+			"GroupId": "",
+			"Name": "角度 Y"
+		},
+		{
+			"Id": "ParamAngleZ",
+			"GroupId": "",
+			"Name": "角度 Z"
+		},
+		{
+			"Id": "ParamEyeLOpen",
+			"GroupId": "",
+			"Name": "左眼 开闭"
+		},
+		{
+			"Id": "ParamEyeLSmile",
+			"GroupId": "",
+			"Name": "左眼 微笑"
+		},
+		{
+			"Id": "ParamEyeROpen",
+			"GroupId": "",
+			"Name": "右眼 开闭"
+		},
+		{
+			"Id": "ParamEyeRSmile",
+			"GroupId": "",
+			"Name": "右眼 微笑"
+		},
+		{
+			"Id": "ParamEyeBallX",
+			"GroupId": "",
+			"Name": "眼珠 X"
+		},
+		{
+			"Id": "ParamEyeBallY",
+			"GroupId": "",
+			"Name": "眼珠 Y"
+		},
+		{
+			"Id": "ParamBrowLY",
+			"GroupId": "",
+			"Name": "左眉 上下"
+		},
+		{
+			"Id": "ParamBrowRY",
+			"GroupId": "",
+			"Name": "右眉 上下"
+		},
+		{
+			"Id": "ParamBrowLX",
+			"GroupId": "",
+			"Name": "左眉 左右"
+		},
+		{
+			"Id": "ParamBrowRX",
+			"GroupId": "",
+			"Name": "右眉 左右"
+		},
+		{
+			"Id": "ParamBrowLAngle",
+			"GroupId": "",
+			"Name": "左眉 角度"
+		},
+		{
+			"Id": "ParamBrowRAngle",
+			"GroupId": "",
+			"Name": "右眉 角度"
+		},
+		{
+			"Id": "ParamBrowLForm",
+			"GroupId": "",
+			"Name": "左眉 変形"
+		},
+		{
+			"Id": "ParamBrowRForm",
+			"GroupId": "",
+			"Name": "右眉 変形"
+		},
+		{
+			"Id": "ParamMouthForm",
+			"GroupId": "",
+			"Name": "嘴 变形"
+		},
+		{
+			"Id": "ParamMouthOpenY",
+			"GroupId": "",
+			"Name": "嘴 开闭"
+		},
+		{
+			"Id": "ParamCheek",
+			"GroupId": "",
+			"Name": "脸颊泛红"
+		},
+		{
+			"Id": "ParamBodyAngleX",
+			"GroupId": "",
+			"Name": "身体旋转 X"
+		},
+		{
+			"Id": "ParamBodyAngleY",
+			"GroupId": "",
+			"Name": "身体旋转 Y"
+		},
+		{
+			"Id": "ParamBodyAngleZ",
+			"GroupId": "",
+			"Name": "身体旋转 Z"
+		},
+		{
+			"Id": "ParamBreath",
+			"GroupId": "",
+			"Name": "呼吸"
+		},
+		{
+			"Id": "ParamHairFront",
+			"GroupId": "",
+			"Name": "摇动 前发"
+		},
+		{
+			"Id": "ParamPhoenixSway",
+			"GroupId": "",
+			"Name": "PhoenixSway"
+		},
+		{
+			"Id": "ParamBangCenterSway",
+			"GroupId": "",
+			"Name": "BangCenter"
+		},
+		{
+			"Id": "ParamOrnamentLeftSway",
+			"GroupId": "",
+			"Name": "OrnamentLeftSway"
+		},
+		{
+			"Id": "ParamHairSide",
+			"GroupId": "",
+			"Name": "摇动 侧发"
+		},
+		{
+			"Id": "ParamHairBack",
+			"GroupId": "",
+			"Name": "摇动 后发"
+		},
+		{
+			"Id": "ParamHandRightPress",
+			"GroupId": "",
+			"Name": "HandRightPress"
+		},
+		{
+			"Id": "ParamHandLeftPress",
+			"GroupId": "",
+			"Name": "HandLeftPress"
+		},
+		{
+			"Id": "ParamPhoenixTailSway",
+			"GroupId": "",
+			"Name": "PhoenixTailSway"
+		},
+		{
+			"Id": "ParamSideHairRightSway",
+			"GroupId": "",
+			"Name": "右侧发摆动"
+		},
+		{
+			"Id": "ParamSideHairLeftSway",
+			"GroupId": "",
+			"Name": "左侧发摆动"
+		},
+		{
+			"Id": "ParamPhoenixWingSway",
+			"GroupId": "",
+			"Name": "凤凰翅膀摆动"
+		}
+	],
+	"ParameterGroups": [],
+	"Parts": [
+		{
+			"Id": "Part18",
+			"Name": "ChangliOriginalLeftTailComplete-v2.psd"
+		},
+		{
+			"Id": "Part17",
+			"Name": "ChangliKeyboardFacingCharacter-v1.psd"
+		},
+		{
+			"Id": "Part16",
+			"Name": "ChangliOriginalLeftTailComplete-v1.psd"
+		},
+		{
+			"Id": "Part15",
+			"Name": "ChangliOriginalCuffBackfill-v1.psd"
+		},
+		{
+			"Id": "Part14",
+			"Name": "ChangliOriginalShoulderJoins-v1.psd"
+		},
+		{
+			"Id": "Part13",
+			"Name": "ChangliOriginalPhoenix-v1.psd"
+		},
+		{
+			"Id": "Part12",
+			"Name": "ChangliClosedEyesDraft-v3.psd"
+		},
+		{
+			"Id": "Part11",
+			"Name": "ChangliFaceUnderpaintDraft-v2.psd"
+		},
+		{
+			"Id": "Part10",
+			"Name": "ChangliReferenceRepairSources-v1.psd"
+		},
+		{
+			"Id": "Part9",
+			"Name": "ChangliEyeComponentsDraft-v1.psd"
+		},
+		{
+			"Id": "Part8",
+			"Name": "ChangliEyeSkinRepairDraft-v1.psd"
+		},
+		{
+			"Id": "Part7",
+			"Name": "ChangliLeftOrnamentDraft.psd"
+		},
+		{
+			"Id": "Part6",
+			"Name": "ChangliBangCenterDraft-v4.psd"
+		},
+		{
+			"Id": "Part5",
+			"Name": "ChangliPhoenixWingDraft.psd"
+		},
+		{
+			"Id": "Part4",
+			"Name": "ChangliHairCuffDraft.psd"
+		},
+		{
+			"Id": "Part3",
+			"Name": "ChangliPhoenixTailDraft.psd"
+		},
+		{
+			"Id": "Part2",
+			"Name": "ChangliSecondaryAdditionsDraft.psd"
+		},
+		{
+			"Id": "Part",
+			"Name": "ChangliHandAdditionsDraft.psd"
+		}
+	]
+}

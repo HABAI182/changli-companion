@@ -1,0 +1,42 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "ChangliReferenceRepairV60.moc3",
+    "Textures": [
+      "ChangliReferenceRepairV60.2048/texture_00.png",
+      "ChangliReferenceRepairV60.2048/texture_01.png",
+      "ChangliReferenceRepairV60.2048/texture_02.png",
+      "ChangliReferenceRepairV60.2048/texture_03.png",
+      "ChangliReferenceRepairV60.2048/texture_04.png",
+      "ChangliReferenceRepairV60.2048/texture_05.png",
+      "ChangliReferenceRepairV60.2048/texture_06.png",
+      "ChangliReferenceRepairV60.2048/texture_07.png"
+    ],
+    "Physics": "ChangliReferenceRepairV60.physics3.json",
+    "DisplayInfo": "ChangliReferenceRepairV60.cdi3.json",
+    "Motions": {
+      "PhoenixInteract": [
+        {
+          "File": "phoenix-interaction.motion3.json"
+        }
+      ]
+    }
+  },
+  "Groups": [
+    {
+      "Target": "Parameter",
+      "Name": "EyeBlink",
+      "Ids": []
+    },
+    {
+      "Target": "Parameter",
+      "Name": "LipSync",
+      "Ids": []
+    }
+  ],
+  "Layout": {
+    "width": 1.7,
+    "x": 0,
+    "y": 0
+  }
+}

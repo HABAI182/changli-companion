@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "canvas": [1254, 1254],
+  "status": "awaiting-art",
+  "fallback": "assets/changli-cutout.png",
+  "layers": [
+    { "id": "back_hair", "asset": null, "z": 10, "anchor": [0.5, 0.5], "pivot": [0.5, 0.35] },
+    { "id": "body", "asset": null, "z": 20, "anchor": [0.5, 0.5], "pivot": [0.5, 0.75] },
+    { "id": "face", "asset": null, "z": 30, "anchor": [0.5, 0.5], "pivot": [0.5, 0.48] },
+    { "id": "left_eye", "asset": null, "z": 35, "anchor": [0.5, 0.5], "pivot": [0.35, 0.55] },
+    { "id": "right_eye", "asset": null, "z": 36, "anchor": [0.5, 0.5], "pivot": [0.65, 0.55] },
+    { "id": "brows", "asset": null, "z": 37, "anchor": [0.5, 0.5], "pivot": [0.5, 0.47] },
+    { "id": "mouth", "asset": null, "z": 38, "anchor": [0.5, 0.5], "pivot": [0.5, 0.63] },
+    { "id": "front_hair", "asset": null, "z": 40, "anchor": [0.5, 0.5], "pivot": [0.5, 0.31] },
+    { "id": "ornaments", "asset": null, "z": 45, "anchor": [0.5, 0.5], "pivot": [0.5, 0.2] },
+    { "id": "left_arm_hand", "asset": null, "z": 50, "anchor": [0.5, 0.5], "pivot": [0.27, 0.69] },
+    { "id": "right_arm_hand", "asset": null, "z": 51, "anchor": [0.5, 0.5], "pivot": [0.72, 0.69] },
+    { "id": "keyboard", "asset": null, "z": 60, "anchor": [0.5, 0.5], "pivot": [0.5, 0.82] },
+    { "id": "mouse", "asset": null, "z": 61, "anchor": [0.5, 0.5], "pivot": [0.15, 0.78] },
+    { "id": "phoenix", "asset": null, "z": 70, "anchor": [0.5, 0.5], "pivot": [0.9, 0.69] },
+    {
+      "id": "foreground_effects",
+      "asset": null,
+      "z": 80,
+      "anchor": [0.5, 0.5],
+      "pivot": [0.5, 0.5]
+    }
+  ]
+}

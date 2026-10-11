@@ -40,6 +40,7 @@ export interface IdleParameters {
   headTilt: number;
   headTurn: number;
   keyboardReach?: number;
+  keyboardDepth?: number;
   mouseHandX?: number;
   mouseHandY?: number;
   dragSway?: number;
@@ -153,6 +154,8 @@ export class PresentationRuntime {
   private nextAmbientAt: number;
   private responses: ResponseDeck;
   private keyboardReach = 0;
+  private keyboardDepth = 0;
+  private depthTarget = 0;
   private handUpdatedAt: number;
   private keyboardTarget = 0;
   private reachUntil = 0;
@@ -183,14 +186,14 @@ export class PresentationRuntime {
     if (this.dragActive) return;
     if (mode === 'keyboard_only' && mouseSignals.includes(signal)) return;
     if (signal === 'complete') {
-      this.play('wave', now);
+      this.touchSmileUntil = now + 900;
       return;
     }
     if (now - this.lastInput > 300000) this.react('wake', now);
     this.lastInput = now;
     this.ambient = 'none';
     this.nextAmbientAt = now + 9000 + this.random() * 6000;
-    // A head touch briefly closes the real native eyes in a happy reaction.
+    // A head touch briefly uses the open-eyed happy expression.
     // Explicit toggle/hold expressions retain priority and are never replaced.
     if (signal === 'pet') this.touchSmileUntil = now + 900;
     if (signal !== 'move' && now - this.lastBounceAt > 110) {
@@ -210,6 +213,7 @@ export class PresentationRuntime {
     if (!id) return;
     if (['keyboard_left', 'keyboard_right', 'key', 'space', 'enter', 'backspace'].includes(signal)) {
       this.keyboardTarget = signal === 'space' ? 0 : signal === 'keyboard_left' ? -1 : 1;
+      this.depthTarget = signal === 'space' ? 1 : Math.max(-1, Math.min(1, y));
       this.reachUntil = now + 310;
       if (now - this.keyBurst.startedAt > 6000) this.keyBurst = { count: 0, startedAt: now };
       if (++this.keyBurst.count >= 12 && now - this.lastAutomaticSpeechAt >= 25000) {
@@ -257,7 +261,7 @@ export class PresentationRuntime {
     return this.setSpeech(this.responses.pick(topic), now);
   }
   setSpeech(text: string, now: number, kind: SpeechBubble['kind'] = 'speech') {
-    const trimmed = text.trim().slice(0, 100);
+    const trimmed = text.trim().slice(0, 100).replace(/[。．.]+$/u, '');
     if (!trimmed || now - this.lastSpeechAt < 1600) return false;
     this.lastSpeechAt = now;
     this.ambient = 'none';
@@ -325,7 +329,7 @@ export class PresentationRuntime {
         ? 'sleep'
         : settings.inputMode;
     const animation = this.animation;
-    const animationExpression: Record<string, string> = { wave: 'smile', sleep: 'sleepy', angry_fire: 'angry', shy: 'shy', phoenix: 'phoenix_eyes' };
+    const animationExpression: Record<string, string> = { angry_fire: 'angry', shy: 'shy', phoenix: 'phoenix_eyes' };
     const expression =
       (animation && animationExpression[animation.id]) || this.manualExpression ||
       (base === 'sleep' ? 'sleepy' : now < this.touchSmileUntil ? 'smile' : 'default');
@@ -348,6 +352,7 @@ export class PresentationRuntime {
     this.handUpdatedAt = Math.max(now, this.handUpdatedAt);
     const keyboardTarget = now < this.reachUntil ? this.keyboardTarget : 0;
     this.keyboardReach += (keyboardTarget - this.keyboardReach) * handBlend;
+    this.keyboardDepth += ((now < this.reachUntil ? this.depthTarget : 0) - this.keyboardDepth) * handBlend;
     const mouseActive = base === 'keyboard_mouse' && now < this.mouseUntil;
     for (const axis of ['x', 'y'] as const) {
       const target = mouseActive ? this.gaze[axis] : 0;
@@ -411,20 +416,14 @@ export class PresentationRuntime {
     const awake = base !== 'sleep' ? factor : 0;
     const progress = animation ? Math.min(1, Math.max(0, (now - animation.startedAt) / (animation.until - animation.startedAt))) : 0;
     const actionEnvelope = Math.sin(Math.PI * progress) ** 2 * factor;
-    if (animation?.id === 'wave') {
-      pose.headY -= Math.sin(progress * Math.PI * 4) * actionEnvelope * .35;
-      pose.headRotation += Math.sin(progress * Math.PI * 2) * actionEnvelope * .45;
-    } else if (animation?.id === 'sleep') {
-      pose.headY += actionEnvelope * .38;
-      pose.headRotation -= actionEnvelope * .55;
-    } else if (animation?.id === 'angry_fire') {
+    if (animation?.id === 'angry_fire') {
       pose.headX += Math.sin(progress * Math.PI * 10) * actionEnvelope * .4;
       pose.headShape += Math.sin(progress * Math.PI * 6) * actionEnvelope * .35;
     } else if (animation?.id === 'shy') {
       pose.headRotation += actionEnvelope * .55;
       pose.headY += actionEnvelope * .16;
     }
-    const blink = this.advanceBlink(now, factor > 0 && base !== 'sleep');
+    const blink = this.advanceBlink(now, factor > 0 && base !== 'sleep' && expression !== 'sleepy');
     return {
       base,
       action: animation ? null : this.action,
@@ -450,6 +449,7 @@ export class PresentationRuntime {
         headTilt: factor ? this.ambientPose.tilt * factor : 0,
         headTurn: factor ? this.ambientPose.turn * factor : 0,
         keyboardReach: this.keyboardReach * factor,
+        keyboardDepth: this.keyboardDepth * factor,
         mouseHandX: base === 'keyboard_mouse' ? this.mouseHand.x * factor : 0,
         mouseHandY: base === 'keyboard_mouse' ? this.mouseHand.y * factor : 0,
         dragSway: dragSway * factor,

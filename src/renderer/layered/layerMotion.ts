@@ -44,7 +44,7 @@ export function layerTransform(id: string, state: RenderSnapshot): string {
     const side = id === 'left_arm_hand' ? -1 : 1;
     const action = state.action && handAction(state.action.id, state.base);
     const active = action?.includes(side < 0 ? 'left' : 'right') ? 1 : 0;
-    y = active * 2 + breath * 0.4;
+    y = active * 2 + breath * 0.4 + (side > 0 ? -(state.idle.keyboardDepth || 0) * 4 : 0);
     x = side < 0 ? (state.idle.mouseHandX || 0) * 4 : (state.idle.keyboardReach || 0) * 13.3;
     if (side < 0) y += (state.idle.mouseHandY || 0) * 2.8;
     angle = side * (active * 1.5 + drag * 1.2);

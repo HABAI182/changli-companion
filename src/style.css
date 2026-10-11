@@ -251,6 +251,7 @@ header {
 }
 .pet-wrap {
   position: relative;
+  container-type: inline-size;
   width: 100%;
   line-height: 0;
   user-select: none;
@@ -333,13 +334,13 @@ header {
   top: 3%;
   right: 2%;
   max-width: 43%;
-  padding: 7px 10px;
-  border: 1px solid #d7ac86;
-  border-radius: 12px 12px 3px 12px;
-  background: #fff9edee;
-  box-shadow: 0 5px 16px #50302d33;
-  color: #6c4641;
-  font-size: 11px;
+  padding: 1.95cqw 2.8cqw;
+  border: .5cqw solid #dfab8e;
+  border-radius: 4.5cqw 4.5cqw 1.4cqw 4.5cqw;
+  background: #fff8f0f5;
+  box-shadow: 0 1.4cqw 4cqw #50302d22;
+  color: #80514a;
+  font-size: 3.05cqw;
   line-height: 1.45;
   white-space: normal;
   pointer-events: none;

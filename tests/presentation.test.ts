@@ -5,7 +5,7 @@ const settings = {
   inputMode: 'keyboard_mouse' as const,
   autoSleepMinutes: 0 as const,
 };
-it('摸头短暂开心闭眼，重复触摸延长反应，结束后恢复默认', () => {
+it('摸头短暂开心，重复触摸延长反应，结束后恢复默认', () => {
   const pet = new PresentationRuntime(0, () => .5);
   pet.input('pet', 100);
   expect(pet.snapshot(101, settings).expression).toBe('smile');
@@ -54,12 +54,26 @@ it('输入动作与持续表情可组合，完整动画结束恢复当前表情'
   pet.input('keyboard_left', 10);
   expect(pet.snapshot(20, settings).action?.id).toBe('keyboard_left');
   expect(pet.snapshot(20, settings).expression).toBe('smile');
-  expect(pet.play('wave', 30)).toBe(true);
-  expect(pet.snapshot(40, settings).animation?.id).toBe('wave');
+  expect(pet.play('shy', 30)).toBe(true);
+  expect(pet.snapshot(40, settings).animation?.id).toBe('shy');
   pet.input('keyboard_right', 50);
   expect(pet.snapshot(60, settings).action).toBeNull();
   expect(pet.snapshot(1830, settings).animation).toBeNull();
   expect(pet.snapshot(1830, settings).expression).toBe('smile');
+});
+it('四区切换同一只键盘手，前后方向独立平滑，气泡无末尾句号', () => {
+  const pet=new PresentationRuntime(0,()=>.5);
+  pet.input('keyboard_left',100,0,-1);
+  let s=pet.snapshot(200,settings);
+  expect(s.idle.keyboardReach).toBeLessThan(-.8);expect(s.idle.keyboardDepth).toBeLessThan(-.8);
+  pet.input('keyboard_left',220,0,1);s=pet.snapshot(320,settings);
+  expect(s.idle.keyboardReach).toBeLessThan(-.9);expect(s.idle.keyboardDepth).toBeGreaterThan(.7);
+  pet.input('keyboard_right',340,0,-1);s=pet.snapshot(440,settings);
+  expect(s.idle.keyboardReach).toBeGreaterThan(.7);expect(s.idle.keyboardDepth).toBeLessThan(-.7);
+  expect(handAction(s.action!.id,s.base)).toBe('keyboard_right');
+  pet.snapshot(1800,settings);expect(Math.abs(pet.snapshot(2500,settings).idle.keyboardDepth!)).toBeLessThan(.001);
+  pet.setSpeech('又被你发现了。',3000);expect(pet.snapshot(3100,settings).bubble?.text).toBe('又被你发现了');
+  expect(pet.play('wave',4000)).toBe(false);expect(pet.play('sleep',4000)).toBe(false);
 });
 it('hold 松开恢复，toggle 再按关闭', () => {
   const pet = new PresentationRuntime(0);

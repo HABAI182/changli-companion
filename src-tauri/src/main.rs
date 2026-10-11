@@ -569,20 +569,8 @@ fn main() {
                     &show, &top, &km, &ko, &settings, &renderer, &reload, &restore, &reset, &quit,
                 ],
             )?;
-            // A generated solid-color icon guarantees the tray recovery entry is present.
-            let pixels: Vec<u8> = (0..32 * 32)
-                .flat_map(|i| {
-                    let x = i % 32;
-                    let y = i / 32;
-                    if (x as i32 - 16).pow(2) + (y as i32 - 16).pow(2) < 196 {
-                        [173, 82, 72, 255]
-                    } else {
-                        [0, 0, 0, 0]
-                    }
-                })
-                .collect();
             TrayIconBuilder::new()
-                .icon(tauri::image::Image::new_owned(pixels, 32, 32))
+                .icon(app.default_window_icon().expect("bundled Changli icon").clone())
                 .tooltip("离火长明 · 恢复桌宠")
                 .menu(&menu)
                 .on_menu_event(|app, event| match event.id.as_ref() {

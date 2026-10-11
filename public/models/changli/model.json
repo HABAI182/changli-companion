@@ -2,7 +2,7 @@
   "schema": 2,
   "name": "Changli",
   "display_name": "长离",
-  "version": "0.12.4",
+  "version": "0.12.5",
   "input_mode": "keyboard_mouse",
   "renderer": {
     "preferred": "live2d",
@@ -11,7 +11,7 @@
       "manifest": "assets/layers/layers.json"
     },
     "live2d": {
-      "entry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-expressive.model3.json",
+      "entry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json",
       "parameterMap": {
         "head.x": "ParamAngleX",
         "head.z": "ParamAngleZ",
@@ -44,8 +44,6 @@
         "mouse_left": "LeftPress/0",
         "mouse_right": "LeftPress/0",
         "wheel": "LeftPress/0",
-        "wave": "Greeting/0",
-        "sleep": "Nap/0",
         "angry_fire": "AngryFire/0",
         "shy": "Shy/0"
       },
@@ -68,7 +66,7 @@
         "phoenix_eyes": "PhoenixEyesReaction",
         "flame_eyes": "FlameEyesReaction"
       },
-      "art_status": "v71原生Live2D，17个可用表情和5段动作；附加表情符号为随脸网格运动的运行时矢量美术，未写入CMO3。保留尾羽加长、弹性和轮廓裁切。",
+      "art_status": "v71原生Live2D；0.7.5运行资源：四区键盘、睁眼开心、闭眼困倦、随脸矢量效果；未重新导出CMO3",
       "runtimeOffsets": {
         "leftHand": [
           "ArtMesh10"
@@ -76,7 +74,7 @@
         "rightHand": [
           "ArtMesh9"
         ],
-        "reachPixels": 64,
+        "reachPixels": 120,
         "mousePixels": 18,
         "mouth": [
           "ArtMesh28"
@@ -318,7 +316,10 @@
               0
             ]
           }
-        }
+        },
+        "depthPixels": 18,
+        "keyboardMesh": "ArtMesh56",
+        "keyboardAsset": "assets/keyboard-four-zones.svg"
       }
     }
   },
@@ -327,7 +328,7 @@
     1254,
     1254
   ],
-  "art_status": "v71原生Live2D，17个可用表情和5段动作；附加表情符号为随脸网格运动的运行时矢量美术，未写入CMO3。保留尾羽加长、弹性和轮廓裁切。",
+  "art_status": "v71原生Live2D；0.7.5运行资源：四区键盘、睁眼开心、闭眼困倦、随脸矢量效果；未重新导出CMO3",
   "assets": {
     "base": "assets/changli-cutout.png"
   },
@@ -490,31 +491,9 @@
   ],
   "animations": [
     {
-      "id": "wave",
-      "name": "打招呼",
-      "duration": 1800,
-      "frames": [],
-      "status": "ready",
-      "loopCount": 1,
-      "priority": 100,
-      "interrupt": "higher-only",
-      "restore": "previous"
-    },
-    {
       "id": "phoenix",
       "name": "凤凰互动",
       "duration": 2200,
-      "frames": [],
-      "status": "ready",
-      "loopCount": 1,
-      "priority": 100,
-      "interrupt": "higher-only",
-      "restore": "previous"
-    },
-    {
-      "id": "sleep",
-      "name": "入睡",
-      "duration": 2400,
       "frames": [],
       "status": "ready",
       "loopCount": 1,

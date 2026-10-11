@@ -133,7 +133,7 @@ mod windows {
             send(
                 signal,
                 0.0,
-                0.0,
+                crate::model::key_depth(event.vkCode),
                 key_label(event.vkCode).map(|label| KeyDisplay {
                     label,
                     phase: "down",

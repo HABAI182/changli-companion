@@ -21,6 +21,8 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   private lastDrawOrder: Record<string, number> = {};
   private flame = {phase: 0, strength: 0};
   private mouthCoverage = 0;
+  private keyboard?: {mesh: string; texture: number};
+  setKeyboard(mesh: string, texture: number) { this.keyboard={mesh,texture}; }
   setMouthCoverage(value: number) { this.mouthCoverage = value; }
   private contourInfo: Record<string, {nativeVertices: number; renderedVertices: number}> = {};
   constructor(width: number,height: number,private region?: MouseRegion, private handOrder?: HandDrawOrder,
@@ -63,6 +65,20 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   public override drawMeshWebGL(model: Readonly<CubismModel>,index:number):void {
     const id = model.getModel().drawables.ids[index];
     if (!this.isGeneratingMask()) {
+      if(id===this.keyboard?.mesh) {
+        const v=model.getDrawableVertexPositions(index),xs=[],ys=[];
+        for(let i=0;i<v.length;i+=2){xs.push(v[i]);ys.push(v[i+1]);}
+        const minX=Math.min(...xs),minY=Math.min(...ys),dx=Math.max(...xs)-minX,dy=Math.max(...ys)-minY;
+        const uvs=new Float32Array(v.length);
+        for(let i=0;i<v.length;i+=2){uvs[i]=(v[i]-minX)/dx;uvs[i+1]=(v[i+1]-minY)/dy;}
+        const texture=this.keyboard.texture;
+        const proxy=new Proxy(model as CubismModel,{get(target,property){
+          if(property==='getDrawableTextureIndex')return(i:number)=>i===index?texture:target.getDrawableTextureIndex(i);
+          if(property==='getDrawableVertexUvs')return(i:number)=>i===index?uvs:target.getDrawableVertexUvs(i);
+          const value=Reflect.get(target,property);return typeof value==='function'?value.bind(target):value;
+        }});
+        super.drawMeshWebGL(proxy,index);return;
+      }
       if (id==='ArtMesh28' && this.mouthCoverage>0) {
         const coverage=this.mouthCoverage;
         const proxy=new Proxy(model as CubismModel,{get(target,property){

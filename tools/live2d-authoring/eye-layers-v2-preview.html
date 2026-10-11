@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>长离 · 双眼独立分层核对</title>
+<style>body{background:#fff6f2;color:#543b39;font:16px system-ui;text-align:center}canvas{width:min(85vw,65vh,750px);height:min(85vw,65vh,750px)}button{padding:10px;margin:5px}pre{max-width:1000px;margin:auto;text-align:left;white-space:pre-wrap}</style>
+<h1>双眼分层 · 隔离候选</h1>
+<p>眼白、虹膜与原画轮廓分别建模，双眼独立剪切。闭眼弧线与补绘融合仍需检查；技术通过不代表正式美术完成。</p>
+<canvas id="model" width="1200" height="1200"></canvas>
+<div><button id="open">睁眼</button><button id="half">半闭</button><button id="close">闭眼</button><button id="left">左眼单眨</button><button id="right">右眼单眨</button><button id="blink">连续眨眼</button></div>
+<p id="summary">读取真实 Cubism Core…</p><p id="runtime">尚未渲染连续眨眼。</p><details><summary>验证数据</summary><pre id="report"></pre></details>
+<script type="module">
+import {loadCubismCore} from '/src/renderer/live2d/CoreLoader.ts';
+try {
+ await loadCubismCore();
+ const {CubismMoc}=await import('/vendor/live2d/src/model/cubismmoc.ts');
+ const {CubismBackend}=await import('/src/renderer/live2d/CubismBackend.ts');
+ const root='/models/changli/live-eye-layers-v2-candidate/', name='ChangliEyeLayersV2';
+ const backend=new CubismBackend();
+ await backend.load(document.getElementById('model'),root+name+'.model3.json');backend.resize(1200,1200);
+ const moc=CubismMoc.create(await(await fetch(root+name+'.moc3')).arrayBuffer(),true),model=moc.createModel(),core=model.getModel(),ppu=model.getPixelsPerUnit();
+ const oldMoc=CubismMoc.create(await(await fetch('/models/changli/live-head-split-v1-candidate/ChangliHeadSplitV1.moc3')).arrayBuffer(),true),oldModel=oldMoc.createModel(),old=oldModel.getModel();
+ const ids=[...core.drawables.ids], params=[...core.parameters.ids];
+ function set(c,p={}){c.parameters.values.set(c.parameters.defaultValues);for(const[id,v]of Object.entries(p)){const i=c.parameters.ids.indexOf(id);if(i<0)throw Error('Missing '+id);c.parameters.values[i]=v;}c.update();return c.drawables.vertexPositions.map(v=>[...v]);}
+ const base=set(core),diff=(a,b)=>Math.max(0,...a.map((v,i)=>Math.abs(v-b[i])*ppu));
+ const at=id=>{const i=ids.indexOf(id);if(i<0)throw Error('Missing drawable '+id);return i;};
+ const height=v=>{const y=v.filter((_,i)=>i%2===1);return (Math.max(...y)-Math.min(...y))*ppu;};
+ const topology=ids.map((id,i)=>({id,vertices:core.drawables.vertexCounts[i],mask:[...core.drawables.masks[i]].slice(0,core.drawables.maskCounts[i]).map(j=>ids[j]),inverted:model.getDrawableInvertedMaskBit(i),opacity:core.drawables.opacities[i]}));
+ const eyes=[{side:'left',param:'ParamEyeLOpen',iris:'ArtMesh24',sclera:'ArtMesh26',outline:'EyeLeft2'},{side:'right',param:'ParamEyeROpen',iris:'ArtMesh23',sclera:'ArtMesh25',outline:'EyeRight2'}];
+ const cases=eyes.map(e=>({...e,steps:[0,.25,.5,.75,1].map(value=>{const pos=set(core,{[e.param]:value});return {value,changed:ids.filter((id,i)=>diff(pos[i],base[i])>.001),irisShiftPixels:diff(pos[at(e.iris)],base[at(e.iris)]),scleraHeightPixels:height(pos[at(e.sclera)]),outlineHeightPixels:height(pos[at(e.outline)]),opacity:[e.iris,e.sclera,e.outline].map(id=>({id,value:core.drawables.opacities[at(id)]}))};})}));
+ const eyePass=e=>e.steps.every((s,i)=>s.changed.every(id=>id===e.sclera||id===e.outline)&&s.changed.length===(s.value===1?0:2)&&s.irisShiftPixels<.001&&s.opacity.every(o=>o.value===1)&&(i===0||s.scleraHeightPixels>e.steps[i-1].scleraHeightPixels))&&e.steps[0].scleraHeightPixels<e.steps[4].scleraHeightPixels*.15;
+ const maskPass=eyes.every(e=>{const iris=topology[at(e.iris)],outline=topology[at(e.outline)];return iris.mask.length===1&&iris.mask[0]===e.sclera&&!iris.inverted&&outline.mask.length===1&&outline.mask[0]===e.sclera&&outline.inverted;});
+ const regressions=[{}, {ParamAngleZ:-30},{ParamAngleZ:30,ParamBangCenterSway:1,ParamSideHairLeftSway:-1,ParamSideHairRightSway:1,ParamOrnamentLeftSway:1,ParamHandLeftPress:30,ParamHandRightPress:30,ParamPhoenixSway:30,ParamPhoenixWingSway:30,ParamPhoenixTailSway:30}].map(p=>{const a=set(core,p),b=set(old,p);let max=0;for(let j=0;j<old.drawables.ids.length;j++){const id=old.drawables.ids[j];if(id==='EyeLeft'||id==='EyeRight')continue;const i=at(id);if(a[i].length!==b[j].length)throw Error('Unrelated topology changed: '+id);max=Math.max(max,diff(a[i],b[j]));}return {params:p,maxDifferencePixels:max,pass:max<.001};});
+ set(core,{ParamEyeLOpen:0,ParamEyeROpen:0,ParamAngleZ:30});const returned=set(core),returnResidual=Math.max(...returned.map((v,i)=>diff(v,base[i])));
+ const report={candidate:name,officialCore:true,drawables:ids.length,parameters:params.length,topology,cases,maskPass,regressions,returnResidual,pass:cases.every(eyePass)&&maskPass&&regressions.every(r=>r.pass)&&returnResidual<.001,limitations:['Independent iris geometry exists but gaze not bound yet','Original outline inverse clipping needs visual inspection','Underpaint patches are drafts; no formal art acceptance','Candidate is not the default or a Windows package']};
+ const show=()=>document.getElementById('report').textContent=JSON.stringify(report,null,2);show();document.getElementById('summary').textContent=(report.pass?'PASS':'FAIL')+'：双眼剪切、独立闭合、恒定不透明度与原绑定回归。';
+ const render=(l,r)=>{backend.setParameter('ParamEyeLOpen',l);backend.setParameter('ParamEyeROpen',r);};
+ for(const[id,v]of Object.entries({open:[1,1],half:[.5,.5],close:[0,0],left:[0,1],right:[1,0]}))document.getElementById(id).onclick=()=>render(...v);render(1,1);
+ document.getElementById('blink').onclick=async()=>{const button=document.getElementById('blink');button.disabled=true;let frames=0,min=1,max=0;const start=performance.now();await new Promise(resolve=>{const frame=now=>{const t=(now-start)/1000,p=t%1,v=p<.15?1-p/.15:p<.3?(p-.15)/.15:1;render(v,v);const s=backend.getParameterSnapshot();min=Math.min(min,s.ParamEyeLOpen,s.ParamEyeROpen);max=Math.max(max,s.ParamEyeLOpen,s.ParamEyeROpen);frames++;if(t<3)requestAnimationFrame(frame);else resolve();};requestAnimationFrame(frame);});render(1,1);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const s=backend.getParameterSnapshot();report.runtimeBlink={frames,elapsedSeconds:(performance.now()-start)/1000,observedRange:[min,max],final:[s.ParamEyeLOpen,s.ParamEyeROpen],pass:min<.1&&max>.9&&s.ParamEyeLOpen===1&&s.ParamEyeROpen===1};show();button.disabled=false;document.getElementById('runtime').textContent=(report.runtimeBlink.pass?'PASS':'FAIL')+'：实际连续渲染三轮眨眼并复位。';};
+ moc.deleteModel(model);moc.release();oldMoc.deleteModel(oldModel);oldMoc.release();
+}catch(error){document.getElementById('summary').textContent='ERROR: '+error.message;document.getElementById('report').textContent=String(error.stack||error);}
+</script></html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" />
+  <title>长离 · 侧发 Live2D 制作预览</title>
+  <style>
+    body { background: #fff6f2; color: #543b39; font: 16px system-ui; text-align: center; }
+    canvas { width: min(80vw, 650px); height: min(80vw, 650px); }
+    button { padding: 10px; margin: 5px; }
+    output { display: block; white-space: pre-wrap; max-width: 900px; margin: 12px auto; text-align: left; }
+  </style>
+  <h1>长离 · 独立侧发摆动</h1>
+  <p>官方 Cubism Editor 导出与可替换草稿美术；此页仅用于制作核对。</p>
+  <canvas id="model" width="800" height="800"></canvas>
+  <div><button id="left">左侧发</button><button id="right">右侧发</button><button id="reset">归零</button></div>
+  <div><button data-expression="Neutral">默认</button><button data-expression="Smile">开心</button><button data-expression="Sleepy">困倦</button><button data-expression="Surprised">惊讶</button></div>
+  <output id="expression-report"></output>
+  <output id="report">正在读取 Cubism Core…</output>
+  <script type="module">
+    import { loadCubismCore } from '/src/renderer/live2d/CoreLoader.ts';
+    const root = '/models/changli/live-sidehair-draft/';
+    const report = document.getElementById('report');
+    try {
+      await loadCubismCore();
+      const { CubismBackend } = await import('/src/renderer/live2d/CubismBackend.ts');
+      const { CubismMoc } = await import('/vendor/live2d/src/model/cubismmoc.ts');
+      const { CubismPhysics } = await import('/vendor/live2d/src/physics/cubismphysics.ts');
+      const { CubismExpressionMotion } = await import('/vendor/live2d/src/motion/cubismexpressionmotion.ts');
+      const { CubismExpressionMotionManager } = await import('/vendor/live2d/src/motion/cubismexpressionmotionmanager.ts');
+      const backend = new CubismBackend();
+      await backend.load(document.getElementById('model'), root + 'ChangliSideHair.model3.json');
+      const backendDefaults = backend.getParameterSnapshot();
+      backend.resize(800, 800);
+      const moc = CubismMoc.create(await (await fetch(root + 'ChangliSideHair.moc3')).arrayBuffer(), true);
+      const model = moc.createModel();
+      const core = model.getModel();
+      const params = ['ParamSideHairRightSway', 'ParamSideHairLeftSway'];
+      const indices = params.map(id => core.parameters.ids.indexOf(id));
+      if (indices.some(i => i < 0)) throw Error('侧发参数未导出');
+      const snap = () => core.drawables.vertexPositions.map(v => [...v]);
+      core.update();
+      const base = snap();
+      const set = (i, value) => { core.parameters.values[indices[i]] = value; core.update(); };
+      const moved = () => snap().flatMap((v, i) =>
+        v.some((x, j) => Math.abs(x - base[i][j]) > 1e-5) ? [core.drawables.ids[i]] : []);
+      const bindings = [];
+      for (let i = 0; i < 2; i++) {
+        set(i, 1);
+        const plus = moved();
+        set(i, -1);
+        const minus = moved();
+        set(i, 0);
+        const restored = moved().length === 0;
+        if (plus.length !== 1 || minus.length !== 1 || plus[0] !== minus[0] || !restored)
+          throw Error(JSON.stringify({ param: params[i], plus, minus, restored }));
+        bindings.push({ param: params[i], mesh: plus[0], restored });
+      }
+      if (bindings[0].mesh === bindings[1].mesh) throw Error('左右侧发共用了同一网格');
+      const manifest = await (await fetch(root + 'ChangliSideHair.model3.json')).json();
+      const expressions = manifest.FileReferences.Expressions || [];
+      if (expressions.length !== 4) throw Error('技术表情资源未接入');
+      const physics = await (await fetch(root + manifest.FileReferences.Physics)).json();
+      if (physics.Meta.PhysicsSettingCount !== 5 ||
+          !params.every(id => physics.PhysicsSettings.some(s => s.Output.some(o => o.Destination.Id === id))))
+        throw Error('侧发物理设置缺失');
+      const physicsData = await (await fetch(root + manifest.FileReferences.Physics)).arrayBuffer();
+      const simulator = CubismPhysics.create(physicsData, physicsData.byteLength);
+      const ranges = params.map(() => [0, 0]);
+      simulator.stabilization(model);
+      const angleIndex = core.parameters.ids.indexOf('ParamAngleX');
+      for (let frame = 0; frame < 1200; frame++) {
+        core.parameters.values[angleIndex] = frame < 12 ? 0 : frame < 30 ? 30 : frame < 48 ? -30 : 0;
+        simulator.evaluate(model, 1 / 60);
+        model.update();
+        for (let i = 0; i < params.length; i++) {
+          const v = core.parameters.values[indices[i]];
+          if (!Number.isFinite(v) || Math.abs(v) > 1.001) throw Error(`侧发物理值越界：${params[i]} ${v}`);
+          ranges[i][0] = Math.min(ranges[i][0], v);
+          ranges[i][1] = Math.max(ranges[i][1], v);
+        }
+      }
+      if (ranges.some(([min, max]) => max - min < 0.02)) throw Error('侧发物理没有产生可见变化');
+      const expressionModel = moc.createModel();
+      expressionModel.saveParameters();
+      const expressionManager = new CubismExpressionMotionManager();
+      const snapshots = [];
+      for (const name of ['Smile', 'Sleepy', 'Surprised', 'Neutral']) {
+        const file = expressions.find(e => e.Name === name).File;
+        const data = await (await fetch(root + file)).arrayBuffer();
+        expressionManager.startMotion(CubismExpressionMotion.create(data, data.byteLength), true);
+        for (let frame = 0; frame < 45; frame++) {
+          expressionModel.loadParameters();
+          expressionModel.saveParameters();
+          expressionManager.updateMotion(expressionModel, 1 / 60);
+          expressionModel.update();
+        }
+        const p = expressionModel.getModel().parameters;
+        const get = id => p.values[p.ids.indexOf(id)];
+        snapshots.push({ name, eye: get('ParamEyeLOpen'),
+          mouth: get('ParamMouthOpenY'), form: get('ParamMouthForm') });
+      }
+      const near = (value, expected) => Math.abs(value - expected) < 0.05;
+      for (const [index, [eye, mouth, form]] of [
+        [0, 0, 0.55], [0, 0.15, 0], [1, 0.65, 0], [1, 0, 0],
+      ].entries()) {
+        const s = snapshots[index];
+        if (!near(s.eye, eye) || !near(s.mouth, mouth) || !near(s.form, form))
+          throw Error('表情连续切换失败：' + JSON.stringify(snapshots));
+      }
+      const result = { status: 'PASS', artMeshes: core.drawables.count, parameters: core.parameters.count,
+        textures: manifest.FileReferences.Textures.length, bindings,
+        physicsSettings: physics.Meta.PhysicsSettingCount, sideHairPhysicsRanges: ranges,
+        expressions: expressions.map(e => e.Name),
+        expressionSequence: snapshots,
+        initialEyes: [backendDefaults.ParamEyeLOpen, backendDefaults.ParamEyeROpen] };
+      report.textContent = JSON.stringify(result, null, 2);
+      window.sidehairVerification = result;
+      const animate = (id, sign) => {
+        let n = 0;
+        const step = () => {
+          const value = n < 20 ? sign * Math.sin(n / 20 * Math.PI) : 0;
+          backend.setParameter(id, value);
+          n++;
+          if (n <= 20) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+      document.getElementById('left').onclick = () => animate(params[1], 0.7);
+      document.getElementById('right').onclick = () => animate(params[0], -0.7);
+      document.getElementById('reset').onclick = () => params.forEach(id => backend.setParameter(id, 0));
+      for (const button of document.querySelectorAll('[data-expression]'))
+        button.onclick = () => {
+          backend.setExpression(button.dataset.expression);
+          setTimeout(() => {
+            const p = backend.getParameterSnapshot();
+            document.getElementById('expression-report').textContent =
+              `${button.dataset.expression}: 左眼 ${p.ParamEyeLOpen?.toFixed(2)}，右眼 ${p.ParamEyeROpen?.toFixed(2)}，张嘴 ${p.ParamMouthOpenY?.toFixed(2)}，嘴形 ${p.ParamMouthForm?.toFixed(2)}`;
+          }, 450);
+        };
+    } catch (error) {
+      report.textContent = 'FAIL: ' + (error?.stack || error);
+      window.sidehairVerification = { status: 'FAIL', error: String(error) };
+      console.error(error);
+    }
+  </script>
+</html>

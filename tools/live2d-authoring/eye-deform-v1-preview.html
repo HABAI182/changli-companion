@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" />
+  <title>长离 · 双眼闭合曲面核对</title>
+  <style>
+    body {
+      background: #fff6f2;
+      color: #543b39;
+      font: 16px system-ui;
+      text-align: center;
+    }
+    canvas {
+      width: min(80vw, 50vh, 650px);
+      height: min(80vw, 50vh, 650px);
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+    }
+    pre {
+      max-width: 1000px;
+      margin: auto;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    output {
+      display: block;
+      margin: 8px;
+    }
+  </style>
+  <h1>双眼闭合曲面 · 隔离候选</h1>
+  <p>
+    官方 Editor
+    新增两个眼部父级曲面；仍含透明度过渡和闭眼底绘重影，尚未进入默认桌宠。眼睑与虹膜未独立精修。
+  </p>
+  <canvas id="model" width="800" height="800"></canvas>
+  <div>
+    <button id="open">双眼睁开</button><button id="half">双眼半闭</button
+    ><button id="close">双眼闭合</button><button id="left">左眼单眨</button
+    ><button id="right">右眼单眨</button><button id="blink">连续眨眼核对</button>
+  </div>
+  <output id="summary">读取真实 Core…</output
+  ><output id="runtime">尚未执行渲染眨眼。</output>
+  <details>
+    <summary>验证数据</summary>
+    <pre id="report"></pre>
+  </details>
+  <script type="module">
+    import { loadCubismCore } from '/src/renderer/live2d/CoreLoader.ts';
+    try {
+      await loadCubismCore();
+      const { CubismMoc } = await import('/vendor/live2d/src/model/cubismmoc.ts');
+      const { CubismBackend } = await import('/src/renderer/live2d/CubismBackend.ts');
+      const root = '/models/changli/live-eye-deform-v1-candidate/',
+        name = 'ChangliEyeDeformV1';
+      const backend = new CubismBackend();
+      await backend.load(document.getElementById('model'), root + name + '.model3.json');
+      backend.resize(800, 800);
+      const bytes = await (await fetch(root + name + '.moc3')).arrayBuffer(),
+        moc = CubismMoc.create(bytes, true),
+        model = moc.createModel(),
+        core = model.getModel(),
+        ppu = model.getPixelsPerUnit();
+      const previousBytes = await (
+          await fetch('/models/changli/live-left-ornament-v1-candidate/ChangliLeftOrnamentV1.moc3')
+        ).arrayBuffer(),
+        oldMoc = CubismMoc.create(previousBytes, true),
+        oldModel = oldMoc.createModel(),
+        old = oldModel.getModel();
+      const ids = core.parameters.ids,
+        drawIds = core.drawables.ids;
+      const reset = (c) => {
+        c.parameters.values.set(c.parameters.defaultValues);
+        c.update();
+      };
+      const positions = (c) => c.drawables.vertexPositions.map((v) => [...v]);
+      const set = (c, params) => {
+        reset(c);
+        for (const [id, v] of Object.entries(params)) {
+          const i = c.parameters.ids.indexOf(id);
+          if (i < 0) throw Error('Missing ' + id);
+          c.parameters.values[i] = v;
+        }
+        c.update();
+        return positions(c);
+      };
+      reset(core);
+      const base = positions(core);
+      const maxDiff = (a, b) => Math.max(0, ...a.map((x, i) => Math.abs(x - b[i]) * ppu));
+      const span = (v, axis) => {
+        const a = v.filter((_, i) => i % 2 === axis);
+        return Math.max(...a) - Math.min(...a);
+      };
+      const eye = (param, drawable) =>
+        [0, 0.25, 0.5, 0.75, 1].map((value) => {
+          const all = set(core, { [param]: value }),
+            i = drawIds.indexOf(drawable);
+          if (i < 0) throw Error('Missing ' + drawable);
+          const changed = all.flatMap((v, j) => (maxDiff(v, base[j]) > 0.001 ? [drawIds[j]] : []));
+          return {
+            value,
+            changed,
+            maxShiftPixels: maxDiff(all[i], base[i]),
+            heightPixels: span(all[i], 1) * ppu,
+            widthPixels: span(all[i], 0) * ppu,
+            opacity: core.drawables.opacities[i],
+          };
+        });
+      const left = eye('ParamEyeLOpen', 'EyeLeft'),
+        right = eye('ParamEyeROpen', 'EyeRight');
+      const eyePass = (rows, id) =>
+        rows.every(
+          (r, i) =>
+            r.changed.every((x) => x === id) &&
+            r.changed.length === (r.value === 1 ? 0 : 1) &&
+            r.widthPixels > 0 &&
+            r.heightPixels > 0 &&
+            (i === 0 || r.heightPixels > rows[i - 1].heightPixels),
+        ) &&
+        rows[0].heightPixels < rows[4].heightPixels * 0.4 &&
+        rows[4].maxShiftPixels < 0.001;
+      const regressionCases = [
+        {},
+        { ParamAngleZ: -30 },
+        {
+          ParamAngleZ: 30,
+          ParamBangCenterSway: 1,
+          ParamOrnamentLeftSway: 1,
+          ParamHairFront: 1,
+          ParamSideHairRightSway: 1,
+          ParamHandLeftPress: 30,
+          ParamPhoenixWingSway: 30,
+          ParamPhoenixTailSway: 30,
+        },
+      ];
+      // Only compare controls present in both official exports; reject a guessed id.
+      const regressions = regressionCases.map((params) => {
+        const a = set(core, params),
+          b = set(old, params);
+        let max = 0;
+        for (let i = 0; i < drawIds.length; i++) {
+          const j = old.drawables.ids.indexOf(drawIds[i]);
+          if (j < 0 || a[i].length !== b[j].length) throw Error('Unexpected drawable topology');
+          max = Math.max(max, maxDiff(a[i], b[j]));
+        }
+        return { params, maxDifferencePixels: max, pass: max < 0.001 };
+      });
+      const combined = set(core, { ParamEyeLOpen: 0, ParamEyeROpen: 0 }).flatMap((v, i) =>
+        maxDiff(v, base[i]) > 0.001 ? [drawIds[i]] : [],
+      );
+      reset(core);
+      const returnResidual = Math.max(...positions(core).map((v, i) => maxDiff(v, base[i])));
+      const report = {
+        candidate: name,
+        officialCore: true,
+        drawables: drawIds.length,
+        parameters: ids.length,
+        left,
+        right,
+        combined,
+        regressions,
+        returnResidual,
+        pass:
+          eyePass(left, 'EyeLeft') &&
+          eyePass(right, 'EyeRight') &&
+          combined.length === 2 &&
+          combined.includes('EyeLeft') &&
+          combined.includes('EyeRight') &&
+          regressions.every((r) => r.pass) &&
+          returnResidual < 0.001,
+        limitations: [
+          'Closed eye still uses existing bottom painting',
+          'Opacity interpolation remains and causes intermediate ghosting',
+          'No separate iris or eyelid art yet',
+          'Candidate is not the default model',
+        ],
+      };
+      const show = () =>
+        (document.getElementById('report').textContent = JSON.stringify(report, null, 2));
+      show();
+      document.getElementById('summary').textContent =
+        (report.pass ? 'PASS' : 'FAIL') + '：真实眼网格独立闭合、插值与原绑定回归。';
+      const render = (l, r) => {
+        backend.setParameter('ParamEyeLOpen', l);
+        backend.setParameter('ParamEyeROpen', r);
+      };
+      render(1, 1);
+      for (const [id, values] of Object.entries({
+        open: [1, 1],
+        half: [0.5, 0.5],
+        close: [0, 0],
+        left: [0, 1],
+        right: [1, 0],
+      }))
+        document.getElementById(id).onclick = () => render(...values);
+      document.getElementById('blink').onclick = async () => {
+        const button = document.getElementById('blink');
+        button.disabled = true;
+        let frames = 0,
+          min = 1,
+          max = 0;
+        const start = performance.now();
+        await new Promise((resolve) => {
+          const frame = (now) => {
+            const t = (now - start) / 1000,
+              phase = t % 1,
+              value = phase < 0.15 ? 1 - phase / 0.15 : phase < 0.3 ? (phase - 0.15) / 0.15 : 1;
+            render(value, value);
+            const values = backend.getParameterSnapshot();
+            min = Math.min(min, values.ParamEyeLOpen, values.ParamEyeROpen);
+            max = Math.max(max, values.ParamEyeLOpen, values.ParamEyeROpen);
+            frames++;
+            if (t < 3) requestAnimationFrame(frame);
+            else resolve();
+          };
+          requestAnimationFrame(frame);
+        });
+        render(1, 1);
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const final = backend.getParameterSnapshot();
+        report.runtimeBlink = {
+          frames,
+          elapsedSeconds: (performance.now() - start) / 1000,
+          observedRange: [min, max],
+          final: [final.ParamEyeLOpen, final.ParamEyeROpen],
+          pass: min < 0.1 && max > 0.9 && final.ParamEyeLOpen === 1 && final.ParamEyeROpen === 1,
+        };
+        show();
+        button.disabled = false;
+        document.getElementById('runtime').textContent =
+          (report.runtimeBlink.pass ? 'PASS' : 'FAIL') +
+          '：已实际渲染三轮开闭并恢复睁眼。仍需精修眼皮与底绘重影。';
+      };
+      moc.deleteModel(model);
+      moc.release();
+      oldMoc.deleteModel(oldModel);
+      oldMoc.release();
+    } catch (error) {
+      document.getElementById('summary').textContent = 'ERROR: ' + error.message;
+      document.getElementById('report').textContent = String(error.stack || error);
+    }
+  </script>
+</html>

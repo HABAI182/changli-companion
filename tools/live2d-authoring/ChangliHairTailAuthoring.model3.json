@@ -1,0 +1,12 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "ChangliHairTailAuthoring.moc3",
+		"Textures": [
+			"ChangliHairTailAuthoring.2048/texture_00.png",
+			"ChangliHairTailAuthoring.2048/texture_01.png",
+			"ChangliHairTailAuthoring.2048/texture_02.png"
+		],
+		"DisplayInfo": "ChangliHairTailAuthoring.cdi3.json"
+	}
+}

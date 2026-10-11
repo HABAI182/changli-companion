@@ -1,0 +1,83 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><link rel="icon" href="data:,">
+<title>长离 · 双眼闭合浅弧核对</title>
+<style>body{background:#fff6f2;color:#543b39;font:16px system-ui;text-align:center}canvas{width:min(85vw,65vh,750px);height:min(85vw,65vh,750px)}button{padding:10px;margin:5px}pre{max-width:1000px;margin:auto;text-align:left;white-space:pre-wrap}</style>
+<h1>双眼闭合浅弧 · 隔离试作</h1><p>左右闭合曲面浅弧试作；保留各自独立开合与视线。位置、补绘和正式眼睑仍需精修，尚未进入默认或 Windows 包。</p>
+<canvas id="model" width="1200" height="1200"></canvas>
+<div><button id="neutral">中性</button><button id="left">左视</button><button id="right">右视</button><button id="up">上视</button><button id="down">下视</button><button id="diagonal">斜视半闭</button><button id="half">半闭</button><button id="closed">闭眼</button><button id="animate">视线叠加眨眼</button></div>
+<p id="summary">读取真实 Cubism Core（细分候选）…</p><p id="runtime"></p><details><summary>验证数据</summary><pre id="report"></pre></details>
+<script type="module">
+import {loadCubismCore} from '/src/renderer/live2d/CoreLoader.ts';
+try {
+ await loadCubismCore();
+ const {CubismMoc}=await import('/vendor/live2d/src/model/cubismmoc.ts');
+ const {CubismBackend}=await import('/src/renderer/live2d/CubismBackend.ts');
+ const {Live2DAdapter}=await import('/src/renderer/live2d/Live2DAdapter.ts');
+ const {PresentationRuntime}=await import('/src/pet/presentation.ts');
+ const root='/models/changli/live-eye-arc-v2-candidate/',name='ChangliEyeArcV2';
+ const backend=new CubismBackend();
+ const adapter=new Live2DAdapter({entry:'live-eye-arc-v2-candidate/'+name+'.model3.json',parameterMap:{'eye.x':'ParamEyeBallX','eye.y':'ParamEyeBallY','eye.left.open':'ParamEyeLOpen','eye.right.open':'ParamEyeROpen'},motionMap:{},expressionMap:{}},backend);
+ if(await adapter.init(document.getElementById('model'))!=='ready')throw Error(adapter.error||'Adapter failed');backend.resize(1200,1200);
+ const presentation=new PresentationRuntime(0,()=>0);
+ const moc=CubismMoc.create(await(await fetch(root+name+'.moc3')).arrayBuffer(),true), model=moc.createModel(),core=model.getModel(),ppu=model.getPixelsPerUnit();
+ const previousMoc=CubismMoc.create(await(await fetch('/models/changli/live-eye-dense-v1-candidate/ChangliEyeDenseV1.moc3')).arrayBuffer(),true),previousModel=previousMoc.createModel(),old=previousModel.getModel();
+ const ids=[...core.drawables.ids],irises=['ArtMesh23','ArtMesh24'],at=id=>ids.indexOf(id);
+ function set(c,p={}){c.parameters.values.set(c.parameters.defaultValues);for(const[id,v]of Object.entries(p)){const i=c.parameters.ids.indexOf(id);if(i<0)throw Error('Missing '+id);c.parameters.values[i]=v;}c.update();return c.drawables.vertexPositions.map(v=>[...v]);}
+ const base=set(core),diff=(a,b)=>Math.max(0,...a.map((v,i)=>Math.abs(v-b[i])*ppu));
+ function translation(a,b){const xs=[],ys=[];for(let i=0;i<a.length;i+=2){xs.push((a[i]-b[i])*ppu);ys.push((a[i+1]-b[i+1])*ppu);}const mean=v=>v.reduce((a,b)=>a+b,0)/v.length;return {x:mean(xs),y:mean(ys),nonRigid:Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys))};}
+ const axes=['ParamEyeBallX','ParamEyeBallY'].flatMap(param=>[-1,-.5,0,.5,1].map(value=>{const pos=set(core,{[param]:value}),moves=irises.map(id=>({id,...translation(pos[at(id)],base[at(id)])})),changed=ids.filter((id,i)=>diff(pos[i],base[i])>.001);return {param,value,changed,moves,pass:changed.every(id=>irises.includes(id))&&changed.length===(value===0?0:2)&&moves.every(m=>m.nonRigid<.001&&(param.endsWith('X')?Math.abs(m.y)<.001:Math.abs(m.x)<.001))};}));
+ const combinations=[-1,-.5,0,.5,1].flatMap(x=>[-1,-.5,0,.5,1].map(y=>{const xy=set(core,{ParamEyeBallX:x,ParamEyeBallY:y}),xp=set(core,{ParamEyeBallX:x}),yp=set(core,{ParamEyeBallY:y});let residual=0;for(const id of irises){const i=at(id);residual=Math.max(residual,...xy[i].map((v,j)=>Math.abs(v-xp[i][j]-yp[i][j]+base[i][j])*ppu));}return {x,y,residualPixels:residual,pass:residual<.001};}));
+
+
+ const leftChanged=['ArtMesh26','EyeLeft2','ArtMesh25','EyeRight2'];
+ const topology=ids.map((id,i)=>({id,vertices:core.drawables.vertexCounts[i],baselineVertices:old.drawables.vertexCounts[old.drawables.ids.indexOf(id)]}));
+ const topologyPass=ids.length===old.drawables.ids.length&&topology.every(v=>v.vertices===v.baselineVertices)&&ids.every((id,i)=>{
+   const j=old.drawables.ids.indexOf(id);return JSON.stringify([...core.drawables.indices[i]])===JSON.stringify([...old.drawables.indices[j]])&&diff(core.drawables.vertexUvs[i],old.drawables.vertexUvs[j])<.001;
+ });
+ const poses=[{}, {ParamAngleZ:-30}, {ParamEyeLOpen:0,ParamEyeROpen:1}, {ParamEyeLOpen:1,ParamEyeROpen:0}, {ParamEyeLOpen:.5,ParamEyeROpen:.5},
+ {ParamEyeLOpen:0,ParamEyeROpen:0,ParamAngleZ:30,ParamBangCenterSway:1,ParamSideHairLeftSway:-1,ParamSideHairRightSway:1,ParamOrnamentLeftSway:1,ParamHandLeftPress:30,ParamHandRightPress:30,ParamPhoenixSway:30,ParamPhoenixWingSway:30,ParamPhoenixTailSway:30}];
+ const regressions=poses.map(params=>{
+   const a=set(core,params),b=set(old,params),changed=ids.filter((id,i)=>diff(a[i],b[old.drawables.ids.indexOf(id)])>.001);
+   const expected=[...((params.ParamEyeLOpen??1)<1?['ArtMesh26','EyeLeft2']:[]),...((params.ParamEyeROpen??1)<1?['ArtMesh25','EyeRight2']:[])];
+   let unrelatedMax=0;for(let i=0;i<ids.length;i++)if(!leftChanged.includes(ids[i]))unrelatedMax=Math.max(unrelatedMax,diff(a[i],b[old.drawables.ids.indexOf(ids[i])]));
+   return {params,changed,unrelatedMaxPixels:unrelatedMax,pass:unrelatedMax<.001&&(changed.length===expected.length&&changed.every(id=>expected.includes(id)))};
+ });
+ const closed=set(core,{ParamEyeLOpen:0,ParamEyeROpen:0}),closedOld=set(old,{ParamEyeLOpen:0,ParamEyeROpen:0}),opened=set(core);
+ const arcs=leftChanged.map(id=>{
+   const i=at(id),j=old.drawables.ids.indexOf(id),uv=core.drawables.vertexUvs[i],p=closed[i],q=closedOld[j];
+   const groups=new Map();for(let k=0;k<uv.length;k+=2){const key=uv[k+1].toFixed(5);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(k);}
+   const rows=[...groups.values()].map(row=>{row.sort((a,b)=>uv[a]-uv[b]);if(row.length!==5)throw Error('Expected five vertices per eye row');
+     const a=row[0],m=row[2],b=row[4];return {centerDepthPixels:((p[a+1]+p[b+1])/2-p[m+1])*ppu,
+       baselineDepthPixels:((q[a+1]+q[b+1])/2-q[m+1])*ppu,
+       endpointMaxPixels:Math.max(Math.abs(p[a]-q[a]),Math.abs(p[a+1]-q[a+1]),Math.abs(p[b]-q[b]),Math.abs(p[b+1]-q[b+1]))*ppu};});
+   // Mesh rectangles sit inside the warp: their edges are NOT pinned eye corners.
+   // Keep width and row thickness, and bound the shallow vertical displacement.
+   let widthResidual=0,thicknessResidual=0,maxDisplacement=0;
+   const ordered=[...groups.values()].sort((a,b)=>uv[a[0]+1]-uv[b[0]+1]);
+   for(let row=0;row<ordered.length;row++)for(let col=0;col<5;col++){
+     const k=ordered[row][col],first=ordered[0][col];
+     widthResidual=Math.max(widthResidual,Math.abs(p[k]-q[k])*ppu);
+     thicknessResidual=Math.max(thicknessResidual,Math.abs((p[k+1]-p[first+1])-(q[k+1]-q[first+1]))*ppu);
+     maxDisplacement=Math.max(maxDisplacement,Math.abs(p[k+1]-q[k+1])*ppu);
+   }
+   return {id,rows,widthResidualPixels:widthResidual,thicknessResidualPixels:thicknessResidual,maxDisplacementPixels:maxDisplacement,
+     pass:rows.length===5&&rows.every(r=>r.centerDepthPixels>4&&r.centerDepthPixels<12)&&widthResidual<.001&&thicknessResidual<.001&&maxDisplacement<15};
+ });
+ function area(p,a,b,c){a*=2;b*=2;c*=2;return (p[b]-p[a])*(p[c+1]-p[a+1])-(p[b+1]-p[a+1])*(p[c]-p[a]);}
+ const interpolation=['left','right'].flatMap(side=>[0,.125,.25,.375,.5,.625,.75,.875,1].map(open=>{
+   const params=side==='left'?{ParamEyeLOpen:open}:{ParamEyeROpen:open};const pos=set(core,params),oldPos=set(old,params);let max=0,flips=0,degenerate=0;
+   for(const id of (side==='left'?['ArtMesh26','EyeLeft2']:['ArtMesh25','EyeRight2'])){const i=at(id),j=old.drawables.ids.indexOf(id);for(let k=0;k<pos[i].length;k++)max=Math.max(max,Math.abs(pos[i][k]-opened[i][k]*open-closed[i][k]*(1-open))*ppu);
+     const tri=core.drawables.indices[i];for(let t=0;t<tri.length;t+=3){const a=area(pos[i],tri[t],tri[t+1],tri[t+2]),b=area(oldPos[j],tri[t],tri[t+1],tri[t+2]);if(a*b<0)flips++;if(Math.abs(a)<1e-12)degenerate++;}}
+   return {side,open,linearResidualPixels:max,flips,degenerate,pass:max<.001&&flips===0&&degenerate===0};
+ }));
+ const arcPass=arcs.every(a=>a.pass)&&interpolation.every(a=>a.pass);
+ const blinkCombinations=[0,.25,.5,.75,1].flatMap(open=>[-1,1].flatMap(x=>[-1,1].map(y=>{const p={ParamEyeLOpen:open,ParamEyeROpen:open},neutral=set(core,p),gaze=set(core,{...p,ParamEyeBallX:x,ParamEyeBallY:y});const changed=ids.filter((id,i)=>diff(gaze[i],neutral[i])>.001);const masks=irises.map(id=>{const i=at(id);return {id,mask:[...core.drawables.masks[i]].slice(0,core.drawables.maskCounts[i]).map(j=>ids[j]),inverted:model.getDrawableInvertedMaskBit(i),opacity:core.drawables.opacities[i]};});return {open,x,y,changed,masks,pass:changed.length===2&&changed.every(id=>irises.includes(id))&&masks.every(m=>m.mask.length===1&&!m.inverted&&m.opacity===1)};})));
+ set(core,{ParamEyeBallX:1,ParamEyeBallY:-1,ParamEyeLOpen:0});const returned=set(core),returnResidual=Math.max(...returned.map((v,i)=>diff(v,base[i])));
+ const directionPass=axes.filter(c=>Math.abs(c.value)===1).every(c=>c.moves.every(m=>c.param.endsWith('X')?m.x*c.value>1:m.y*c.value>1));
+ const report={candidate:name,officialCore:true,arcs,interpolation,arcPass,topology,topologyPass,drawables:ids.length,parameters:core.parameters.count,axes,combinations,regressions,blinkCombinations,directionPass,returnResidual,pass:arcPass&&topologyPass&&directionPass&&axes.every(c=>c.pass)&&combinations.every(c=>c.pass)&&regressions.every(c=>c.pass)&&blinkCombinations.every(c=>c.pass)&&returnResidual<.001,limitations:['Both closed-eye arcs remain trials; eyelid placement and thickness need art refinement','Underpaint patches and iris art remain drafts','No Windows acceptance for this candidate']};
+ const show=()=>document.getElementById('report').textContent=JSON.stringify(report,null,2);show();document.getElementById('summary').textContent=(report.pass?'PASS':'FAIL')+'：双眼浅弧、无翻折插值、原绑定与视线回归。';
+ function render(x=0,y=0,open=1){const snapshot=presentation.snapshot(0,{motion:'full',inputMode:'keyboard_mouse',autoSleepMinutes:0});snapshot.idle.gazeX=x;snapshot.idle.gazeY=y;snapshot.idle.blink=1-open;adapter.update(snapshot);}
+ for(const[id,v]of Object.entries({neutral:[0,0,1],left:[-1,0,1],right:[1,0,1],up:[0,-1,1],down:[0,1,1],diagonal:[1,1,.5],half:[0,0,.5],closed:[0,0,0]}))document.getElementById(id).onclick=async()=>{render(...v);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const s=backend.getParameterSnapshot();report.semanticChecks??={};report.semanticChecks[id]={screenInput:{x:v[0],y:v[1]},cubism:{x:s.ParamEyeBallX,y:s.ParamEyeBallY,left:s.ParamEyeLOpen,right:s.ParamEyeROpen},pass:Math.abs(s.ParamEyeBallX-v[0])<.001&&Math.abs(s.ParamEyeBallY+v[1])<.001&&Math.abs(s.ParamEyeLOpen-v[2])<.001&&Math.abs(s.ParamEyeROpen-v[2])<.001};show();};render();
+ document.getElementById('animate').onclick=async()=>{const button=document.getElementById('animate');button.disabled=true;const start=performance.now();let frames=0,min=1,max=0;await new Promise(resolve=>{const frame=now=>{const t=(now-start)/1000,p=t%1,v=p<.15?1-p/.15:p<.3?(p-.15)/.15:1;render(Math.sin(t*Math.PI),Math.cos(t*Math.PI),v);const s=backend.getParameterSnapshot();min=Math.min(min,s.ParamEyeLOpen);max=Math.max(max,s.ParamEyeLOpen);frames++;if(t<4)requestAnimationFrame(frame);else resolve();};requestAnimationFrame(frame);});render();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const s=backend.getParameterSnapshot();report.runtime={frames,elapsedSeconds:(performance.now()-start)/1000,observedEyeRange:[min,max],final:{x:s.ParamEyeBallX,y:s.ParamEyeBallY,left:s.ParamEyeLOpen,right:s.ParamEyeROpen},pass:frames>10&&min<.1&&max>.9&&s.ParamEyeBallX===0&&s.ParamEyeBallY===0&&s.ParamEyeLOpen===1&&s.ParamEyeROpen===1};show();document.getElementById('runtime').textContent=(report.runtime.pass?'PASS':'FAIL')+'：视线与四轮眨眼实际连续渲染并复位。';button.disabled=false;};
+ moc.deleteModel(model);moc.release();previousMoc.deleteModel(previousModel);previousMoc.release();
+}catch(error){document.getElementById('summary').textContent='ERROR: '+error.message;document.getElementById('report').textContent=String(error.stack||error);}
+</script></html>

@@ -1,0 +1,1005 @@
+{
+  "schema": 2,
+  "name": "Changli",
+  "display_name": "长离",
+  "version": "0.12.3",
+  "input_mode": "keyboard_mouse",
+  "renderer": {
+    "preferred": "live2d",
+    "fallback": "layered",
+    "layered": {
+      "manifest": "assets/layers/layers.json"
+    },
+    "live2d": {
+      "entry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-elastic.model3.json",
+      "parameterMap": {
+        "head.x": "ParamAngleX",
+        "head.z": "ParamAngleZ",
+        "eye.x": "ParamEyeBallX",
+        "eye.y": "ParamEyeBallY",
+        "eye.left.open": "ParamEyeLOpen",
+        "eye.right.open": "ParamEyeROpen",
+        "mouth.open": "ParamMouthOpenY",
+        "mouth.form": "ParamMouthForm",
+        "breath": "ParamBreath",
+        "hairSway": "ParamHairFront",
+        "ornamentSway": "ParamHairSide",
+        "phoenixFloat": "ParamPhoenixSway",
+        "phoenix.wing": "ParamPhoenixWingSway",
+        "phoenix.tail": "ParamPhoenixTailSway",
+        "hand.left.press": "ParamHandLeftPress",
+        "hand.right.press": "ParamHandRightPress",
+        "head.y": "ParamAngleY"
+      },
+      "motionMap": {
+        "phoenix": "PhoenixInteract/0",
+        "pet": "SecondaryImpulse/0",
+        "body": "SecondaryImpulse/0",
+        "keyboard_left": "RightPress/0",
+        "keyboard_right": "RightPress/0",
+        "space": "RightPress/0",
+        "enter": "RightPress/0",
+        "backspace": "RightPress/0",
+        "rapid": "RightPress/0",
+        "mouse_left": "LeftPress/0",
+        "mouse_right": "LeftPress/0",
+        "wheel": "LeftPress/0"
+      },
+      "expressionMap": {
+        "default": "NeutralReaction",
+        "smile": "SmileReaction",
+        "sleepy": "SleepyReaction",
+        "surprised": "SurprisedReaction",
+        "think": "ThinkReaction",
+        "resigned": "ResignedReaction",
+        "serious": "SeriousReaction",
+        "confused": "ConfusedReaction"
+      },
+      "art_status": "v71原生模型+运行时网格修整。两只手上缘残片按UV轮廓裁切，尾羽纵向加长22%，大头带阻尼弹性/挤压回弹，凤凰常驻摆动和火苗弯曲。去掉抬手与鼠标倾手/滚轮变体。不是新Cubism原生美术导出；精细表情仍待制作。",
+      "runtimeOffsets": {
+        "leftHand": [
+          "ArtMesh10"
+        ],
+        "rightHand": [
+          "ArtMesh9"
+        ],
+        "reachPixels": 64,
+        "mousePixels": 18,
+        "mouth": [
+          "ArtMesh28"
+        ],
+        "smileEyes": [
+          "ArtMesh42",
+          "ArtMesh43"
+        ],
+        "mouseRegion": {
+          "mesh": "ArtMesh20",
+          "outline": [
+            [
+              -5,
+              870
+            ],
+            [
+              333,
+              870
+            ],
+            [
+              365,
+              927
+            ],
+            [
+              280,
+              1005
+            ],
+            [
+              -5,
+              1090
+            ]
+          ]
+        },
+        "handOrder": {
+          "ids": [
+            "ArtMesh10",
+            "ArtMesh9"
+          ],
+          "after": "ArtMesh34"
+        },
+        "contours": {
+          "ArtMesh10": [
+            [
+              0,
+              0.6
+            ],
+            [
+              0.12,
+              0.4
+            ],
+            [
+              0.28,
+              0.27
+            ],
+            [
+              0.46,
+              0.19
+            ],
+            [
+              0.62,
+              0.18
+            ],
+            [
+              0.76,
+              0.21
+            ],
+            [
+              0.9,
+              0.36
+            ],
+            [
+              1,
+              0.6
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "ArtMesh9": [
+            [
+              0,
+              0.6
+            ],
+            [
+              0.12,
+              0.32
+            ],
+            [
+              0.28,
+              0.2
+            ],
+            [
+              0.46,
+              0.14
+            ],
+            [
+              0.63,
+              0.16
+            ],
+            [
+              0.78,
+              0.23
+            ],
+            [
+              0.92,
+              0.38
+            ],
+            [
+              1,
+              0.64
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "ArtMesh53": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              0.74
+            ],
+            [
+              0,
+              0.74
+            ]
+          ],
+          "ArtMesh36": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0.54,
+              1
+            ],
+            [
+              0,
+              0.32
+            ]
+          ]
+        },
+        "head": {
+          "ids": [
+            "ArtMesh3",
+            "ArtMesh4",
+            "ArtMesh18",
+            "ArtMesh23",
+            "ArtMesh24",
+            "ArtMesh25",
+            "ArtMesh26",
+            "EyeLeft2",
+            "EyeRight2",
+            "ArtMesh27",
+            "ArtMesh28",
+            "ArtMesh29",
+            "ArtMesh31",
+            "ArtMesh32",
+            "ArtMesh33",
+            "ArtMesh36",
+            "ArtMesh37",
+            "ArtMesh38",
+            "ArtMesh39",
+            "ArtMesh40",
+            "ArtMesh41",
+            "ArtMesh42",
+            "ArtMesh43",
+            "ArtMesh44",
+            "ArtMesh45",
+            "ArtMesh46",
+            "ArtMesh47",
+            "ArtMesh48",
+            "ArtMesh52",
+            "ArtMesh53",
+            "ArtMesh57",
+            "ArtMesh58"
+          ],
+          "anchor": [
+            627,
+            870
+          ]
+        },
+        "tail": {
+          "ids": [
+            "ArtMesh31",
+            "ArtMesh57",
+            "ArtMesh58"
+          ],
+          "anchorY": 750,
+          "stretch": 1.22
+        },
+        "phoenix": {
+          "ids": [
+            "ArtMesh49",
+            "ArtMesh50",
+            "ArtMesh51"
+          ],
+          "anchor": [
+            1115,
+            925
+          ]
+        },
+        "flameMesh": "ArtMesh50"
+      }
+    }
+  },
+  "preview": "preview.jpg",
+  "canvas": [
+    1254,
+    1254
+  ],
+  "art_status": "v71原生模型+运行时网格修整。两只手上缘残片按UV轮廓裁切，尾羽纵向加长22%，大头带阻尼弹性/挤压回弹，凤凰常驻摆动和火苗弯曲。去掉抬手与鼠标倾手/滚轮变体。不是新Cubism原生美术导出；精细表情仍待制作。",
+  "assets": {
+    "base": "assets/changli-cutout.png"
+  },
+  "states": {
+    "idle": {
+      "asset": "base",
+      "label": "待机"
+    },
+    "keyboard_left": {
+      "asset": "base",
+      "label": "左键区输入 · 手部帧待替换",
+      "feedback": "keyboard-left"
+    },
+    "keyboard_right": {
+      "asset": "base",
+      "label": "右键区输入 · 手部帧待替换",
+      "feedback": "keyboard-right"
+    },
+    "mouse": {
+      "asset": "base",
+      "label": "鼠标输入 · 手部帧待替换",
+      "feedback": "mouse"
+    }
+  },
+  "hotspots": {
+    "head": [
+      0.18,
+      0.15,
+      0.64,
+      0.52
+    ],
+    "body": [
+      0.31,
+      0.65,
+      0.39,
+      0.11
+    ],
+    "keyboard_left": [
+      0.27,
+      0.75,
+      0.29,
+      0.1
+    ],
+    "keyboard_right": [
+      0.56,
+      0.75,
+      0.35,
+      0.1
+    ],
+    "mouse": [
+      0.11,
+      0.7,
+      0.16,
+      0.1
+    ]
+  },
+  "expressions": [
+    {
+      "id": "default",
+      "name": "默认",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "smile",
+      "name": "开心",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "think",
+      "name": "思考",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "surprised",
+      "name": "惊讶",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "resigned",
+      "name": "无语",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "blush",
+      "name": "脸红",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "sleepy",
+      "name": "困倦",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "serious",
+      "name": "认真",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "laugh",
+      "name": "大笑",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "angry",
+      "name": "生气",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "pout",
+      "name": "鼓脸",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "shy",
+      "name": "害羞",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "wronged",
+      "name": "委屈",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "proud",
+      "name": "得意",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "confused",
+      "name": "疑惑",
+      "asset": null,
+      "status": "runtime-preset"
+    },
+    {
+      "id": "phoenix_eyes",
+      "name": "凤凰瞳",
+      "asset": null,
+      "status": "awaiting-art"
+    },
+    {
+      "id": "flame_eyes",
+      "name": "火焰眼",
+      "asset": null,
+      "status": "awaiting-art"
+    }
+  ],
+  "animations": [
+    {
+      "id": "wave",
+      "name": "挥手",
+      "duration": 1500,
+      "frames": [],
+      "status": "awaiting-art",
+      "loopCount": 1,
+      "priority": 100,
+      "interrupt": "higher-only",
+      "restore": "previous"
+    },
+    {
+      "id": "phoenix",
+      "name": "凤凰互动",
+      "duration": 1800,
+      "frames": [],
+      "status": "technical-placeholder",
+      "loopCount": 1,
+      "priority": 100,
+      "interrupt": "higher-only",
+      "restore": "previous"
+    },
+    {
+      "id": "sleep",
+      "name": "入睡",
+      "duration": 1400,
+      "frames": [],
+      "status": "awaiting-art",
+      "loopCount": 1,
+      "priority": 100,
+      "interrupt": "higher-only",
+      "restore": "previous"
+    },
+    {
+      "id": "angry_fire",
+      "name": "生气冒火",
+      "duration": 1700,
+      "frames": [],
+      "status": "awaiting-art",
+      "loopCount": 1,
+      "priority": 100,
+      "interrupt": "higher-only",
+      "restore": "previous"
+    },
+    {
+      "id": "shy",
+      "name": "害羞",
+      "duration": 1600,
+      "frames": [],
+      "status": "awaiting-art",
+      "loopCount": 1,
+      "priority": 100,
+      "interrupt": "higher-only",
+      "restore": "previous"
+    }
+  ],
+  "key_bindings": {
+    "left_vkeys": [
+      81,
+      87,
+      69,
+      82,
+      84,
+      65,
+      83,
+      68,
+      70,
+      71,
+      90,
+      88,
+      67,
+      86,
+      66,
+      27,
+      9,
+      20,
+      192,
+      49,
+      50,
+      51,
+      52,
+      53,
+      112,
+      113,
+      114,
+      115,
+      116,
+      160,
+      162,
+      164
+    ],
+    "right_vkeys": [
+      89,
+      85,
+      73,
+      79,
+      80,
+      72,
+      74,
+      75,
+      76,
+      78,
+      77,
+      13,
+      8,
+      32,
+      54,
+      55,
+      56,
+      57,
+      48,
+      189,
+      187,
+      219,
+      221,
+      220,
+      186,
+      222,
+      188,
+      190,
+      191,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      161,
+      163,
+      165,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111
+    ],
+    "fallback": "keyboard_right"
+  },
+  "shortcuts": [
+    {
+      "id": "slot-01",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+1",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-02",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+2",
+      "expression": "smile",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "smile"
+      }
+    },
+    {
+      "id": "slot-03",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+3",
+      "expression": "think",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "think"
+      }
+    },
+    {
+      "id": "slot-04",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+4",
+      "expression": "surprised",
+      "mode": "hold",
+      "trigger": "hold",
+      "action": {
+        "type": "expression",
+        "id": "surprised"
+      }
+    },
+    {
+      "id": "slot-05",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+5",
+      "expression": "resigned",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "resigned"
+      }
+    },
+    {
+      "id": "slot-06",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+6",
+      "expression": "blush",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "blush"
+      }
+    },
+    {
+      "id": "slot-07",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+7",
+      "expression": "sleepy",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "sleepy"
+      }
+    },
+    {
+      "id": "slot-08",
+      "enabled": true,
+      "shortcut": "Ctrl+Alt+8",
+      "expression": "serious",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "serious"
+      }
+    },
+    {
+      "id": "slot-09",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-10",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-11",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-12",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-13",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-14",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-15",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-16",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-17",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-18",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-19",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-20",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-21",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-22",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-23",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-24",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    },
+    {
+      "id": "slot-25",
+      "enabled": false,
+      "shortcut": "",
+      "expression": "default",
+      "mode": "toggle",
+      "trigger": "toggle",
+      "action": {
+        "type": "expression",
+        "id": "default"
+      }
+    }
+  ],
+  "gamepad_bindings": {
+    "a": "keyboard_left",
+    "b": "keyboard_right",
+    "x": "left",
+    "y": "right",
+    "lb": "keyboard_left",
+    "rb": "keyboard_right",
+    "lt": "left",
+    "rt": "right",
+    "dpad_up": "enter",
+    "dpad_down": "backspace",
+    "dpad_left": "keyboard_left",
+    "dpad_right": "keyboard_right",
+    "left_stick": "move",
+    "right_stick": "move"
+  },
+  "sounds": {
+    "focus_complete": {
+      "asset": "assets/audio/placeholder-chime.wav",
+      "kind": "sfx",
+      "cooldownMs": 1000,
+      "status": "original-placeholder"
+    }
+  },
+  "actions": {
+    "keyboard_left_down": {
+      "durationMs": 140,
+      "priority": 60
+    },
+    "keyboard_right_down": {
+      "durationMs": 140,
+      "priority": 60
+    },
+    "space": {
+      "durationMs": 200,
+      "priority": 65
+    },
+    "enter": {
+      "durationMs": 350,
+      "priority": 65
+    },
+    "backspace": {
+      "durationMs": 270,
+      "priority": 65
+    },
+    "mouse_left": {
+      "durationMs": 180,
+      "priority": 70
+    },
+    "mouse_right": {
+      "durationMs": 180,
+      "priority": 70
+    },
+    "wheel": {
+      "durationMs": 240,
+      "priority": 50
+    }
+  },
+  "phoenix": {
+    "states": [
+      "normal",
+      "happy",
+      "ruffled",
+      "sleep",
+      "flying"
+    ],
+    "asset": null,
+    "status": "awaiting-art"
+  },
+  "overlays": {
+    "key": {
+      "durationMs": 680,
+      "maxVisible": 1
+    }
+  },
+  "voices": {},
+  "capabilities": {
+    "layered": false,
+    "live2d": true,
+    "audio": true
+  }
+}

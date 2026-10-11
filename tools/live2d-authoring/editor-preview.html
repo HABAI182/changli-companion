@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>长离 Cubism Editor 模型校验</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f6eeeb;
+        color: #543b39;
+        font:
+          16px system-ui,
+          sans-serif;
+      }
+      main {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        padding: 20px;
+      }
+      canvas {
+        width: min(80vw, 650px);
+        height: min(80vw, 650px);
+        background: #fff8f5;
+      }
+      button {
+        margin: 0 5px;
+        padding: 8px 16px;
+      }
+      main > div,
+      output {
+        max-width: 650px;
+        width: 100%;
+        overflow-wrap: anywhere;
+      }
+      main > div:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>长离 · Cubism Editor 模型校验</h1>
+      <div id="status" role="status">模型加载中…</div>
+      <canvas id="model" width="800" height="800"></canvas>
+      <output id="verification" aria-live="polite">关键形态校验中…</output>
+      <output id="motion-verification" aria-live="polite">播放短动作后显示实际参数采样结果</output>
+      <div>
+        <button data-pose="open">睁眼</button>
+        <button data-pose="closed">闭眼</button>
+        <button data-pose="wink">眨左眼</button>
+        <button data-angle="-30">左摆</button>
+        <button data-angle="0">居中</button>
+        <button data-angle="30">右摆</button>
+        <button data-mouth="0">闭嘴</button>
+        <button data-mouth="0.5">半开嘴</button>
+        <button data-mouth="1">张嘴</button>
+        <button data-motion="Blink">播放眨眼</button>
+        <button data-motion="Sway">播放轻摆</button>
+        <button data-motion="Mouth">播放嘴部开合</button>
+      </div>
+    </main>
+    <script type="module">
+      import { loadCubismCore } from '/src/renderer/live2d/CoreLoader.ts';
+      import { verifyEditorModel } from './verify-editor-model.js';
+
+      const status = document.getElementById('status');
+      const canvas = document.getElementById('model');
+      let backend;
+      try {
+        await loadCubismCore();
+        const { CubismBackend } = await import('/src/renderer/live2d/CubismBackend.ts');
+        backend = new CubismBackend();
+        await backend.load(canvas, '/models/changli/live-editor/ChangliEditor.model3.json');
+        backend.resize(800, 800);
+        backend.setParameter('ParamMouthOpenY', 0);
+        try {
+          const report = await verifyEditorModel();
+          document.getElementById('verification').textContent =
+            `模型数据校验通过：${JSON.stringify(report)}`;
+        } catch (error) {
+          document.getElementById('verification').textContent =
+            `模型数据校验失败：${error.message}`;
+        }
+        status.textContent =
+          '已加载 Cubism Editor 导出模型 · 四层技术模型，尚无独立头发、双手及凤凰绑定';
+        document.querySelectorAll('[data-pose]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const pose = button.dataset.pose;
+            backend.setParameter('ParamEyeLOpen', pose === 'open' ? 1 : 0);
+            backend.setParameter('ParamEyeROpen', pose === 'closed' ? 0 : 1);
+            status.textContent = `${button.textContent} · 参数已更新`;
+          });
+        });
+        document.querySelectorAll('[data-angle]').forEach((button) => {
+          button.addEventListener('click', () => {
+            backend.setParameter('ParamAngleZ', Number(button.dataset.angle));
+            status.textContent = `${button.textContent} · 模型内整体旋转，极值为 2°`;
+          });
+        });
+        document.querySelectorAll('[data-mouth]').forEach((button) => {
+          button.addEventListener('click', () => {
+            backend.setParameter('ParamMouthOpenY', Number(button.dataset.mouth));
+            status.textContent = `${button.textContent} · 局部嘴部曲面技术形态`;
+          });
+        });
+        document.querySelectorAll('[data-motion]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach((item) => {
+              item.disabled = true;
+            });
+            backend.setParameter('ParamAngleZ', 0);
+            backend.setParameter('ParamEyeLOpen', 1);
+            backend.setParameter('ParamEyeROpen', 1);
+            backend.setParameter('ParamMouthOpenY', 0);
+            backend.startMotion(button.dataset.motion);
+            status.textContent = `${button.textContent} · 临时参数动作`;
+            const ranges = {
+              ParamEyeLOpen: [1, 1],
+              ParamEyeROpen: [1, 1],
+              ParamAngleZ: [0, 0],
+              ParamMouthOpenY: [0, 0],
+            };
+            const started = performance.now();
+            const duration = { Blink: 850, Sway: 2450, Mouth: 1750 }[button.dataset.motion];
+            const sample = () => {
+              const values = backend.getParameterSnapshot();
+              for (const id of Object.keys(ranges)) {
+                ranges[id][0] = Math.min(ranges[id][0], values[id]);
+                ranges[id][1] = Math.max(ranges[id][1], values[id]);
+              }
+              if (performance.now() - started < duration) {
+                requestAnimationFrame(sample);
+                return;
+              }
+              const passed =
+                button.dataset.motion === 'Blink'
+                  ? ranges.ParamEyeLOpen[0] < 0.05 && ranges.ParamEyeROpen[0] < 0.05
+                  : button.dataset.motion === 'Mouth'
+                    ? ranges.ParamMouthOpenY[1] > 0.95 && values.ParamMouthOpenY < 0.05
+                    : ranges.ParamAngleZ[0] < -15 && ranges.ParamAngleZ[1] > 15;
+              document.getElementById('motion-verification').textContent =
+                `${button.textContent}采样${passed ? '通过' : '失败'}：${JSON.stringify(ranges)}`;
+              buttons.forEach((item) => {
+                item.disabled = false;
+              });
+            };
+            requestAnimationFrame(sample);
+          });
+        });
+      } catch (error) {
+        status.textContent = `加载失败：${error instanceof Error ? error.message : String(error)}`;
+      }
+      addEventListener('beforeunload', () => backend?.dispose(), { once: true });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><link rel="icon" href="data:,"><title>长离桌宠 · 实际运行链路验收</title>
+<style>body{font:16px system-ui;background:#fff8f5;color:#543b39;margin:24px}canvas{width:540px;height:540px;background:#eee7e3}pre{white-space:pre-wrap}</style>
+<h1>长离桌宠 · 实际运行链路验收</h1>
+<p>使用桌宠当前配置、真实渲染器及同一套输入适配。模型仍为制作候选；本页结果属于浏览器验证。</p>
+<canvas id="pet" width="800" height="800"></canvas><p id="status">加载中…</p><pre id="report"></pre>
+<script type="module">
+import { model } from '/src/model.ts';
+import { loadCubismCore } from '/src/renderer/live2d/CoreLoader.ts';
+import { Live2DAdapter } from '/src/renderer/live2d/Live2DAdapter.ts';
+import { PresentationRuntime } from '/src/pet/presentation.ts';
+const canvas=document.getElementById('pet'), status=document.getElementById('status');
+await loadCubismCore();
+const { CubismBackend }=await import('/src/renderer/live2d/CubismBackend.ts');
+const backend=new CubismBackend(), adapter=new Live2DAdapter(model.renderer.live2d,backend);
+const pet=new PresentationRuntime(performance.now(),()=>.5);
+const settings={motion:'full',inputMode:'keyboard_mouse',autoSleepMinutes:0};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let frame;
+function update(){const snapshot=pet.snapshot(performance.now(),settings); snapshot.idle.blink=0;
+ snapshot.idle.hairSway=0;snapshot.idle.ornamentSway=0;snapshot.idle.phoenixFloat=0;
+ adapter.update(snapshot);frame=requestAnimationFrame(update);}
+function difference(a,b){return Object.fromEntries(Object.keys(a).map(id=>[id,Math.max(...a[id].positions.map((v,i)=>Math.abs(v-b[id].positions[i])))]));}
+try {
+ if(await adapter.init(canvas)!=='ready')throw Error(adapter.error||'Cubism 未就绪');
+ adapter.resize(800,800);update();await sleep(650);
+ const report={entry:model.renderer.live2d.entry,officialCore:true,browser:true,windowsDesktopVerified:false,formalArtComplete:false};
+ const neutral=backend.getDrawableSnapshot();
+ report.meshes=Object.keys(neutral).length;
+ pet.setDragState(true,performance.now());await sleep(180);
+ const dragValues=backend.getParameterSnapshot(),dragGeometry=backend.getDrawableSnapshot(),dragMoved=difference(neutral,dragGeometry);
+ const modelVersion=Number(report.entry.match(/live-reference-repair-v(\d+)-/)?.[1]);
+ const phoenixIds=modelVersion>=48?['ArtMesh50','ArtMesh49','ArtMesh51']:['ArtMesh16','ArtMesh15','ArtMesh8'];
+ const fixed=[...phoenixIds,'ArtMesh9','ArtMesh10','ArtMesh20'];
+ report.dragHead={angle:dragValues.ParamAngleZ,headPixels:dragMoved.ArtMesh38,fixedPixels:Object.fromEntries(fixed.map(id=>[id,dragMoved[id]])),
+  pass:dragValues.ParamAngleZ>3.9&&dragMoved.ArtMesh38>.2&&fixed.every(id=>dragMoved[id]<.001)};
+ pet.setDragState(false,performance.now());await sleep(750);
+ const release=backend.getParameterSnapshot();report.dragHead.restoredAngle=release.ParamAngleZ;report.dragHead.pass&&=Math.abs(release.ParamAngleZ)<.001;
+ const press=async(signal,parameter,mesh,other)=>{
+  const before=backend.getDrawableSnapshot();const ranges={min:Infinity,max:-Infinity};let peak=before,peakValue=0;
+  pet.input(signal,performance.now());
+  const started=performance.now();
+  while(performance.now()-started<600){await sleep(8);const value=backend.getParameterSnapshot()[parameter];
+   ranges.min=Math.min(ranges.min,value);ranges.max=Math.max(ranges.max,value);
+   if(value>peakValue){peakValue=value;peak=backend.getDrawableSnapshot();}}
+  const after=backend.getDrawableSnapshot(), moved=difference(before,peak), residual=difference(before,after);
+  return {signal,parameter,ranges,mesh,movementPixels:moved[mesh],otherHandPixels:moved[other],residualPixels:residual[mesh],
+   pass:ranges.max>20&&moved[mesh]>3&&moved[other]<.001&&residual[mesh]<.05};
+ };
+ report.left=await press('keyboard_left','ParamHandRightPress','ArtMesh9','ArtMesh10');
+ report.right=await press('keyboard_right','ParamHandRightPress','ArtMesh9','ArtMesh10');
+ pet.input('move',performance.now(),.8,-.6);await sleep(350);
+ const gaze=backend.getParameterSnapshot();report.gaze={x:gaze.ParamEyeBallX,y:gaze.ParamEyeBallY,pass:gaze.ParamEyeBallX>.7&&gaze.ParamEyeBallY>.5};
+ const headTravel=difference(neutral,backend.getDrawableSnapshot());
+ report.headTracking={x:gaze.ParamAngleX,y:gaze.ParamAngleY,headPixels:headTravel.ArtMesh38,
+  fixedPixels:Object.fromEntries(['ArtMesh9','ArtMesh10','ArtMesh20'].map(id=>[id,headTravel[id]])),
+  pass:gaze.ParamAngleX>5&&gaze.ParamAngleY>3&&headTravel.ArtMesh38>1&&
+   ['ArtMesh9','ArtMesh10','ArtMesh20'].every(id=>headTravel[id]<.001)};
+ pet.input('move',performance.now(),0,0);await sleep(800);
+ // Check real iris motion and intermediate frames, not just parameter delivery.
+ const irisIds=['ArtMesh24','ArtMesh23'];
+ const irisCenter=mesh=>[mesh.positions.filter((_,i)=>i%2===0).reduce((a,b)=>a+b,0)/(mesh.positions.length/2),
+  -mesh.positions.filter((_,i)=>i%2===1).reduce((a,b)=>a+b,0)/(mesh.positions.length/2)];
+ const gazeNeutral=backend.getDrawableSnapshot(), gazeSamples=[];
+ for(const [x,y] of [[-.85,0],[.85,0],[0,-.85],[0,.85]]){
+  pet.input('move',performance.now(),0,0);await sleep(600);
+  const before=backend.getDrawableSnapshot(),start=performance.now();pet.input('move',start,x,y);
+  let maxFrameStep=0,previous=before,frames=0;
+  while(performance.now()-start<430){await sleep(12);const current=backend.getDrawableSnapshot();
+   for(const id of irisIds){const a=irisCenter(current[id]),b=irisCenter(previous[id]);maxFrameStep=Math.max(maxFrameStep,Math.hypot(a[0]-b[0],a[1]-b[1]));}
+   frames++;previous=current;
+  }
+  const deltas=irisIds.map(id=>{const a=irisCenter(previous[id]),b=irisCenter(before[id]);return a.map((v,i)=>v-b[i]);});
+  const axis=x?0:1,sign=Math.sign(x||y);
+  const interEyeTravelDifference=Math.abs(deltas[0][axis]-deltas[1][axis]);
+  gazeSamples.push({x,y,deltas,maxFrameStep,frames,interEyeTravelDifference,
+   pass:frames>10&&maxFrameStep<6&&deltas.every(d=>d[axis]*sign>4)&&
+    (!/live-reference-repair-v(32|35|36|37)-/.test(report.entry)||interEyeTravelDifference<.8)});
+ }
+ pet.input('move',performance.now(),0,0);await sleep(800);
+ const gazeResidual=difference(gazeNeutral,backend.getDrawableSnapshot());
+ report.irisTracking={samples:gazeSamples,residualPixels:Object.fromEntries(irisIds.map(id=>[id,gazeResidual[id]])),
+  pass:gazeSamples.every(s=>s.pass)&&irisIds.every(id=>gazeResidual[id]<.05)};
+ pet.expression('smile','toggle',true,performance.now());await sleep(650);
+ const smile=backend.getParameterSnapshot();pet.expression('think','toggle',true,performance.now());await sleep(850);
+ const restored=backend.getParameterSnapshot();
+ report.expressionRecovery={smile:[smile.ParamEyeLOpen,smile.ParamEyeROpen],restored:[restored.ParamEyeLOpen,restored.ParamEyeROpen],
+  pass:smile.ParamEyeLOpen<.01&&smile.ParamEyeROpen<.01&&restored.ParamEyeLOpen>.99&&restored.ParamEyeROpen>.99};
+ pet.expression('default','toggle',true,performance.now());
+ pet.input('pet',performance.now());
+ const ranges=Object.fromEntries(['ParamBangCenterSway','ParamSideHairLeftSway','ParamSideHairRightSway'].map(id=>[id,{min:Infinity,max:-Infinity}]));
+ const started=performance.now();let samples=0,closedTouchFrames=0;
+ while(performance.now()-started<2600){await sleep(16);samples++;const values=backend.getParameterSnapshot();
+  if(values.ParamEyeLOpen<.05&&values.ParamEyeROpen<.05)closedTouchFrames++;
+  for(const id of Object.keys(ranges)){ranges[id].min=Math.min(ranges[id].min,values[id]);ranges[id].max=Math.max(ranges[id].max,values[id]);}}
+ report.petPhysics={ranges,samples,pass:samples>60&&Object.values(ranges).every(r=>r.max-r.min>.02)};
+ const touchRecovered=backend.getParameterSnapshot();
+ report.touchReaction={closedTouchFrames,restored:[touchRecovered.ParamEyeLOpen,touchRecovered.ParamEyeROpen],
+  actualCoreParameters:true,pass:closedTouchFrames>3&&touchRecovered.ParamEyeLOpen>.99&&touchRecovered.ParamEyeROpen>.99};
+ // Exercise the actual menu animation path twice, including full end recovery.
+ const phoenixParameters=['ParamPhoenixSway','ParamPhoenixWingSway','ParamPhoenixTailSway'];
+ const phoenixRuns=[];
+ for(let run=0;run<2;run++){
+  const before=backend.getDrawableSnapshot(),maxMovement=Object.fromEntries(phoenixIds.map(id=>[id,0]));
+  const parameterRanges=Object.fromEntries(phoenixParameters.map(id=>[id,{min:Infinity,max:-Infinity}]));
+  const unaffected=['ArtMesh9','ArtMesh10','ArtMesh20','ArtMesh38'];let unrelatedMaxPixels=0,sampleCount=0;
+  const started=performance.now(),accepted=pet.play('phoenix',started);
+  while(performance.now()-started<2250){await sleep(12);sampleCount++;
+   const values=backend.getParameterSnapshot(),moved=difference(before,backend.getDrawableSnapshot());
+   for(const id of phoenixIds)maxMovement[id]=Math.max(maxMovement[id],moved[id]);
+   for(const id of phoenixParameters){parameterRanges[id].min=Math.min(parameterRanges[id].min,values[id]);parameterRanges[id].max=Math.max(parameterRanges[id].max,values[id]);}
+   unrelatedMaxPixels=Math.max(unrelatedMaxPixels,...unaffected.map(id=>moved[id]));
+  }
+  const restored=backend.getParameterSnapshot(),residual=difference(before,backend.getDrawableSnapshot());
+  phoenixRuns.push({accepted,samples:sampleCount,parameterRanges,maxMovement,unrelatedMaxPixels,
+   restoredParameters:Object.fromEntries(phoenixParameters.map(id=>[id,restored[id]])),residualPixels:Object.fromEntries(phoenixIds.map(id=>[id,residual[id]])),
+   pass:accepted&&sampleCount>70&&Object.values(maxMovement).every(v=>v>1)&&unrelatedMaxPixels<.001&&
+    phoenixParameters.every(id=>Math.abs(restored[id])<.001)&&phoenixIds.every(id=>residual[id]<.001)});
+ }
+ report.phoenixInteraction={runtimeAuthoredTechnicalMotion:true,nativeEditorAnimationExport:false,runs:phoenixRuns,pass:phoenixRuns.every(r=>r.pass)};
+ cancelAnimationFrame(frame);
+ // Check idle gestures through the same adapter and genuine Core geometry.
+ // Only the presentation clock is accelerated; the model is not mocked.
+ const ambientRuns=[];
+ for(const [random,expected] of [[.1,'glance'],[.5,'nod'],[.8,'curious']]){
+  const idlePet=new PresentationRuntime(0,()=>random),start=9000+random*6000;
+  const present=t=>{const s=idlePet.snapshot(t,settings);s.idle.blink=0;s.idle.hairSway=0;s.idle.ornamentSway=0;s.idle.phoenixFloat=0;adapter.update(s);return s;};
+  present(0);await sleep(80);const baseline=backend.getDrawableSnapshot();
+  let previous=baseline,headMax=0,maxFrameStep=0,fixedMax=0,kind='none';
+  for(let t=start;t<=start+3000;t+=35){const snapshot=present(t);if(snapshot.ambient!=='none')kind=snapshot.ambient;await sleep(18);
+   const geometry=backend.getDrawableSnapshot(),delta=difference(baseline,geometry),step=difference(previous,geometry);
+   headMax=Math.max(headMax,delta.ArtMesh38);maxFrameStep=Math.max(maxFrameStep,step.ArtMesh38);
+   fixedMax=Math.max(fixedMax,...['ArtMesh9','ArtMesh10','ArtMesh20'].map(id=>delta[id]));previous=geometry;
+  }
+  // Presentation time is accelerated, but native physics runs in real time.
+  // Hold the returned neutral pose while the pendant inertia settles instead
+  // of measuring a still-moving pendant as a residual head deformation.
+  present(start+4000);await sleep(1000);
+  const residual=difference(baseline,backend.getDrawableSnapshot());
+  ambientRuns.push({expected,kind,headMaxPixels:headMax,maxFrameStepPixels:maxFrameStep,fixedMaxPixels:fixedMax,
+   residualHeadPixels:residual.ArtMesh38,pass:kind===expected&&headMax>1&&maxFrameStep<1.5&&fixedMax<.001&&residual.ArtMesh38<.02});
+ }
+ report.ambientGestures={actualCoreGeometry:true,runs:ambientRuns,pass:ambientRuns.every(r=>r.pass)};
+ const expectedMeshes=modelVersion>=58?43:modelVersion>=57?41:modelVersion>=56?39:modelVersion>=50?38:modelVersion>=48?36:(/live-reference-repair-v(31|32|35|36|37|38|39|40|41|42|44)-/.test(report.entry)?36:35);
+ report.pass=report.meshes===expectedMeshes&&report.dragHead.pass&&report.left.pass&&report.right.pass&&report.gaze.pass&&(modelVersion<50||report.headTracking.pass)&&report.irisTracking.pass&&report.expressionRecovery.pass&&report.petPhysics.pass&&report.touchReaction.pass&&report.phoenixInteraction.pass&&report.ambientGestures.pass;
+ window.desktopIntegration=report;status.textContent=report.pass?'当前桌宠运行链路通过；正式美术未完工。':'实际运行检查有未通过项。';
+ document.getElementById('report').textContent=JSON.stringify(report,null,2);
+}catch(e){status.textContent='ERROR: '+e.message;window.desktopIntegration={pass:false,error:String(e)};}
+addEventListener('pagehide',()=>{cancelAnimationFrame(frame);adapter.dispose();},{once:true});
+</script></html>
+

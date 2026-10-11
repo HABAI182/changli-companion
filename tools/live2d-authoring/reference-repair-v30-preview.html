@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" />
+  <link rel="icon" href="data:," />
+  <title>长离原图 · 发量与脸型核对</title>
+  <style>
+    body {
+      background: #fff8f5;
+      color: #513d3c;
+      font: 16px system-ui;
+      margin: 24px;
+    }
+    h1 {
+      font-size: 26px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .panels {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .stage {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: #fff5ef;
+    }
+    .stage img,
+    .stage canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    figure {
+      margin: 0;
+    }
+    figcaption {
+      padding: 10px 0;
+    }
+    .candidates {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .candidates img {
+      width: 270px;
+      background: #eee0d8;
+    }
+    @media (max-width: 700px) {
+      .panels {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <h1>凤凰轮廓网格与桌宠动作核对 · v30</h1>
+  <p>
+    右侧是官方 Editor 导出的真实 Live2D 修正版，可核对原图发量、脸型、圆嘴和摆动。后续版本逐步修正闭眼轮廓、眨眼淡出及睁眼边缘。脸侧接缝、饰品独立摆动和完整表情仍待精修，尚未通过最终美术验收。
+  </p>
+  <div class="controls">
+    <label><input type="checkbox" id="hideLeft" /> 检查原图左侧发束贡献</label
+    ><button id="half">半闭</button><button id="closed">闭眼</button
+    ><button id="tiltLeft">左倾</button><button id="tiltRight">右倾</button
+    ><button id="hairLeft">发束左摆</button><button id="hairRight">发束右摆</button>
+    <label
+      >原图叠加 <input type="range" id="blend" min="0" max="100" value="0" /><output id="blendValue"
+        >0%</output
+      ></label
+    >
+    <button id="mouthHalf">圆嘴半开</button><button id="mouthOpen">圆嘴张开</button>
+    <button id="rightHairLeft">右发左摆</button><button id="rightHairRight">右发右摆</button>
+    <button id="bangLeft">中央刘海左摆</button><button id="bangRight">中央刘海右摆</button>
+    <button id="winkLeft">左眼闭合</button><button id="winkRight">右眼闭合</button>
+    <button id="reset">回到中性核对</button>
+    <button id="phoenixLeft">凤凰左摆</button><button id="phoenixRight">凤凰右摆</button><button id="phoenixWing">凤凰扇翅</button><button id="phoenixTail">凤凰尾羽</button><button id="nativePhysics" hidden>播放原生头发物理</button>
+  </div>
+  <div class="panels">
+    <figure>
+      <div class="stage">
+        <img src="./references/changli-original-current.png" alt="用户提供的原图" />
+      </div>
+      <figcaption>原图：左侧是细长发束；脸颊至下巴连续，嘴在原位置。</figcaption>
+    </figure>
+    <figure>
+      <div class="stage">
+        <canvas id="model" width="1254" height="1254"></canvas
+        ><img id="overlay" src="./references/changli-original-current.png" alt="同坐标原图叠加" />
+      </div>
+      <figcaption id="status">读取官方 Core 与现有模型…</figcaption>
+    </figure>
+  </div>
+  <details>
+    <summary>真实 Core 与坐标核对数据</summary>
+    <pre id="report"></pre>
+  </details>
+  <script type="module">
+    import { loadCubismCore } from '/src/renderer/live2d/CoreLoader.ts';
+    const status = document.getElementById('status');
+    try {
+      await loadCubismCore();
+      const { CubismFramework } = await import('/vendor/live2d/src/live2dcubismframework.ts');
+      const { CubismMoc } = await import('/vendor/live2d/src/model/cubismmoc.ts');
+      const { CubismMatrix44 } = await import('/vendor/live2d/src/math/cubismmatrix44.ts');
+      const { CubismRenderer_WebGL } =
+        await import('/vendor/live2d/src/rendering/cubismrenderer_webgl.ts');
+      const { CubismShaderManager_WebGL } =
+        await import('/vendor/live2d/src/rendering/cubismshader_webgl.ts');
+      if (!CubismFramework.startUp()) throw Error('Framework startup failed');
+      CubismFramework.initialize();
+      const requestedVersion = Number(new URLSearchParams(location.search).get('version'));
+      const version = 30;
+      const root = `/models/changli/live-reference-repair-v${version}-candidate/`;
+      const manifest = await (
+        await fetch(root + `ChangliReferenceRepairV${version}.model3.json`)
+      ).json();
+      const moc = CubismMoc.create(
+        await (await fetch(root + manifest.FileReferences.Moc)).arrayBuffer(),
+        true,
+      );
+      if (!moc) throw Error('Official Core rejected MOC3');
+      const model = moc.createModel(),
+        core = model.getModel(),
+        ppu = model.getPixelsPerUnit();
+      const canvas = document.getElementById('model');
+      const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true });
+      if (!gl) throw Error('WebGL unavailable');
+      const renderer = new CubismRenderer_WebGL(1254, 1254);
+      renderer.initialize(model);
+      renderer.startUp(gl);
+      renderer.setIsPremultipliedAlpha(true);
+      renderer.loadShaders('/vendor/live2d/shaders/');
+      const textures = [];
+      for (const [i, file] of manifest.FileReferences.Textures.entries()) {
+        const image = await new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = reject;
+          im.src = root + file;
+        });
+        const texture = gl.createTexture();
+        textures.push(texture);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        renderer.bindTexture(i, texture);
+      }
+      const shader = CubismShaderManager_WebGL.getInstance().getShader(gl),
+        start = performance.now();
+      while (!shader._isShaderLoaded) {
+        if (performance.now() - start > 10000) throw Error('Shader timeout');
+        await new Promise((r) => setTimeout(r, 16));
+      }
+      // Map Core coordinates back to original 1254px source space. No guessed
+      // mesh resize or framing enlargement. Physics is opt-in after static QA.
+      const info = core.canvasinfo;
+      const matrix = new CubismMatrix44(),
+        values = matrix.getArray();
+      values[0] = values[5] = (2 * ppu) / 1254;
+      values[12] = (2 * info.CanvasOriginX) / 1254 - 1;
+      values[13] = 1 - (2 * info.CanvasOriginY) / 1254;
+      renderer.setMvpMatrix(matrix);
+      core.parameters.values.set(core.parameters.defaultValues);
+      model.update();
+      const ids = [...core.drawables.ids],
+        hairIndex = ids.indexOf('ArtMesh27');
+      if (hairIndex < 0) throw Error('Left hair mesh not found');
+      const bounds = ids.map((id, i) => {
+        const v = core.drawables.vertexPositions[i],
+          xs = [],
+          ys = [];
+        for (let j = 0; j < v.length; j += 2) {
+          xs.push(v[j] * ppu + info.CanvasOriginX);
+          ys.push(info.CanvasOriginY - v[j + 1] * ppu);
+        }
+        return {
+          id,
+          vertices: v.length / 2,
+          drawOrder: core.drawables.drawOrders[i],
+          renderOrder: core.getRenderOrders()[i],
+          textureIndex: core.drawables.textureIndices[i],
+          opacity: core.drawables.opacities[i],
+          bounds: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)],
+        };
+      });
+      const report = {
+        version,
+        officialCore: true,
+        sourceSize: [1254, 1254],
+        canvasInfo: {
+          width: info.CanvasWidth,
+          height: info.CanvasHeight,
+          originX: info.CanvasOriginX,
+          originY: info.CanvasOriginY,
+          pixelsPerUnit: ppu,
+        },
+        drawables: ids.length,
+        parameters: core.parameters.count,
+        neutral: true,
+        animationEnabled: false,
+        physicsEnabled: false,
+        bindingsModified: true,
+        temporaryHidden: [],
+        bounds,
+        alignment: 'Core canvas origin and pixels-per-unit; no aesthetic auto-alignment',
+        artApproved: false,
+      };
+      function draw() {
+        const hairOpacity = core.drawables.opacities[hairIndex];
+        const hide = document.getElementById('hideLeft').checked;
+        if (hide) core.drawables.opacities[hairIndex] = 0;
+        gl.viewport(0, 0, 1254, 1254);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        renderer.setRenderState(null, [0, 0, 1254, 1254]);
+        renderer.drawModel('/vendor/live2d/shaders/');
+        report.temporaryHidden = hide ? ['ArtMesh27'] : [];
+        report.visibleLeftHairOpacity = core.drawables.opacities[hairIndex];
+        core.drawables.opacities[hairIndex] = hairOpacity;
+        document.getElementById('report').textContent = JSON.stringify(report, null, 2);
+        status.textContent = hide
+          ? '临时隐藏独立原图左发，以核对旧底绘残留。'
+          : '已加载真实 Live2D 原图修正版；可对照和检查姿态，尚未通过最终美术验收。';
+      }
+      document.getElementById('hideLeft').onchange = draw;
+      document.getElementById('blend').oninput = (event) => {
+        document.getElementById('overlay').style.opacity = Number(event.target.value) / 100;
+        document.getElementById('blendValue').textContent = event.target.value + '%';
+      };
+      document.getElementById('reset').onclick = () => {
+        document.getElementById('hideLeft').checked = false;
+        document.getElementById('blend').value = 0;
+        document.getElementById('blend').dispatchEvent(new Event('input'));
+        draw();
+      };
+      function pose(target, params = {}) {
+        const c = target.getModel();
+        c.parameters.values.set(c.parameters.defaultValues);
+        for (const [id, value] of Object.entries(params)) {
+          const i = c.parameters.ids.indexOf(id);
+          if (i < 0) throw Error('Parameter missing: ' + id);
+          c.parameters.values[i] = value;
+        }
+        target.update();
+        return [...c.drawables.vertexPositions].map((v) => [...v]);
+      }
+      function area(p, a, b, c) {
+        a *= 2;
+        b *= 2;
+        c *= 2;
+        return (p[b] - p[a]) * (p[c + 1] - p[a + 1]) - (p[b + 1] - p[a + 1]) * (p[c] - p[a]);
+      }
+      const { checkPhoenixMeshes } = await import('./reference-repair-v30-checks.js');
+      const { baselineMoc, baselineModel, neutral, repaired } = await checkPhoenixMeshes({ model, core, ids, ppu, report, CubismMoc, pose, area });
+      report.windowsDesktopVerified = false;
+      let nativePhysics, physicsAnimation;
+      function stopPhysics() {
+        cancelAnimationFrame(physicsAnimation); physicsAnimation = undefined;
+        document.getElementById('nativePhysics').textContent = '播放原生头发物理';
+        report.animationEnabled = false; report.physicsEnabled = false;
+        delete report.livePhysics;
+      }
+      window.referenceRepair = {
+        report,
+        validatePose(params) {
+          const p = pose(model, params);
+          let flips = 0,
+            degenerate = 0,
+            nonFinite = 0;
+          const meshIssues = [];
+          for (let i = 0; i < ids.length; i++) {
+            nonFinite += p[i].filter((value) => !Number.isFinite(value)).length;
+            if (!repaired.includes(ids[i])) continue;
+            const tri = core.drawables.indices[i];
+            for (let k = 0; k < tri.length; k += 3) {
+              const a = area(p[i], ...tri.slice(k, k + 3));
+              const b = area(neutral[i], ...tri.slice(k, k + 3));
+              if (a * b < 0) { flips++; meshIssues.push({ id: ids[i], triangle: [...tri.slice(k, k + 3)], area: a, neutralArea: b, opacity: core.drawables.opacities[i] }); }
+              if (Math.abs(a) < 1e-12) { degenerate++; meshIssues.push({ id: ids[i], triangle: [...tri.slice(k, k + 3)], degenerate: true }); }
+            }
+          }
+          draw();
+          return { flips, degenerate, nonFinite, meshIssues };
+        },
+        setPose(params) {
+          stopPhysics();
+          pose(model, params);
+          report.currentPose = params;
+          draw();
+        },
+        positions(params) {
+          return pose(model, params);
+        },
+      };
+      if (version >= 27) {
+        const { createReferenceHairPhysics } = await import('./reference-hair-physics-qa.js');
+        nativePhysics = await createReferenceHairPhysics({ version, root, manifest, model, core, ppu, ids, neutral, repaired, pose, area, draw });
+        window.referenceRepair.physics = nativePhysics;
+        const button = document.getElementById('nativePhysics');
+        button.hidden = false;
+        button.onclick = () => {
+          if (physicsAnimation) {
+            window.referenceRepair.setPose({}); return;
+          }
+          nativePhysics.reset();
+          report.animationEnabled = true; report.physicsEnabled = true;
+          button.textContent = '停止原生头发物理';
+          const start = performance.now(); let previous = start;
+          function frame(now) {
+            const t = (now - start) / 1000;
+            const input = { ParamAngleX: 20 * Math.sin(t * 1.4), ParamAngleZ: 20 * Math.sin(t * 1.1),
+              ParamEyeLOpen: 1 - Math.pow(Math.max(0, Math.cos(t * 2)), 18),
+              ParamEyeROpen: 1 - Math.pow(Math.max(0, Math.cos(t * 2)), 18) };
+            report.currentPose = input;
+            report.livePhysics = nativePhysics.step(input, Math.min((now - previous) / 1000, .05), true);
+            status.textContent = '原生头发物理预览正在运行；正式美术仍待精修。';
+            previous = now; physicsAnimation = requestAnimationFrame(frame);
+          }
+          physicsAnimation = requestAnimationFrame(frame);
+        };
+      }
+      const actions = {
+        phoenixLeft: { ParamPhoenixSway: -30 },
+        phoenixRight: { ParamPhoenixSway: 30 },
+        phoenixWing: { ParamPhoenixWingSway: 30 },
+        phoenixTail: { ParamPhoenixTailSway: 30 },
+        half: { ParamEyeLOpen: 0.5, ParamEyeROpen: 0.5 },
+        closed: { ParamEyeLOpen: 0, ParamEyeROpen: 0 },
+        winkLeft: { ParamEyeLOpen: 0, ParamEyeROpen: 1 },
+        winkRight: { ParamEyeLOpen: 1, ParamEyeROpen: 0 },
+        tiltLeft: { ParamAngleZ: -30 },
+        tiltRight: { ParamAngleZ: 30 },
+        hairLeft: { ParamSideHairLeftSway: -1 },
+        hairRight: { ParamSideHairLeftSway: 1 },
+        rightHairLeft: { ParamSideHairRightSway: -1 },
+        bangLeft: { ParamBangCenterSway: -1 },
+        bangRight: { ParamBangCenterSway: 1 },
+        rightHairRight: { ParamSideHairRightSway: 1 },
+        mouthHalf: { ParamMouthOpenY: 0.5 },
+        mouthOpen: { ParamMouthOpenY: 1 },
+      };
+      for (const [id, params] of Object.entries(actions)) {
+        const button = document.getElementById(id);
+        if (button) button.onclick = () => window.referenceRepair.setPose(params);
+      }
+      document.getElementById('reset').onclick = () => {
+        document.getElementById('hideLeft').checked = false;
+        window.referenceRepair.setPose({});
+      };
+      window.referenceRepair.setPose({});
+      addEventListener(
+        'pagehide',
+        () => {
+          cancelAnimationFrame(physicsAnimation); nativePhysics?.release();
+          baselineMoc.deleteModel(baselineModel);
+          baselineMoc.release();
+          renderer.release();
+          for (const t of textures) gl.deleteTexture(t);
+          moc.deleteModel(model);
+          moc.release();
+        },
+        { once: true },
+      );
+    } catch (error) {
+      status.textContent = 'ERROR: ' + error.message;
+      document.getElementById('report').textContent = error.stack;
+    }
+  </script>
+</html>

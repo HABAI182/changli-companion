@@ -1,0 +1,20 @@
+[package]
+name = "changli-companion"
+version = "0.7.3"
+description = "离火长明 — 可替换占位素材的本地桌面伴侣原型"
+authors = ["Changli Companion contributors"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
+[dependencies]
+tauri = { version = "=2.11.6", features = ["tray-icon"] }
+tauri-plugin-autostart = "=2.5.1"
+tauri-plugin-global-shortcut = "=2.3.2"
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+rusqlite = { version = "=0.40.2", features = ["bundled"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Input_XboxController", "Win32_System_Threading", "Win32_System_LibraryLoader"] }

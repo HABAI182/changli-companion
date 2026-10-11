@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" />
+  <title>长离原图 · 发量与脸型核对</title>
+  <style>
+    body {
+      background: #fff8f5;
+      color: #513d3c;
+      font: 16px system-ui;
+      margin: 24px;
+    }
+    h1 {
+      font-size: 26px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .panels {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .stage {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: #fff5ef;
+    }
+    .stage img,
+    .stage canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    figure {
+      margin: 0;
+    }
+    figcaption {
+      padding: 10px 0;
+    }
+    .candidates {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .candidates img {
+      width: 270px;
+      background: #eee0d8;
+    }
+    @media (max-width: 700px) {
+      .panels {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <h1>原图、左侧发量与脸型核对</h1>
+  <p>
+    右侧是已导出的真实 Live2D
+    中性姿态；此页只作诊断，尚未修正源模型。保留原图自然倾斜，不强制左右对称。
+  </p>
+  <div class="controls">
+    <label><input type="checkbox" id="hideLeft" /> 临时隐藏左侧候选发束</label>
+    <label
+      >原图叠加 <input type="range" id="blend" min="0" max="100" value="0" /><output id="blendValue"
+        >0%</output
+      ></label
+    >
+    <button id="reset">回到中性核对</button>
+  </div>
+  <div class="panels">
+    <figure>
+      <div class="stage">
+        <img src="./references/changli-original-20261002.png" alt="用户提供的原图" />
+      </div>
+      <figcaption>原图：左侧是细长发束；脸颊至下巴连续，嘴在原位置。</figcaption>
+    </figure>
+    <figure>
+      <div class="stage">
+        <canvas id="model" width="1254" height="1254"></canvas
+        ><img id="overlay" src="./references/changli-original-20261002.png" alt="同坐标原图叠加" />
+      </div>
+      <figcaption id="status">读取官方 Core 与现有模型…</figcaption>
+    </figure>
+  </div>
+  <h2>待校准素材</h2>
+  <p>
+    新发束去掉了下端多余的圆卷，但生成结果仍改变了比例、位置及局部线条；只能作为待校准候选，不能直接称已修好。
+  </p>
+  <div class="candidates">
+    <figure>
+      <img src="./assets/hair-left-v1.png" alt="旧左侧发束" />
+      <figcaption>旧候选</figcaption>
+    </figure>
+    <figure>
+      <img src="./assets/hair-left-v2-candidate.png" alt="新左侧发束候选" />
+      <figcaption>v2 候选，未导入</figcaption>
+    </figure>
+  </div>
+  <details>
+    <summary>真实 Core 与坐标核对数据</summary>
+    <pre id="report"></pre>
+  </details>
+  <script type="module">
+    import { loadCubismCore } from '/src/renderer/live2d/CoreLoader.ts';
+    const status = document.getElementById('status');
+    try {
+      await loadCubismCore();
+      const { CubismFramework } = await import('/vendor/live2d/src/live2dcubismframework.ts');
+      const { CubismMoc } = await import('/vendor/live2d/src/model/cubismmoc.ts');
+      const { CubismMatrix44 } = await import('/vendor/live2d/src/math/cubismmatrix44.ts');
+      const { CubismRenderer_WebGL } =
+        await import('/vendor/live2d/src/rendering/cubismrenderer_webgl.ts');
+      const { CubismShaderManager_WebGL } =
+        await import('/vendor/live2d/src/rendering/cubismshader_webgl.ts');
+      if (!CubismFramework.startUp()) throw Error('Framework startup failed');
+      CubismFramework.initialize();
+      const root = '/models/changli/live-eye-gaze-v1-candidate/';
+      const manifest = await (await fetch(root + 'ChangliEyeGazeV1.model3.json')).json();
+      const moc = CubismMoc.create(
+        await (await fetch(root + manifest.FileReferences.Moc)).arrayBuffer(),
+        true,
+      );
+      if (!moc) throw Error('Official Core rejected MOC3');
+      const model = moc.createModel(),
+        core = model.getModel(),
+        ppu = model.getPixelsPerUnit();
+      const canvas = document.getElementById('model');
+      const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true });
+      if (!gl) throw Error('WebGL unavailable');
+      const renderer = new CubismRenderer_WebGL(1254, 1254);
+      renderer.initialize(model);
+      renderer.startUp(gl);
+      renderer.setIsPremultipliedAlpha(true);
+      renderer.loadShaders('/vendor/live2d/shaders/');
+      const textures = [];
+      for (const [i, file] of manifest.FileReferences.Textures.entries()) {
+        const image = await new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = reject;
+          im.src = root + file;
+        });
+        const texture = gl.createTexture();
+        textures.push(texture);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        renderer.bindTexture(i, texture);
+      }
+      const shader = CubismShaderManager_WebGL.getInstance().getShader(gl),
+        start = performance.now();
+      while (!shader._isShaderLoaded) {
+        if (performance.now() - start > 10000) throw Error('Shader timeout');
+        await new Promise((r) => setTimeout(r, 16));
+      }
+      // Map Core coordinates back to original 1254px source space. No guessed
+      // mesh resize, no framing enlargement, no animation or physics on this page.
+      const info = core.canvasinfo;
+      const matrix = new CubismMatrix44(),
+        values = matrix.getArray();
+      values[0] = values[5] = (2 * ppu) / 1254;
+      values[12] = (2 * info.CanvasOriginX) / 1254 - 1;
+      values[13] = 1 - (2 * info.CanvasOriginY) / 1254;
+      renderer.setMvpMatrix(matrix);
+      core.parameters.values.set(core.parameters.defaultValues);
+      model.update();
+      const ids = [...core.drawables.ids],
+        hairIndex = ids.indexOf('ArtMesh13');
+      if (hairIndex < 0) throw Error('Left hair mesh not found');
+      const baseOpacity = [...core.drawables.opacities];
+      const bounds = ids.map((id, i) => {
+        const v = core.drawables.vertexPositions[i],
+          xs = [],
+          ys = [];
+        for (let j = 0; j < v.length; j += 2) {
+          xs.push(v[j] * ppu + info.CanvasOriginX);
+          ys.push(info.CanvasOriginY - v[j + 1] * ppu);
+        }
+        return {
+          id,
+          vertices: v.length / 2,
+          bounds: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)],
+        };
+      });
+      const report = {
+        officialCore: true,
+        sourceSize: [1254, 1254],
+        canvasInfo: {
+          width: info.CanvasWidth,
+          height: info.CanvasHeight,
+          originX: info.CanvasOriginX,
+          originY: info.CanvasOriginY,
+          pixelsPerUnit: ppu,
+        },
+        drawables: ids.length,
+        parameters: core.parameters.count,
+        neutral: true,
+        animationEnabled: false,
+        physicsEnabled: false,
+        bindingsModified: false,
+        temporaryHidden: [],
+        bounds,
+        alignment: 'Core canvas origin and pixels-per-unit; no aesthetic auto-alignment',
+        artApproved: false,
+      };
+      function draw() {
+        core.drawables.opacities.set(baseOpacity);
+        const hide = document.getElementById('hideLeft').checked;
+        if (hide) core.drawables.opacities[hairIndex] = 0;
+        gl.viewport(0, 0, 1254, 1254);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        renderer.setRenderState(null, [0, 0, 1254, 1254]);
+        renderer.drawModel('/vendor/live2d/shaders/');
+        report.temporaryHidden = hide ? ['ArtMesh13'] : [];
+        report.visibleLeftHairOpacity = core.drawables.opacities[hairIndex];
+        document.getElementById('report').textContent = JSON.stringify(report, null, 2);
+        status.textContent = hide
+          ? '左发暂时隐藏：仅用于定位额外发量，源模型未改。'
+          : '已加载真实 Live2D 中性位；当前脸型和发量仍需修正。';
+      }
+      document.getElementById('hideLeft').onchange = draw;
+      document.getElementById('blend').oninput = (event) => {
+        document.getElementById('overlay').style.opacity = Number(event.target.value) / 100;
+        document.getElementById('blendValue').textContent = event.target.value + '%';
+      };
+      document.getElementById('reset').onclick = () => {
+        document.getElementById('hideLeft').checked = false;
+        document.getElementById('blend').value = 0;
+        document.getElementById('blend').dispatchEvent(new Event('input'));
+        draw();
+      };
+      draw();
+      addEventListener(
+        'pagehide',
+        () => {
+          renderer.release();
+          for (const t of textures) gl.deleteTexture(t);
+          moc.deleteModel(model);
+          moc.release();
+        },
+        { once: true },
+      );
+    } catch (error) {
+      status.textContent = 'ERROR: ' + error.message;
+      document.getElementById('report').textContent = error.stack;
+    }
+  </script>
+</html>

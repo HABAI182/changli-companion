@@ -1,0 +1,126 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "ChangliReferenceRepairV71.moc3",
+    "Textures": [
+      "ChangliReferenceRepairV71.2048/texture_00.png",
+      "ChangliReferenceRepairV71.2048/texture_01.png",
+      "ChangliReferenceRepairV71.2048/texture_02.png",
+      "ChangliReferenceRepairV71.2048/texture_03.png",
+      "ChangliReferenceRepairV71.2048/texture_04.png",
+      "ChangliReferenceRepairV71.2048/texture_05.png",
+      "ChangliReferenceRepairV71.2048/texture_06.png",
+      "ChangliReferenceRepairV71.2048/texture_07.png"
+    ],
+    "Physics": "ChangliReferenceRepairV71.physics3.json",
+    "DisplayInfo": "ChangliReferenceRepairV71.cdi3.json",
+    "Expressions": [
+      {
+        "Name": "Neutral",
+        "File": "neutral.exp3.json"
+      },
+      {
+        "Name": "Smile",
+        "File": "smile.exp3.json"
+      },
+      {
+        "Name": "Sleepy",
+        "File": "sleepy.exp3.json"
+      },
+      {
+        "Name": "Surprised",
+        "File": "surprised.exp3.json"
+      },
+      {
+        "Name": "NeutralReaction",
+        "File": "reaction-default.exp3.json"
+      },
+      {
+        "Name": "SmileReaction",
+        "File": "reaction-smile.exp3.json"
+      },
+      {
+        "Name": "SleepyReaction",
+        "File": "reaction-sleepy.exp3.json"
+      },
+      {
+        "Name": "SurprisedReaction",
+        "File": "reaction-surprised.exp3.json"
+      },
+      {
+        "Name": "ThinkReaction",
+        "File": "reaction-think.exp3.json"
+      },
+      {
+        "Name": "ResignedReaction",
+        "File": "reaction-resigned.exp3.json"
+      },
+      {
+        "Name": "SeriousReaction",
+        "File": "reaction-serious.exp3.json"
+      },
+      {
+        "Name": "ConfusedReaction",
+        "File": "reaction-confused.exp3.json"
+      }
+    ],
+    "Motions": {
+      "LeftPress": [
+        {
+          "File": "leftpress.motion3.json"
+        }
+      ],
+      "RightPress": [
+        {
+          "File": "rightpress.motion3.json"
+        }
+      ],
+      "SecondaryImpulse": [
+        {
+          "File": "secondary-impulse.motion3.json"
+        }
+      ],
+      "BothPress": [
+        {
+          "File": "bothpress.motion3.json"
+        }
+      ],
+      "PhoenixInteract": [
+        {
+          "File": "phoenix-interaction.motion3.json"
+        }
+      ],
+      "RightClick": [
+        {
+          "File": "desktop-right-click.motion3.json",
+          "FadeInTime": 0.025,
+          "FadeOutTime": 0.03
+        }
+      ],
+      "WheelRoll": [
+        {
+          "File": "desktop-wheel-roll.motion3.json",
+          "FadeInTime": 0.025,
+          "FadeOutTime": 0.03
+        }
+      ]
+    }
+  },
+  "Groups": [
+    {
+      "Target": "Parameter",
+      "Name": "EyeBlink",
+      "Ids": []
+    },
+    {
+      "Target": "Parameter",
+      "Name": "LipSync",
+      "Ids": []
+    }
+  ],
+  "Layout": {
+    "width": 1.7,
+    "x": 0,
+    "y": 0
+  }
+}

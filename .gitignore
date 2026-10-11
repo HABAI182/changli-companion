@@ -1,0 +1,44 @@
+node_modules/
+dist/
+src-tauri/target/
+*.log
+
+# Local secrets, dependencies, authoring caches and generated deliveries.
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
+*.zip
+*.exe
+*.msi
+*.psd
+*.cmo3
+*.moc3
+!public/models/changli/live-reference-repair-v71-candidate/*.moc3
+!/authoring/*.cmo3
+__pycache__/
+*.pyc
+.venv/
+tools/live2d-authoring/build/
+tools/live2d-authoring/references/
+tools/github-upload/bin/
+tools/github-upload/local/
+deliveries/
+qa/
+
+# The current build needs only v71; old candidate models stay local.
+public/models/changli/live-reference-repair-v*-candidate/
+!public/models/changli/live-reference-repair-v71-candidate/
+public/models/changli/live-left-ornament-v1-candidate/
+
+# Local cleanup inventories and machine-specific progress histories.
+/CLEANUP-*
+/PROGRESS-CHECKPOINT-*.md
+/ENGINEERING_HANDOFF.md
+/TEST-REPORT.md
+/TEST_REPORT.md
+/DELIVERY-0.6.*.md
+/DELIVERY-0.7.0.md
+/DELIVERY-0.7.1.md
+/DELIVERY-0.7.2.md

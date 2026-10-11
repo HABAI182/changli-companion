@@ -1,0 +1,36 @@
+{
+  "Version": 3,
+  "Meta": {
+    "Duration": 0.3,
+    "Fps": 60,
+    "Loop": false,
+    "AreBeziersRestricted": true,
+    "CurveCount": 1,
+    "TotalSegmentCount": 3,
+    "TotalPointCount": 4,
+    "UserDataCount": 0,
+    "TotalUserDataSize": 0,
+    "FadeInTime": 0.025,
+    "FadeOutTime": 0.03
+  },
+  "Curves": [
+    {
+      "Target": "Parameter",
+      "Id": "ParamHandLeftPress",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.09,
+        18,
+        0,
+        0.19,
+        0,
+        0,
+        0.3,
+        0
+      ]
+    }
+  ],
+  "UserData": []
+}

@@ -7,7 +7,7 @@ export interface MouseRegion {
 }
 import { partitionMouseMesh } from './MouseMesh';
 import { handDrawOrder, type HandDrawOrder } from './HandDrawOrder';
-import { contourMesh, flameMesh, type Contours, type MeshGeometry } from './ContourMesh';
+import { contourMesh, flameMesh, skinPatchMesh, type SkinPatches, type Contours, type MeshGeometry } from './ContourMesh';
 
 // The mouse and cable share a native foreground quad with the keyboard/body.
 // Render an ephemeral partition of that quad. Never rewrite Core/MOC3 buffers
@@ -20,9 +20,11 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   private target=-1;
   private lastDrawOrder: Record<string, number> = {};
   private flame = {phase: 0, strength: 0};
+  private mouthCoverage = 0;
+  setMouthCoverage(value: number) { this.mouthCoverage = value; }
   private contourInfo: Record<string, {nativeVertices: number; renderedVertices: number}> = {};
   constructor(width: number,height: number,private region?: MouseRegion, private handOrder?: HandDrawOrder,
-    private contours?: Contours, private flameId?: string) {super(width,height);}
+    private contours?: Contours, private flameId?: string, private skinPatches?: SkinPatches) {super(width,height);}
   setFlameMotion(phase: number, strength: number) { this.flame = {phase, strength}; }
   getContourSnapshot() { return {...this.contourInfo}; }
   private drawGeometry(model: Readonly<CubismModel>, index: number, g: MeshGeometry) {
@@ -61,6 +63,18 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   public override drawMeshWebGL(model: Readonly<CubismModel>,index:number):void {
     const id = model.getModel().drawables.ids[index];
     if (!this.isGeneratingMask()) {
+      if (id==='ArtMesh28' && this.mouthCoverage>0) {
+        const coverage=this.mouthCoverage;
+        const proxy=new Proxy(model as CubismModel,{get(target,property){
+          if(property==='getDrawableOpacity')return(i:number)=>target.getDrawableOpacity(i)*(i===index?1-coverage:1);
+          const v=Reflect.get(target,property);return typeof v==='function'?v.bind(target):v;
+        }});
+        super.drawMeshWebGL(proxy,index);return;
+      }
+      if (this.skinPatches?.[id]) {
+        const g=skinPatchMesh(model.getDrawableVertexPositions(index),model.getDrawableVertexUvs(index),model.getDrawableVertexIndices(index),this.skinPatches[id]);
+        this.drawGeometry(model,index,g);return;
+      }
       if (this.contours?.[id]) {
         const g = contourMesh(model.getDrawableVertexPositions(index), model.getDrawableVertexUvs(index),
           model.getDrawableVertexIndices(index), this.contours[id]);

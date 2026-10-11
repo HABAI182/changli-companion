@@ -21,6 +21,7 @@ export class FaceEffects {
     if (this.faceIndex >= 0) this.reference = model.getDrawableVertexPositions(this.faceIndex).slice();
   }
   snapshot() { return Object.fromEntries(this.weights); }
+  mouthCoverage() { return Math.min(1, [...this.weights].reduce((s,[id,w])=>s+(['laugh','pout','angry','wronged','shy','proud','blush'].includes(id)?w:0),0)); }
   draw(model: CubismModel, matrix: CubismMatrix44, source: HTMLCanvasElement, expression: string, now: number, moving: boolean) {
     if (this.canvas.width !== source.width || this.canvas.height !== source.height) {
       this.canvas.width = source.width; this.canvas.height = source.height;
@@ -55,6 +56,17 @@ export class FaceEffects {
     const t = moving ? now / 1000 : 0;
     for (const [id, weight] of this.weights) {
       c.save(); c.globalAlpha=weight;
+      c.strokeStyle='#c66d70';c.lineWidth=2.3;c.lineCap='round';c.lineJoin='round';
+      if(id==='laugh'){
+        c.fillStyle='#a9515b';c.beginPath();c.moveTo(559,786);c.quadraticCurveTo(578,797,597,787);c.bezierCurveTo(594,822,564,821,559,786);c.fill();c.stroke();
+        c.save();c.clip();c.fillStyle='#f3a4a3';c.beginPath();c.ellipse(578,813,14,7,0,0,7);c.fill();c.restore();
+      }else if(['shy','proud','blush'].includes(id)){
+        c.beginPath();c.moveTo(565,793);c.quadraticCurveTo(579,805,590,792);c.stroke();
+      }else if(id==='pout'){
+        c.beginPath();c.moveTo(570,795);c.quadraticCurveTo(582,793,587,797);c.quadraticCurveTo(583,802,573,800);c.stroke();
+      }else if(['wronged','angry'].includes(id)){
+        c.beginPath();c.moveTo(566,801);c.quadraticCurveTo(578,790,589,800);c.stroke();
+      }
       if (['blush','shy'].includes(id)) {
         for (const [x,y] of [[394,755],[783,802]]) {
           const g=c.createRadialGradient(x,y,2,x,y,48);g.addColorStop(0,'rgba(242,91,100,.5)');g.addColorStop(1,'rgba(242,91,100,0)');

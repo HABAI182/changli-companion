@@ -36,6 +36,9 @@ for id, values in faces.items():
  rig['expressionMap'][id]=name
 for e in model['expressions']: e['status']='runtime-preset'
 rig['runtimeOffsets']['faceEffects']=True
+rig['runtimeOffsets']['skinPatches']={'ArtMesh41':{'bounds':[.375,.773,.083,.116],'shift':[.11,0]}}
+rig['runtimeOffsets']['contours']['ArtMesh10']=[[0,.60],[.12,.40],[.28,.27],[.46,.19],[.62,.22],[.76,.33],[.9,.51],[1,.72],[1,1],[0,1]]
+rig['runtimeOffsets']['contours']['ArtMesh9']=[[0,.60],[.12,.32],[.28,.20],[.46,.14],[.63,.18],[.78,.30],[.92,.50],[1,.75],[1,1],[0,1]]
 
 def motion(id, group, duration, curves):
  out=[]

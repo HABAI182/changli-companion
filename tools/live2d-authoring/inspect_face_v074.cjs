@@ -1,0 +1,8 @@
+const fs=require('node:fs/promises'),path=require('node:path');
+const {createRequire}=require('node:module');const{chromium}=createRequire('C:/Users/18769/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/package.json')('playwright');
+(async()=>{const b=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'}),folder=path.join(__dirname,'build/expressive-0.7.4-20261011');
+try{const p=await b.newPage({viewport:{width:1200,height:900},deviceScaleFactor:2});await p.goto('http://127.0.0.1:1420/');await p.waitForFunction(()=>JSON.parse(localStorage.getItem('changli-live2d-runtime-status')||'null')?.status==='ready');await p.addStyleTag({content:'.pet-wrap{width:627px!important}'});
+await p.evaluate(async()=>{const{CubismBackend}=await import('/src/renderer/live2d/CubismBackend.ts');const f=CubismBackend.prototype.setParameter;CubismBackend.prototype.setParameter=function(id,v){window.qa=this;f.call(this,id,v);};});await p.waitForFunction(()=>window.qa);
+await p.evaluate(()=>{const r=window.qa.renderer,f=r.drawMeshWebGL.bind(r);r.drawMeshWebGL=(m,i)=>{if(window.only===m.getModel().drawables.ids[i])f(m,i);};window.qa.faceEffects?.dispose();});
+for(const id of ['ArtMesh28','ArtMesh29','ArtMesh41','ArtMesh9','ArtMesh10']){await p.evaluate(id=>window.only=id,id);await p.waitForTimeout(100);await p.locator('canvas.live2d-canvas').screenshot({path:path.join(folder,'isolated-'+id+'.png')});}
+console.log('Face isolation saved');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

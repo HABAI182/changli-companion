@@ -58,8 +58,8 @@ it('输入动作与持续表情可组合，完整动画结束恢复当前表情'
   expect(pet.snapshot(40, settings).animation?.id).toBe('wave');
   pet.input('keyboard_right', 50);
   expect(pet.snapshot(60, settings).action).toBeNull();
-  expect(pet.snapshot(1530, settings).animation).toBeNull();
-  expect(pet.snapshot(1530, settings).expression).toBe('smile');
+  expect(pet.snapshot(1830, settings).animation).toBeNull();
+  expect(pet.snapshot(1830, settings).expression).toBe('smile');
 });
 it('hold 松开恢复，toggle 再按关闭', () => {
   const pet = new PresentationRuntime(0);

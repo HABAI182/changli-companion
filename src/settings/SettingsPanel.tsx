@@ -139,6 +139,25 @@ function SizeControl({
     </div>
   );
 }
+function FullscreenExceptions({ value, update, fail }: { value: string[]; update: Props['update']; fail: Props['fail'] }) {
+  const [draft, setDraft] = useState(value.join(', '));
+  useEffect(() => { setDraft(value.join(', ')); }, [value]);
+  const save = () => {
+    const items = [...new Set(draft.split(/[,，;；\n]/).map(v => v.trim().toLowerCase()).filter(Boolean))];
+    if (items.length > 32 || items.some(v => !/^[^\\/:*?"<>|]{1,120}\.exe$/i.test(v))) {
+      fail(new Error('填写程序文件名，例如 game.exe；最多 32 个，用逗号分隔'));
+      return;
+    }
+    if (items.join(',') !== value.join(',')) void update({ fullscreenExceptions: items });
+  };
+  return <div className="fullscreen-exceptions">
+    <label htmlFor="fullscreen-exceptions">这些程序全屏时仍显示桌宠</label>
+    <input id="fullscreen-exceptions" aria-label="全屏避让例外" value={draft}
+      placeholder="例如 game.exe, player.exe" onChange={e => setDraft(e.target.value)} onBlur={save}
+      onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
+    <small>输入程序文件名，用逗号分隔；留空则全部避让。</small>
+  </div>;
+}
 export function SettingsPanel(p: Props) {
   const s = p.value;
   const toggle = (key: keyof Settings, title: string, description?: string, desktop = false) => (
@@ -242,6 +261,7 @@ export function SettingsPanel(p: Props) {
           <div className="settings-card">
             {toggle('topmost', '窗口置顶', '显示在其他窗口上方', true)}
             {toggle('fullscreenHideEnabled', '全屏自动避让', '同屏全屏应用出现时隐藏，退出后恢复；手动隐藏不受影响', true)}
+            {s.fullscreenHideEnabled && <FullscreenExceptions value={s.fullscreenExceptions || []} update={p.update} fail={p.fail} />}
             {toggle('edgeSnapEnabled', '屏幕边缘磁吸', '拖到边缘附近后松手，自动留出一小段边距', true)}
             {toggle('hoverHideEnabled', '靠近时淡化', '鼠标移开后恢复，减少遮挡')}
             {s.hoverHideEnabled && (

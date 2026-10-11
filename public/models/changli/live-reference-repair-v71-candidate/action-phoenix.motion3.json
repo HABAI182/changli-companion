@@ -1,0 +1,94 @@
+{
+  "Version": 3,
+  "Meta": {
+    "Duration": 2.2,
+    "Fps": 60,
+    "Loop": false,
+    "AreBeziersRestricted": true,
+    "CurveCount": 3,
+    "TotalSegmentCount": 17,
+    "TotalPointCount": 20,
+    "UserDataCount": 0,
+    "TotalUserDataSize": 0,
+    "FadeInTime": 0.08,
+    "FadeOutTime": 0.12
+  },
+  "Curves": [
+    {
+      "Target": "Parameter",
+      "Id": "ParamPhoenixSway",
+      "Segments": [
+        0.0,
+        0,
+        0,
+        0.44,
+        10,
+        0,
+        0.88,
+        4,
+        0,
+        1.32,
+        10,
+        0,
+        1.76,
+        4,
+        0,
+        2.2,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "ParamPhoenixWingSway",
+      "Segments": [
+        0.0,
+        0,
+        0,
+        0.264,
+        22,
+        0,
+        0.55,
+        -22,
+        0,
+        0.836,
+        22,
+        0,
+        1.1,
+        -22,
+        0,
+        1.364,
+        22,
+        0,
+        1.65,
+        -22,
+        0,
+        1.936,
+        12,
+        0,
+        2.2,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "ParamPhoenixTailSway",
+      "Segments": [
+        0.0,
+        0,
+        0,
+        0.55,
+        15,
+        0,
+        1.1,
+        -15,
+        0,
+        1.65,
+        12,
+        0,
+        2.2,
+        0
+      ]
+    }
+  ],
+  "UserData": []
+}

@@ -105,7 +105,7 @@ pub fn restore_pet_position(app: tauri::AppHandle, slot: u8) -> Result<(), Strin
 }
 
 #[cfg(windows)]
-fn external_fullscreen(app: &tauri::AppHandle) -> bool {
+fn external_fullscreen(app: &tauri::AppHandle, exceptions: &[String]) -> bool {
     use windows_sys::Win32::{Foundation::RECT, UI::WindowsAndMessaging::*};
     let Some(pet) = app.get_webview_window("pet") else { return false; };
     let Ok(Some(monitor)) = pet.current_monitor() else { return false; };
@@ -124,13 +124,28 @@ fn external_fullscreen(app: &tauri::AppHandle) -> bool {
         let mut rect: RECT = std::mem::zeroed();
         if GetWindowRect(window, &mut rect) == 0 { return false; }
         let pos = monitor.position(); let size = monitor.size();
-        rect.left <= pos.x + 2 && rect.top <= pos.y + 2
+        let full = rect.left <= pos.x + 2 && rect.top <= pos.y + 2
             && rect.right >= pos.x + size.width as i32 - 2
-            && rect.bottom >= pos.y + size.height as i32 - 2
+            && rect.bottom >= pos.y + size.height as i32 - 2;
+        if !full || exceptions.is_empty() { return full; }
+        use windows_sys::Win32::{Foundation::CloseHandle, System::Threading::*};
+        let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if process.is_null() { return full; }
+        let mut path = [0u16; 32768];
+        let mut size = path.len() as u32;
+        let ok = QueryFullProcessImageNameW(process, 0, path.as_mut_ptr(), &mut size);
+        CloseHandle(process);
+        if ok == 0 { return full; }
+        !is_exception(&String::from_utf16_lossy(&path[..size as usize]), exceptions)
     }
 }
 #[cfg(not(windows))]
-fn external_fullscreen(_: &tauri::AppHandle) -> bool { false }
+fn external_fullscreen(_: &tauri::AppHandle, _: &[String]) -> bool { false }
+
+fn is_exception(path: &str, exceptions: &[String]) -> bool {
+    let name = path.rsplit(['\\', '/']).next().unwrap_or(path);
+    exceptions.iter().any(|e| name.eq_ignore_ascii_case(e.trim()))
+}
 
 fn desired_hidden(state: &Visibility, enabled: bool, fullscreen: bool, dragging: bool) -> bool {
     state.manual_hidden || (enabled && fullscreen && !state.override_fullscreen && !dragging)
@@ -138,8 +153,9 @@ fn desired_hidden(state: &Visibility, enabled: bool, fullscreen: bool, dragging:
 pub fn watch(app: tauri::AppHandle) {
     std::thread::spawn(move || loop {
         std::thread::sleep(std::time::Duration::from_millis(500));
-        let enabled = app.state::<Runtime>().settings.lock().map(|s| s.fullscreen_hide_enabled).unwrap_or(false);
-        let fullscreen = external_fullscreen(&app);
+        let (enabled, exceptions) = app.state::<Runtime>().settings.lock()
+            .map(|s| (s.fullscreen_hide_enabled, s.fullscreen_exceptions.clone())).unwrap_or_default();
+        let fullscreen = enabled && external_fullscreen(&app, &exceptions);
         let desktop = app.state::<DesktopState>();
         let Ok(mut state) = desktop.visibility.lock() else { continue; };
         if !fullscreen { state.override_fullscreen = false; }
@@ -191,6 +207,13 @@ pub fn run_fullscreen_fixture() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn fullscreen_exceptions_match_only_complete_executable_names() {
+        let list = vec!["Game.EXE".into()];
+        assert!(is_exception("C:\\Games\\game.exe", &list));
+        assert!(!is_exception("C:\\Games\\othergame.exe", &list));
+        assert!(!is_exception("C:\\Games\\game.exe.bak", &list));
+    }
     #[test]
     fn snap_near_edges_preserves_interior_and_negative_monitor() {
         assert_eq!(snap_axis(-1910, -1920, 1920, 360, 24, 12), -1908);

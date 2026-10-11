@@ -33,8 +33,8 @@ describe('模型输入配置', () => {
     expect(model.expressions.length).toBeGreaterThanOrEqual(8);
     expect(model.animations.length).toBeGreaterThanOrEqual(2);
     expect(model.expressions.every((e) => e.asset === null)).toBe(true);
-    expect(model.animations.filter((a) => a.id !== 'phoenix').every((a) => a.status === 'awaiting-art')).toBe(true);
-    expect(model.animations.find((a) => a.id === 'phoenix')?.status).toBe('technical-placeholder');
+    expect(model.expressions.every(e => model.renderer.live2d.expressionMap[e.id])).toBe(true);
+    expect(model.animations.every(a => a.status === 'ready' && model.renderer.live2d.motionMap[a.id])).toBe(true);
   });
   it('资源路径不可跳出模型目录或访问网络', () => {
     expect(resource('assets/test.png')).toBe('/models/changli/assets/test.png');

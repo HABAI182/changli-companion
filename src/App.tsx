@@ -522,7 +522,7 @@ export function App() {
   // The selected default face releases manual override so native touch and
   // sleep reactions remain visible; other explicitly selected faces stay put.
   const characterSnapshot =
-    expression && expression !== 'default' ? { ...renderSnapshot, expression } : renderSnapshot;
+    expression && expression !== 'default' && !renderSnapshot.animation ? { ...renderSnapshot, expression } : renderSnapshot;
   const touch = (area: 'head' | 'body') => {
     signal(area === 'head' ? 'pet' : 'body');
     presentation.current.react(area === 'head' ? 'head' : 'body', Date.now());
@@ -825,7 +825,7 @@ export function App() {
                 <p className="fine">
                   当前状态：{names[m.current.pose]} /{' '}
                   {expressions[expression || motions[m.current.pose].expression]}
-                  。已绑定表情为 Live2D 技术版，其余素材待制作。
+                  。17 个表情可用，泛红、泪光和瞳孔特效随脸部运动。
                 </p>
               </details>
             )}

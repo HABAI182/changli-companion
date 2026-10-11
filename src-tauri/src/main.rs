@@ -22,6 +22,8 @@ struct Settings {
     drag_reactions_enabled: bool,
     #[serde(rename = "fullscreenHideEnabled")]
     fullscreen_hide_enabled: bool,
+    #[serde(rename = "fullscreenExceptions")]
+    fullscreen_exceptions: Vec<String>,
     #[serde(rename = "edgeSnapEnabled")]
     edge_snap_enabled: bool,
     #[serde(rename = "mouseDetailsEnabled")]
@@ -67,6 +69,7 @@ impl Default for Settings {
         Self {
             drag_reactions_enabled: true,
             fullscreen_hide_enabled: true,
+            fullscreen_exceptions: Vec::new(),
             edge_snap_enabled: true,
             mouse_details_enabled: true,
             scale: 1.0,
@@ -399,6 +402,8 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !(0.0..=1.0).contains(&settings.sfx_volume)
         || !settings.voice_volume.is_finite()
         || !(0.0..=1.0).contains(&settings.voice_volume)
+        || settings.fullscreen_exceptions.len() > 32
+        || settings.fullscreen_exceptions.iter().any(|e| e.len() > 128 || !e.to_ascii_lowercase().ends_with(".exe") || e.contains(['\\', '/', ':', '*', '?', '"', '<', '>', '|']))
     {
         return Err("设置值超出范围".into());
     }

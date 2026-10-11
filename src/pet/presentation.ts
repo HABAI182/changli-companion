@@ -325,8 +325,9 @@ export class PresentationRuntime {
         ? 'sleep'
         : settings.inputMode;
     const animation = this.animation;
+    const animationExpression: Record<string, string> = { wave: 'smile', sleep: 'sleepy', angry_fire: 'angry', shy: 'shy', phoenix: 'phoenix_eyes' };
     const expression =
-      this.manualExpression ||
+      (animation && animationExpression[animation.id]) || this.manualExpression ||
       (base === 'sleep' ? 'sleepy' : now < this.touchSmileUntil ? 'smile' : 'default');
     const phoenix =
       animation?.id === 'phoenix'
@@ -408,6 +409,21 @@ export class PresentationRuntime {
     // Disabled drag feedback must not leak the drag-start/end spring kicks.
     const elasticFactor = settings.dragReactionsEnabled === false && (this.dragActive || now < this.dragReleaseUntil) ? 0 : factor;
     const awake = base !== 'sleep' ? factor : 0;
+    const progress = animation ? Math.min(1, Math.max(0, (now - animation.startedAt) / (animation.until - animation.startedAt))) : 0;
+    const actionEnvelope = Math.sin(Math.PI * progress) ** 2 * factor;
+    if (animation?.id === 'wave') {
+      pose.headY -= Math.sin(progress * Math.PI * 4) * actionEnvelope * .35;
+      pose.headRotation += Math.sin(progress * Math.PI * 2) * actionEnvelope * .45;
+    } else if (animation?.id === 'sleep') {
+      pose.headY += actionEnvelope * .38;
+      pose.headRotation -= actionEnvelope * .55;
+    } else if (animation?.id === 'angry_fire') {
+      pose.headX += Math.sin(progress * Math.PI * 10) * actionEnvelope * .4;
+      pose.headShape += Math.sin(progress * Math.PI * 6) * actionEnvelope * .35;
+    } else if (animation?.id === 'shy') {
+      pose.headRotation += actionEnvelope * .55;
+      pose.headY += actionEnvelope * .16;
+    }
     const blink = this.advanceBlink(now, factor > 0 && base !== 'sleep');
     return {
       base,
@@ -441,7 +457,7 @@ export class PresentationRuntime {
         headShape: pose.headShape * elasticFactor, headRotation: pose.headRotation * elasticFactor,
         phoenixWing: Math.sin(now / 160) * .44 * awake,
         phoenixTail: Math.sin(now / 420 + .7) * .36 * awake,
-        phoenixBounce: (Math.sin(now / 410) * .55 + Math.sin(now / 230) * .15) * awake,
+        phoenixBounce: (Math.sin(now / 410) * .55 + Math.sin(now / 230) * .15) * awake + (animation?.id === 'phoenix' ? actionEnvelope * .75 : 0),
         flamePhase: now / 220, flameStrength: factor,
       },
     };

@@ -15,6 +15,7 @@ import type { Live2DBackend } from './Live2DAdapter';
 import { loadCubismCore } from './CoreLoader';
 import { RuntimeOffsets, type RuntimeOffsetRig } from './RuntimeOffsets';
 import { checkCubismResources, modelFileUrl } from './modelAssets';
+import { FaceEffects } from './FaceEffects';
 
 const SHADER_URL = '/vendor/live2d/shaders/';
 const SHADER_TIMEOUT_MS = 10000;
@@ -68,6 +69,8 @@ export class CubismBackend implements Live2DBackend {
   private frame = 0;
   private previousFrame = 0;
   private disposed = false;
+  private faceEffects?: FaceEffects;
+  private expressionName = 'default';
 
   async load(canvas: HTMLCanvasElement, entryUrl: string): Promise<void> {
     this.canvas = canvas;
@@ -93,6 +96,8 @@ export class CubismBackend implements Live2DBackend {
     this.model = this.moc.createModel();
     if (!this.model) throw new Error('Cubism 模型创建失败');
     this.model.saveParameters();
+    this.model.update();
+    if (this.rig?.faceEffects) this.faceEffects = new FaceEffects(canvas, this.model);
     this.modelMatrix = new CubismModelMatrix(
       this.model.getCanvasWidth(),
       this.model.getCanvasHeight(),
@@ -182,6 +187,7 @@ export class CubismBackend implements Live2DBackend {
   getMouseMotionSnapshot() { return this.renderer?.getMouseMotionSnapshot() || null; }
   getDrawOrderSnapshot() { return this.renderer?.getDrawOrderSnapshot() || {}; }
   getContourSnapshot() { return this.renderer?.getContourSnapshot() || {}; }
+  getFaceEffectsSnapshot() { return this.faceEffects?.snapshot() || {}; }
 
   startMotion(name: string): void {
     if (name === '__clear-input') { this.motionManager.stopAllMotions(); return; }
@@ -197,6 +203,7 @@ export class CubismBackend implements Live2DBackend {
   setExpression(name: string): void {
     const expression = this.expressions.get(name);
     if (expression) this.expressionManager.startMotion(expression, false);
+    this.expressionName = name.replace(/Reaction$/, '').replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
   }
 
   resize(width: number, height: number): void {
@@ -246,6 +253,8 @@ export class CubismBackend implements Live2DBackend {
     this.renderer.setMouseMotion(mouse.x, mouse.y);
     this.renderer.setFlameMotion(this.parameters.get('__gesture.flamePhase') || 0, this.parameters.get('__gesture.flameStrength') || 0);
     this.renderer.drawModel(SHADER_URL);
+    this.faceEffects?.draw(this.model, matrix, canvas, this.expressionName, now,
+      (this.parameters.get('__gesture.flameStrength') || 0) > 0);
     this.frame = requestAnimationFrame(this.draw);
   };
 
@@ -256,6 +265,7 @@ export class CubismBackend implements Live2DBackend {
     this.motionManager.stopAllMotions();
     this.expressionManager.stopAllMotions();
     this.renderer?.release();
+    this.faceEffects?.dispose();
     this.physics?.release();
     if (this.pose) CubismPose.delete(this.pose);
     for (const motion of this.motions.values()) motion.release();

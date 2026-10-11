@@ -2,7 +2,7 @@
   "schema": 2,
   "name": "Changli",
   "display_name": "长离",
-  "version": "0.12.3",
+  "version": "0.12.4",
   "input_mode": "keyboard_mouse",
   "renderer": {
     "preferred": "live2d",
@@ -11,7 +11,7 @@
       "manifest": "assets/layers/layers.json"
     },
     "live2d": {
-      "entry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-elastic.model3.json",
+      "entry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-expressive.model3.json",
       "parameterMap": {
         "head.x": "ParamAngleX",
         "head.z": "ParamAngleZ",
@@ -43,7 +43,11 @@
         "rapid": "RightPress/0",
         "mouse_left": "LeftPress/0",
         "mouse_right": "LeftPress/0",
-        "wheel": "LeftPress/0"
+        "wheel": "LeftPress/0",
+        "wave": "Greeting/0",
+        "sleep": "Nap/0",
+        "angry_fire": "AngryFire/0",
+        "shy": "Shy/0"
       },
       "expressionMap": {
         "default": "NeutralReaction",
@@ -53,9 +57,18 @@
         "think": "ThinkReaction",
         "resigned": "ResignedReaction",
         "serious": "SeriousReaction",
-        "confused": "ConfusedReaction"
+        "confused": "ConfusedReaction",
+        "blush": "BlushReaction",
+        "laugh": "LaughReaction",
+        "angry": "AngryReaction",
+        "pout": "PoutReaction",
+        "shy": "ShyReaction",
+        "wronged": "WrongedReaction",
+        "proud": "ProudReaction",
+        "phoenix_eyes": "PhoenixEyesReaction",
+        "flame_eyes": "FlameEyesReaction"
       },
-      "art_status": "v71原生模型+运行时网格修整。两只手上缘残片按UV轮廓裁切，尾羽纵向加长22%，大头带阻尼弹性/挤压回弹，凤凰常驻摆动和火苗弯曲。去掉抬手与鼠标倾手/滚轮变体。不是新Cubism原生美术导出；精细表情仍待制作。",
+      "art_status": "v71原生Live2D，17个可用表情和5段动作；附加表情符号为随脸网格运动的运行时矢量美术，未写入CMO3。保留尾羽加长、弹性和轮廓裁切。",
       "runtimeOffsets": {
         "leftHand": [
           "ArtMesh10"
@@ -290,7 +303,8 @@
             925
           ]
         },
-        "flameMesh": "ArtMesh50"
+        "flameMesh": "ArtMesh50",
+        "faceEffects": true
       }
     }
   },
@@ -299,7 +313,7 @@
     1254,
     1254
   ],
-  "art_status": "v71原生模型+运行时网格修整。两只手上缘残片按UV轮廓裁切，尾羽纵向加长22%，大头带阻尼弹性/挤压回弹，凤凰常驻摆动和火苗弯曲。去掉抬手与鼠标倾手/滚轮变体。不是新Cubism原生美术导出；精细表情仍待制作。",
+  "art_status": "v71原生Live2D，17个可用表情和5段动作；附加表情符号为随脸网格运动的运行时矢量美术，未写入CMO3。保留尾羽加长、弹性和轮廓裁切。",
   "assets": {
     "base": "assets/changli-cutout.png"
   },
@@ -391,7 +405,7 @@
       "id": "blush",
       "name": "脸红",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "sleepy",
@@ -409,37 +423,37 @@
       "id": "laugh",
       "name": "大笑",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "angry",
       "name": "生气",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "pout",
       "name": "鼓脸",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "shy",
       "name": "害羞",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "wronged",
       "name": "委屈",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "proud",
       "name": "得意",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "confused",
@@ -451,22 +465,22 @@
       "id": "phoenix_eyes",
       "name": "凤凰瞳",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     },
     {
       "id": "flame_eyes",
       "name": "火焰眼",
       "asset": null,
-      "status": "awaiting-art"
+      "status": "runtime-preset"
     }
   ],
   "animations": [
     {
       "id": "wave",
-      "name": "挥手",
-      "duration": 1500,
+      "name": "打招呼",
+      "duration": 1800,
       "frames": [],
-      "status": "awaiting-art",
+      "status": "ready",
       "loopCount": 1,
       "priority": 100,
       "interrupt": "higher-only",
@@ -475,9 +489,9 @@
     {
       "id": "phoenix",
       "name": "凤凰互动",
-      "duration": 1800,
+      "duration": 2200,
       "frames": [],
-      "status": "technical-placeholder",
+      "status": "ready",
       "loopCount": 1,
       "priority": 100,
       "interrupt": "higher-only",
@@ -486,9 +500,9 @@
     {
       "id": "sleep",
       "name": "入睡",
-      "duration": 1400,
+      "duration": 2400,
       "frames": [],
-      "status": "awaiting-art",
+      "status": "ready",
       "loopCount": 1,
       "priority": 100,
       "interrupt": "higher-only",
@@ -499,7 +513,7 @@
       "name": "生气冒火",
       "duration": 1700,
       "frames": [],
-      "status": "awaiting-art",
+      "status": "ready",
       "loopCount": 1,
       "priority": 100,
       "interrupt": "higher-only",
@@ -508,9 +522,9 @@
     {
       "id": "shy",
       "name": "害羞",
-      "duration": 1600,
+      "duration": 1800,
       "frames": [],
-      "status": "awaiting-art",
+      "status": "ready",
       "loopCount": 1,
       "priority": 100,
       "interrupt": "higher-only",

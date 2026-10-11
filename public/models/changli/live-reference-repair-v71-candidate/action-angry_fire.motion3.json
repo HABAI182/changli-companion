@@ -1,0 +1,68 @@
+{
+  "Version": 3,
+  "Meta": {
+    "Duration": 1.7,
+    "Fps": 60,
+    "Loop": false,
+    "AreBeziersRestricted": true,
+    "CurveCount": 2,
+    "TotalSegmentCount": 11,
+    "TotalPointCount": 13,
+    "UserDataCount": 0,
+    "TotalUserDataSize": 0,
+    "FadeInTime": 0.08,
+    "FadeOutTime": 0.12
+  },
+  "Curves": [
+    {
+      "Target": "Parameter",
+      "Id": "ParamAngleZ",
+      "Segments": [
+        0.0,
+        0,
+        0,
+        0.255,
+        -3,
+        0,
+        0.51,
+        3,
+        0,
+        0.765,
+        -3,
+        0,
+        1.02,
+        3,
+        0,
+        1.36,
+        -1,
+        0,
+        1.7,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "ParamPhoenixWingSway",
+      "Segments": [
+        0.0,
+        0,
+        0,
+        0.34,
+        18,
+        0,
+        0.68,
+        -18,
+        0,
+        1.02,
+        18,
+        0,
+        1.36,
+        -12,
+        0,
+        1.7,
+        0
+      ]
+    }
+  ],
+  "UserData": []
+}

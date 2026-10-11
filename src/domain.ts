@@ -160,6 +160,7 @@ export type Todo = { id: string; text: string; done: boolean; day: string };
 export type Settings = {
   dragReactionsEnabled: boolean;
   fullscreenHideEnabled: boolean;
+  fullscreenExceptions: string[];
   edgeSnapEnabled: boolean;
   mouseDetailsEnabled: boolean;
   scale: number;
@@ -206,6 +207,7 @@ export function initialData(): Data {
     settings: {
       dragReactionsEnabled: true,
       fullscreenHideEnabled: true,
+      fullscreenExceptions: [],
       edgeSnapEnabled: true,
       mouseDetailsEnabled: true,
       scale: 1,

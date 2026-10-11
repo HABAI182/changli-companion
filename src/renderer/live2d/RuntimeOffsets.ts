@@ -17,6 +17,7 @@ export interface RuntimeOffsetRig {
   head?: { ids: string[]; anchor: [number, number] };
   tail?: { ids: string[]; anchorY: number; stretch: number };
   phoenix?: {ids: string[]; anchor: [number, number]};
+  faceEffects?: boolean;
 }
 
 // Small procedural translations of the real model's authored hand meshes.

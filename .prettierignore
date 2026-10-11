@@ -1,0 +1,9 @@
+node_modules
+dist
+src-tauri/target
+src-tauri/gen
+src-tauri/icons
+specs
+package-lock.json
+vendor/live2d
+public/vendor/live2d

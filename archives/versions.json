@@ -536,13 +536,12 @@
       "historicalValidationRepeated": false,
       "formalArtComplete": false,
       "source": {
-        "status": "original-git",
-        "checkpoint": null,
-        "sourceTagCommit": null,
+        "status": "original-git-tag",
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
       },
-      "remoteAssetsVerified": false
+      "remoteAssetsVerified": true,
+      "sourceCommit": "444e891d18452b08b9d80992bd1555b5aebd6a14"
     }
   ],
-  "githubArchiveVerified": false
+  "githubArchiveVerified": true
 }

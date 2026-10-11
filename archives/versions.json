@@ -35,7 +35,8 @@
         "modelEntry": "live-reference-repair-v54-candidate/ChangliReferenceRepairV54-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "aebd5bfc1f730e5b5a592d22be247d3cb50657d0"
+      "sourceCommit": "aebd5bfc1f730e5b5a592d22be247d3cb50657d0",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.1",
@@ -69,7 +70,8 @@
         "modelEntry": "live-reference-repair-v55-candidate/ChangliReferenceRepairV55-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "02e0b0ba36a691767676c036769bd047cfa8a989"
+      "sourceCommit": "02e0b0ba36a691767676c036769bd047cfa8a989",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.2",
@@ -103,7 +105,8 @@
         "modelEntry": "live-reference-repair-v56-candidate/ChangliReferenceRepairV56-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "a203230b68292092ffb514b2f68149e12f5f1f12"
+      "sourceCommit": "a203230b68292092ffb514b2f68149e12f5f1f12",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.3",
@@ -130,7 +133,8 @@
         "status": "binary-only",
         "reason": "No exact saved 0.6.3 source checkpoint found; no replacement with newer source."
       },
-      "sourceCommit": "817cc9dd8f76b0f960ec94d5843f9b41d159b459"
+      "sourceCommit": "817cc9dd8f76b0f960ec94d5843f9b41d159b459",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.4",
@@ -164,7 +168,8 @@
         "modelEntry": "live-reference-repair-v60-candidate/ChangliReferenceRepairV60-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "6049c17ff7f35a4109aa0fc38ce6dd330d19accc"
+      "sourceCommit": "6049c17ff7f35a4109aa0fc38ce6dd330d19accc",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.5",
@@ -198,7 +203,8 @@
         "modelEntry": "live-reference-repair-v60-candidate/ChangliReferenceRepairV60-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "0dfa8e2e9545ba2f615b82689a9da2e50b0923fe"
+      "sourceCommit": "0dfa8e2e9545ba2f615b82689a9da2e50b0923fe",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.6",
@@ -232,7 +238,8 @@
         "modelEntry": "live-reference-repair-v60-candidate/ChangliReferenceRepairV60-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "16b0a469f905f0892873d333d8b34bf3bc2c8a1d"
+      "sourceCommit": "16b0a469f905f0892873d333d8b34bf3bc2c8a1d",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.7",
@@ -266,7 +273,8 @@
         "modelEntry": "live-reference-repair-v68-candidate/ChangliReferenceRepairV68-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "7ffada3c9be53b21ec8f86135f4c325f3b8fa97a"
+      "sourceCommit": "7ffada3c9be53b21ec8f86135f4c325f3b8fa97a",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.8",
@@ -300,7 +308,8 @@
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "7bb01c45aa05018e815abf4e4307b95c177dce3c"
+      "sourceCommit": "7bb01c45aa05018e815abf4e4307b95c177dce3c",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.6.9",
@@ -334,7 +343,8 @@
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-physics.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "758134f1e51fc7ed9d6f5c29ff2febe007035fdb"
+      "sourceCommit": "758134f1e51fc7ed9d6f5c29ff2febe007035fdb",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.7.0",
@@ -368,7 +378,8 @@
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-interactions.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "2cf21ece8d318be61f323a6e2fb378bd97def34b"
+      "sourceCommit": "2cf21ece8d318be61f323a6e2fb378bd97def34b",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.7.1",
@@ -402,7 +413,8 @@
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-interactions.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "4ba864a90b7c645c26b279c277a6a64f6888f6d6"
+      "sourceCommit": "4ba864a90b7c645c26b279c277a6a64f6888f6d6",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.7.2",
@@ -436,7 +448,8 @@
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "fd013dcefaeebe6ac2dd132c4e91fcea9714818a"
+      "sourceCommit": "fd013dcefaeebe6ac2dd132c4e91fcea9714818a",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.7.3",
@@ -470,7 +483,8 @@
         "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-elastic.model3.json",
         "historicalBinaryRebuildVerified": false
       },
-      "sourceCommit": "e4964ce44f7a1457c8b5f4f5b1560a975a572349"
+      "sourceCommit": "e4964ce44f7a1457c8b5f4f5b1560a975a572349",
+      "remoteAssetsVerified": true
     },
     {
       "version": "0.7.4",
@@ -497,7 +511,9 @@
         "status": "original-git-tag"
       },
       "recovery": "tools/live2d-authoring/build/current-release/changli-0.7.4-recovery-20261011-201354.zip",
-      "sourceCommit": "1e2fa68e3af401942d000b9f3d6801656d33b1ef"
+      "sourceCommit": "1e2fa68e3af401942d000b9f3d6801656d33b1ef",
+      "remoteAssetsVerified": true
     }
-  ]
+  ],
+  "githubArchiveVerified": true
 }

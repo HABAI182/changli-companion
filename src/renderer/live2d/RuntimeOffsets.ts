@@ -49,7 +49,8 @@ export class RuntimeOffsets {
     this.mouseOffset = { x: mouseX, y: mouseY };
     const groups = [
       { ids: this.rig.leftHand, x: mouseX, y: mouseY },
-      { ids: this.rig.rightHand, x: value('__gesture.keyboardReach') * this.rig.reachPixels, y: -value('__gesture.keyboardDepth') * (this.rig.depthPixels || 0) },
+      { ids: this.rig.rightHand, x: value('__gesture.keyboardReach') * this.rig.reachPixels,
+        y: value('__gesture.keyboardLanding') * (54 - value('__gesture.keyboardDepth') * (this.rig.depthPixels || 0)) },
     ];
     for (const group of groups) {
       if (Math.abs(group.x) + Math.abs(group.y) < .001) continue;

@@ -1,0 +1,1 @@
+{"local-windows":{"identifier":"local-windows","description":"Only packaged local companion windows can receive events and drag the pet.","local":true,"windows":["pet","panel-*"],"permissions":["core:default","core:window:allow-set-position"]}}

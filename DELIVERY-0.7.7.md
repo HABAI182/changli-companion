@@ -8,7 +8,7 @@
 
 类型检查、四区 Q/A/U/H 手部独立性和实际 App WebGL 检查通过，核对静止、键盘手移开、鼠标按下及转头画面；同时使用深浅背景检查透明边缘。没有重复全部旧功能测试。
 
-Windows EXE 与 NSIS 安装包的构建结果在打包后记录；本轮用户按 Esc 停止 Windows 操作，新版 Windows 实机画面和安装卸载尚未验收。不得将浏览器画面算作 Windows 验收。
+Windows EXE 与 NSIS 安装包已构建成功，独立副本与 SHA256 已保存；本轮用户按 Esc 停止 Windows 操作，新版 Windows 实机画面和安装卸载尚未验收。不得将浏览器画面算作 Windows 验收。
 
 交付目录：`deliveries/20261012-desktop-0.7.7/`；GitHub：<https://github.com/HABAI182/changli-companion/releases/tag/v0.7.7>。版本、源码、附件和校验分别留档，旧版不覆盖。
 

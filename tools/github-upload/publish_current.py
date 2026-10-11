@@ -5,6 +5,7 @@ changes or replacement of existing binaries. Requires a clean committed source.
 """
 import hashlib
 import argparse
+import time
 import json
 import subprocess
 from pathlib import Path
@@ -33,14 +34,22 @@ def gh(*args):
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
-def release_for_tag():
+def release_for_tag(required=False, asset_name=None):
     # Drafts do not have a public tag URL yet. Inspect owned releases by tag,
     # so an interrupted upload resumes without making a second draft.
-    rows = json.loads(gh('api', 'repos/' + REPO + '/releases?per_page=100'))
-    matches = [r for r in rows if r['tag_name'] == TAG]
-    if len(matches) > 1:
-        raise ValueError('Ambiguous release drafts')
-    return matches[0] if matches else None
+    for attempt in range(6 if required else 1):
+        rows = json.loads(gh('api', 'repos/' + REPO + '/releases?per_page=100'))
+        matches = [r for r in rows if r['tag_name'] == TAG]
+        if len(matches) > 1:
+            raise ValueError('Ambiguous release drafts')
+        release = matches[0] if matches else None
+        if release and (asset_name is None or any(a['name'] == asset_name for a in release['assets'])):
+            return release
+        if attempt < 5 and required:
+            time.sleep(1)
+    if required:
+        raise ValueError('GitHub metadata not visible yet; rerun to resume the existing draft')
+    return None
 
 def main():
     if gh('api', 'user', '--jq', '.login').casefold() != OWNER.casefold():
@@ -71,7 +80,7 @@ def main():
                  '--draft', '--repo', REPO, '--target', source,
                  '--title', '离火长明 ' + VERSION + ' 工程版', '--prerelease',
                  '--notes-file', str(ROOT / ('tools/github-upload/release-notes-' + VERSION + '.md'))))
-        release = release_for_tag()
+        release = release_for_tag(required=True)
     if release['draft']:
         target = command(['git', 'rev-parse', release['target_commitish']]).stdout.strip()
         target_package = json.loads(command(['git', 'show', target + ':package.json']).stdout)
@@ -86,7 +95,7 @@ def main():
         if not asset:
             print('Uploading missing asset:', item['file'], flush=True)
             gh('release', 'upload', TAG, str(DELIVERY / item['file']), '--repo', REPO)
-            release = release_for_tag()
+            release = release_for_tag(required=True, asset_name=item['file'])
             asset = next(a for a in release['assets'] if a['name'] == item['file'])
         if asset['size'] != item['bytes'] or asset.get('digest', '').upper() != 'SHA256:' + item['sha256']:
             raise ValueError('Remote checksum mismatch: ' + item['file'])

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 
 import type { Settings } from '../domain';
 import { ScalePreviewQueue } from './scalePreview';
 import { PositionPresets } from './PositionPresets';
+import { openProjectLink } from '../native';
 import './settings.css';
 
 type Props = {
@@ -139,27 +140,152 @@ function SizeControl({
     </div>
   );
 }
-function FullscreenExceptions({ value, update, fail }: { value: string[]; update: Props['update']; fail: Props['fail'] }) {
+function FullscreenExceptions({
+  value,
+  update,
+  fail,
+}: {
+  value: string[];
+  update: Props['update'];
+  fail: Props['fail'];
+}) {
   const [draft, setDraft] = useState(value.join(', '));
-  useEffect(() => { setDraft(value.join(', ')); }, [value]);
+  useEffect(() => {
+    setDraft(value.join(', '));
+  }, [value]);
   const save = () => {
-    const items = [...new Set(draft.split(/[,，;；\n]/).map(v => v.trim().toLowerCase()).filter(Boolean))];
-    if (items.length > 32 || items.some(v => !/^[^\\/:*?"<>|]{1,120}\.exe$/i.test(v))) {
+    const items = [
+      ...new Set(
+        draft
+          .split(/[,，;；\n]/)
+          .map((v) => v.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    ];
+    if (items.length > 32 || items.some((v) => !/^[^\\/:*?"<>|]{1,120}\.exe$/i.test(v))) {
       fail(new Error('填写程序文件名，例如 game.exe；最多 32 个，用逗号分隔'));
       return;
     }
     if (items.join(',') !== value.join(',')) void update({ fullscreenExceptions: items });
   };
-  return <div className="fullscreen-exceptions">
-    <label htmlFor="fullscreen-exceptions">这些程序全屏时仍显示桌宠</label>
-    <input id="fullscreen-exceptions" aria-label="全屏避让例外" value={draft}
-      placeholder="例如 game.exe, player.exe" onChange={e => setDraft(e.target.value)} onBlur={save}
-      onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
-    <small>输入程序文件名，用逗号分隔；留空则全部避让。</small>
-  </div>;
+  return (
+    <div className="fullscreen-exceptions">
+      <label htmlFor="fullscreen-exceptions">这些程序全屏时仍显示桌宠</label>
+      <input
+        id="fullscreen-exceptions"
+        aria-label="全屏避让例外"
+        value={draft}
+        placeholder="例如 game.exe, player.exe"
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur();
+        }}
+      />
+      <small>输入程序文件名，用逗号分隔；留空则全部避让。</small>
+    </div>
+  );
+}
+function PreferenceRange({
+  title,
+  description,
+  value,
+  min,
+  max,
+  step = 5,
+  unit = '%',
+  update,
+  busy,
+}: {
+  title: string;
+  description: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+  update: (value: number) => Promise<boolean>;
+  busy: boolean;
+}) {
+  const [draft, setDraft] = useState(value);
+  const dirty = useRef(false);
+  useEffect(() => {
+    if (!dirty.current) setDraft(value);
+  }, [value]);
+  const save = async () => {
+    if (!dirty.current) return;
+    dirty.current = false;
+    if (!(await update(draft))) setDraft(value);
+  };
+  return (
+    <div className="preference-range">
+      <div className="range-heading">
+        <span>
+          <strong>{title}</strong>
+          <small>{description}</small>
+        </span>
+        <output>
+          {draft}
+          {unit}
+        </output>
+      </div>
+      <input
+        aria-label={title}
+        aria-valuetext={`${draft}${unit}`}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        disabled={busy}
+        value={draft}
+        style={{ '--range-fill': `${((draft - min) / (max - min)) * 100}%` } as CSSProperties}
+        onChange={(e) => {
+          dirty.current = true;
+          setDraft(Number(e.target.value));
+        }}
+        onPointerUp={() => void save()}
+        onPointerCancel={() => void save()}
+        onKeyUp={() => void save()}
+        onBlur={() => void save()}
+      />
+    </div>
+  );
 }
 export function SettingsPanel(p: Props) {
   const s = p.value;
+  const [page, setPage] = useState<'appearance' | 'interaction' | 'desktop' | 'advanced'>(
+    'appearance',
+  );
+  const [systemDark, setSystemDark] = useState(
+    () => matchMedia('(prefers-color-scheme: dark)').matches,
+  );
+  useEffect(() => {
+    const media = matchMedia('(prefers-color-scheme: dark)');
+    const changed = () => setSystemDark(media.matches);
+    media.addEventListener('change', changed);
+    return () => media.removeEventListener('change', changed);
+  }, []);
+  const theme = s.settingsTheme === 'system' ? (systemDark ? 'dark' : 'light') : s.settingsTheme;
+  const range = (
+    key: 'headElasticity' | 'keyboardMotionScale' | 'mouseMotionScale' | 'bubbleDurationSeconds',
+    title: string,
+    description: string,
+    min: number,
+    max: number,
+    seconds = false,
+  ) => (
+    <PreferenceRange
+      title={title}
+      description={description}
+      value={Math.round(s[key] * (seconds ? 1 : 100))}
+      min={min}
+      max={max}
+      step={seconds ? 1 : 5}
+      unit={seconds ? ' 秒' : '%'}
+      busy={p.busy}
+      update={(value) => p.update({ [key]: value / (seconds ? 1 : 100) })}
+    />
+  );
   const toggle = (key: keyof Settings, title: string, description?: string, desktop = false) => (
     <Row title={title} description={description}>
       <input
@@ -173,24 +299,113 @@ export function SettingsPanel(p: Props) {
     </Row>
   );
   return (
-    <section className="panel settings-page" aria-label="桌宠设置">
+    <section
+      className="panel settings-page"
+      data-theme={theme}
+      data-accent={s.accentColor}
+      data-density={s.settingsDensity}
+      aria-label="桌宠设置"
+    >
       <div className="panel-content">
         <div className="settings-heading">
           <div className="settings-avatar" aria-hidden="true">
-            <img src="/assets/changli-icon-v078.png" alt="" />
+            <img src="/assets/changli-icon-v079.jpg" alt="" />
           </div>
           <div>
             <p className="settings-kicker">离火长明</p>
-            <h2>桌宠设置</h2>
-            <p>按你的习惯，陪在身边。</p>
+            <h2>设置</h2>
+            <p>按你的习惯，陪在身边</p>
           </div>
         </div>
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">模型精修中</span>
+          <span className="model-stage">v0.7.9</span>
         </div>
-        <section className="settings-group" aria-labelledby="appearance-title">
+        <nav className="settings-navigation" aria-label="设置分类">
+          {(
+            [
+              ['appearance', '外观'],
+              ['interaction', '互动'],
+              ['desktop', '桌面'],
+              ['advanced', '高级'],
+            ] as const
+          ).map(([id, title]) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={page === id}
+              className={page === id ? 'active' : ''}
+              onClick={() => setPage(id)}
+            >
+              {title}
+            </button>
+          ))}
+        </nav>
+        <section
+          className="settings-group"
+          hidden={page !== 'appearance'}
+          aria-labelledby="theme-title"
+        >
+          <h3 id="theme-title">界面外观</h3>
+          <div className="settings-card">
+            <Row title="主题" description="设置界面的明暗风格">
+              <select
+                aria-label="主题"
+                value={s.settingsTheme}
+                disabled={p.busy}
+                onChange={(e) =>
+                  void p.update({ settingsTheme: e.target.value as Settings['settingsTheme'] })
+                }
+              >
+                <option value="system">跟随系统</option>
+                <option value="light">浅色</option>
+                <option value="dark">深色</option>
+              </select>
+            </Row>
+            <Row title="强调色">
+              <div className="accent-options" role="group" aria-label="强调色">
+                {(
+                  [
+                    ['coral', '珊瑚'],
+                    ['blue', '蓝色'],
+                    ['violet', '紫色'],
+                    ['sage', '青绿'],
+                  ] as const
+                ).map(([id, title]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`accent-swatch ${id}`}
+                    aria-label={title}
+                    title={title}
+                    aria-pressed={s.accentColor === id}
+                    disabled={p.busy}
+                    onClick={() => void p.update({ accentColor: id })}
+                  />
+                ))}
+              </div>
+            </Row>
+            <Row title="布局密度">
+              <select
+                aria-label="布局密度"
+                value={s.settingsDensity}
+                disabled={p.busy}
+                onChange={(e) =>
+                  void p.update({ settingsDensity: e.target.value as Settings['settingsDensity'] })
+                }
+              >
+                <option value="comfortable">舒适</option>
+                <option value="compact">紧凑</option>
+              </select>
+            </Row>
+          </div>
+        </section>
+        <section
+          className="settings-group"
+          hidden={page !== 'appearance'}
+          aria-labelledby="appearance-title"
+        >
           <h3 id="appearance-title">显示与动作</h3>
           <div className="settings-card">
             <SizeControl
@@ -213,15 +428,22 @@ export function SettingsPanel(p: Props) {
             </Row>
             {toggle('bubblesEnabled', '互动气泡', '摸头、凤凰、拖动与空闲时回应，避免连续重复')}
             {toggle('dragReactionsEnabled', '拖动弹性', '大头和发饰随拖动回摆，放下后缓缓回正')}
+            {range('headElasticity', '大头弹性幅度', '调整回弹幅度，0% 关闭弹性形变', 0, 150)}
           </div>
         </section>
-        <section className="settings-group" aria-labelledby="interaction-title">
+        <section
+          className="settings-group"
+          hidden={page !== 'interaction'}
+          aria-labelledby="interaction-title"
+        >
           <h3 id="interaction-title">键鼠互动</h3>
           <div className="settings-card">
             <Row
               title="输入模式"
               description={
-                s.inputMode === 'keyboard_mouse' ? '左手跟随键盘四区，前后移动较轻；右手响应鼠标' : '左手跟随键盘四区，空格单独落点；不响应鼠标'
+                s.inputMode === 'keyboard_mouse'
+                  ? '左手跟随键盘四区，前后移动较轻；右手响应鼠标'
+                  : '左手跟随键盘四区，空格单独落点；不响应鼠标'
               }
             >
               <select
@@ -237,6 +459,42 @@ export function SettingsPanel(p: Props) {
               </select>
             </Row>
             {toggle('keyOverlayEnabled', '按键浮显', '短暂显示按键，不记录输入内容')}
+            {toggle('cursorFollowEnabled', '鼠标视线跟随', '随鼠标转头与转眼，不影响鼠标手动作')}
+            {range(
+              'keyboardMotionScale',
+              '键盘手移动幅度',
+              '同时调整左右和前后四区的移动距离',
+              50,
+              125,
+            )}
+            {range('mouseMotionScale', '鼠标移动幅度', '右手、鼠标与线缆一起移动', 0, 150)}
+            {range(
+              'bubbleDurationSeconds',
+              '气泡显示时长',
+              '控制每条互动气泡的停留时间',
+              2,
+              8,
+              true,
+            )}
+            <Row title="空闲回应频率" description="只调整无操作时的主动聊天">
+              <select
+                aria-label="空闲回应频率"
+                value={s.bubbleIdleIntervalSeconds}
+                disabled={p.busy}
+                onChange={(e) =>
+                  void p.update({
+                    bubbleIdleIntervalSeconds: Number(
+                      e.target.value,
+                    ) as Settings['bubbleIdleIntervalSeconds'],
+                  })
+                }
+              >
+                <option value="0">不主动聊天</option>
+                <option value="60">每 1 分钟</option>
+                <option value="90">每 1.5 分钟</option>
+                <option value="180">每 3 分钟</option>
+              </select>
+            </Row>
             <Row title="自动睡眠" description="一段时间无操作后小憩">
               <select
                 aria-label="自动睡眠"
@@ -256,13 +514,33 @@ export function SettingsPanel(p: Props) {
             </Row>
           </div>
         </section>
-        <section className="settings-group" aria-labelledby="desktop-title">
+        <section
+          className="settings-group"
+          hidden={page !== 'desktop'}
+          aria-labelledby="desktop-title"
+        >
           <h3 id="desktop-title">桌面陪伴</h3>
           <div className="settings-card">
             {toggle('topmost', '窗口置顶', '显示在其他窗口上方', true)}
-            {toggle('fullscreenHideEnabled', '全屏自动避让', '同屏全屏应用出现时隐藏，退出后恢复；手动隐藏不受影响', true)}
-            {s.fullscreenHideEnabled && <FullscreenExceptions value={s.fullscreenExceptions || []} update={p.update} fail={p.fail} />}
-            {toggle('edgeSnapEnabled', '屏幕边缘磁吸', '拖到边缘附近后松手，自动留出一小段边距', true)}
+            {toggle(
+              'fullscreenHideEnabled',
+              '全屏自动避让',
+              '同屏全屏应用出现时隐藏，退出后恢复；手动隐藏不受影响',
+              true,
+            )}
+            {s.fullscreenHideEnabled && (
+              <FullscreenExceptions
+                value={s.fullscreenExceptions || []}
+                update={p.update}
+                fail={p.fail}
+              />
+            )}
+            {toggle(
+              'edgeSnapEnabled',
+              '屏幕边缘磁吸',
+              '拖到边缘附近后松手，自动留出一小段边距',
+              true,
+            )}
             {toggle('hoverHideEnabled', '靠近时淡化', '鼠标移开后恢复，减少遮挡')}
             {s.hoverHideEnabled && (
               <div className="setting-dependent">
@@ -303,14 +581,18 @@ export function SettingsPanel(p: Props) {
             {toggle('passthrough', '鼠标穿透', '恢复快捷键或系统托盘可关闭穿透', true)}
             <PositionPresets native={p.native} fail={p.fail} />
           </div>
-          {!p.native && <p className="setting-hint">置顶、穿透、全屏避让、磁吸、常用位置和开机启动在 Windows 桌宠中可用。</p>}
+          {!p.native && (
+            <p className="setting-hint">
+              置顶、穿透、全屏避让、磁吸、常用位置和开机启动在 Windows 桌宠中可用。
+            </p>
+          )}
         </section>
-        <details className="settings-advanced">
-          <summary>
-            <span>
-              高级设置<small>启动、快捷键与运行选项</small>
-            </span>
-          </summary>
+        <section
+          className="settings-group settings-advanced"
+          hidden={page !== 'advanced'}
+          aria-labelledby="advanced-title"
+        >
+          <h3 id="advanced-title">启动与运行</h3>
           <div className="settings-card">
             {toggle('autostart', '开机启动', '登录 Windows 后显示桌宠', true)}
             <div className="recovery-shortcut">
@@ -385,8 +667,23 @@ export function SettingsPanel(p: Props) {
             </details>
             {p.children}
           </div>
-        </details>
-        <p className="settings-footer">设置自动保存 · 输入只用于触发动作</p>
+          <div className="project-links">
+            <span>
+              <strong>离火长明</strong>
+              <small>版本 0.7.9 · Windows 桌宠</small>
+            </span>
+            <div>
+              <button type="button" onClick={() => void openProjectLink('updates').catch(p.fail)}>
+                GitHub 更新 ↗
+              </button>
+              <button type="button" onClick={() => void openProjectLink('home').catch(p.fail)}>
+                项目主页 ↗
+              </button>
+            </div>
+            <small>私有项目需登录 GitHub，更新从版本页下载</small>
+          </div>
+        </section>
+        <p className="settings-footer">自动保存 · 设置窗口优先显示</p>
       </div>
     </section>
   );

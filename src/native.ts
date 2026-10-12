@@ -9,6 +9,15 @@ import { browserVirtualKey, keyRegion, keyDepth } from './model';
 import type { KeyDisplay } from './overlay/keyOverlay';
 export type Panel = 'focus' | 'todos' | 'settings';
 export const openPanel = (panel: Panel) => invoke('open_panel', { panel });
+export async function openProjectLink(page: 'home' | 'updates') {
+  if (native) await invoke('open_project_link', { page });
+  else
+    window.open(
+      `https://github.com/HABAI182/changli-companion${page === 'updates' ? '/releases' : ''}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+}
 export const applySettings = (settings: Settings): Promise<Settings> =>
   native ? invoke<Settings>('apply_settings', { settings }) : Promise.resolve(settings);
 export interface GamepadInput {
@@ -40,7 +49,9 @@ export function drag(
   const startY = event.screenY;
   const window = native ? getCurrentWindow() : null;
   const beginning = native ? invoke('begin_pet_drag') : Promise.resolve();
-  const origin = window ? Promise.all([window.outerPosition(), window.scaleFactor()]) : Promise.resolve(null);
+  const origin = window
+    ? Promise.all([window.outerPosition(), window.scaleFactor()])
+    : Promise.resolve(null);
   let latest = { x: startX, y: startY };
   let frame = 0;
   let writes = Promise.resolve();
@@ -112,8 +123,7 @@ export async function subscribeInput(
               ? 'space'
               : undefined;
       fn(
-        special ||
-          (keyRegion(browserVirtualKey(e.code)) as Signal),
+        special || (keyRegion(browserVirtualKey(e.code)) as Signal),
         0,
         keyDepth(browserVirtualKey(e.code)),
         { label: browserKeyLabel(e.code), phase: 'down' },

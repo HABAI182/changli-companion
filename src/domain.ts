@@ -158,6 +158,15 @@ export type Session = {
 export type RecordEntry = { id: string; minutes: number; completedAt: number; day: string };
 export type Todo = { id: string; text: string; done: boolean; day: string };
 export type Settings = {
+  settingsTheme: 'system' | 'light' | 'dark';
+  accentColor: 'coral' | 'blue' | 'violet' | 'sage';
+  settingsDensity: 'comfortable' | 'compact';
+  cursorFollowEnabled: boolean;
+  headElasticity: number;
+  keyboardMotionScale: number;
+  mouseMotionScale: number;
+  bubbleDurationSeconds: number;
+  bubbleIdleIntervalSeconds: 0 | 60 | 90 | 180;
   dragReactionsEnabled: boolean;
   fullscreenHideEnabled: boolean;
   fullscreenExceptions: string[];
@@ -205,6 +214,15 @@ export function initialData(): Data {
     session: null,
     records: [],
     settings: {
+      settingsTheme: 'system',
+      accentColor: 'coral',
+      settingsDensity: 'comfortable',
+      cursorFollowEnabled: true,
+      headElasticity: 1,
+      keyboardMotionScale: 1,
+      mouseMotionScale: 1,
+      bubbleDurationSeconds: 3,
+      bubbleIdleIntervalSeconds: 90,
       dragReactionsEnabled: true,
       fullscreenHideEnabled: true,
       fullscreenExceptions: [],

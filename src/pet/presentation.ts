@@ -115,9 +115,9 @@ export function handAction(id: string, _base: RenderSnapshot['base']): string {
 // Easing to rest at BOTH closed endpoints stalls in a thin, translucent slit.
 export function blinkClosure(elapsed: number): number {
   if (elapsed < 0 || elapsed >= 260) return 0;
-  if (elapsed < 80) return 1 - Math.cos((elapsed / 80) * Math.PI / 2);
+  if (elapsed < 80) return 1 - Math.cos(((elapsed / 80) * Math.PI) / 2);
   if (elapsed < 115) return 1;
-  return 1 - Math.sin(((elapsed - 115) / 145) * Math.PI / 2);
+  return 1 - Math.sin((((elapsed - 115) / 145) * Math.PI) / 2);
 }
 
 export class PresentationRuntime {
@@ -135,16 +135,18 @@ export class PresentationRuntime {
   private gazeUpdatedAt: number;
   private dragActive = false;
   private dragReleaseUntil = 0;
-  private headX = new ElasticSpring(13, .5);
-  private headY = new ElasticSpring(17, .42);
-  private headShape = new ElasticSpring(18, .4);
-  private headRotation = new ElasticSpring(13, .46);
+  private headX = new ElasticSpring(13, 0.5);
+  private headY = new ElasticSpring(17, 0.42);
+  private headShape = new ElasticSpring(18, 0.4);
+  private headRotation = new ElasticSpring(13, 0.46);
   private springUpdatedAt: number;
   private lastBounceAt = -Infinity;
   private dragSway = 0;
   private dragMovedAt = 0;
   private startledUntil = 0;
   private bubble: SpeechBubble | null = null;
+  private bubbleDurationSeconds = 3;
+  private idleSpeechInterval = 90000;
   private lastSpeechAt = -Infinity;
   private ambient: RenderSnapshot['ambient'] = 'none';
   private ambientUntil = 0;
@@ -214,7 +216,9 @@ export class PresentationRuntime {
     }
     const id = actions[signal];
     if (!id) return;
-    if (['keyboard_left', 'keyboard_right', 'key', 'space', 'enter', 'backspace'].includes(signal)) {
+    if (
+      ['keyboard_left', 'keyboard_right', 'key', 'space', 'enter', 'backspace'].includes(signal)
+    ) {
       this.keyboardTarget = signal === 'space' ? 0 : signal === 'keyboard_left' ? -1 : 1;
       this.depthTarget = signal === 'space' ? 1 : Math.max(-1, Math.min(1, y));
       this.landingTarget = signal === 'space' ? 0 : 1;
@@ -250,29 +254,35 @@ export class PresentationRuntime {
       this.headShape.kick(-12);
       this.dragMovedAt = now;
     }
-    if (!active) { this.react('drag', now); this.headY.kick(10); this.headShape.kick(14); }
+    if (!active) {
+      this.react('drag', now);
+      this.headY.kick(10);
+      this.headShape.kick(14);
+    }
   }
   dragMove(dx: number, dy: number, now: number) {
     if (!this.dragActive) return;
     const dt = Math.max(8, now - this.dragMovedAt);
     this.dragMovedAt = now;
     this.dragSway = Math.max(-1, Math.min(1, dx / dt / 1.2));
-    if (Math.hypot(dx, dy) / dt > 1.6 && now >= this.startledUntil)
-      this.startledUntil = now + 650;
+    if (Math.hypot(dx, dy) / dt > 1.6 && now >= this.startledUntil) this.startledUntil = now + 650;
   }
   react(topic: ResponseTopic, now: number) {
     if (now - this.lastSpeechAt < 1600) return false;
     return this.setSpeech(this.responses.pick(topic), now);
   }
   setSpeech(text: string, now: number, kind: SpeechBubble['kind'] = 'speech') {
-    const trimmed = text.trim().slice(0, 100).replace(/[。．.]+$/u, '');
+    const trimmed = text
+      .trim()
+      .slice(0, 100)
+      .replace(/[。．.]+$/u, '');
     if (!trimmed || now - this.lastSpeechAt < 1600) return false;
     this.lastSpeechAt = now;
     this.ambient = 'none';
     this.bubble = {
       text: trimmed,
       kind,
-      until: now + (kind === 'thinking' ? 2200 : Math.min(6000, 1500 + trimmed.length * 100)),
+      until: now + this.bubbleDurationSeconds * 1000,
     };
     return true;
   }
@@ -324,8 +334,14 @@ export class PresentationRuntime {
   }
   snapshot(
     now: number,
-    settings: Pick<Settings, 'motion' | 'inputMode' | 'autoSleepMinutes'> & Partial<Pick<Settings, 'bubblesEnabled' | 'dragReactionsEnabled'>>,
+    settings: Pick<Settings, 'motion' | 'inputMode' | 'autoSleepMinutes'> & Partial<Settings>,
   ): RenderSnapshot {
+    this.bubbleDurationSeconds = settings.bubbleDurationSeconds ?? 3;
+    const idleInterval = (settings.bubbleIdleIntervalSeconds ?? 90) * 1000;
+    if (idleInterval !== this.idleSpeechInterval) {
+      this.idleSpeechInterval = idleInterval;
+      this.nextIdleSpeechAt = now + idleInterval;
+    }
     this.tick(now);
     this.advanceGaze(now);
     const base =
@@ -333,22 +349,27 @@ export class PresentationRuntime {
         ? 'sleep'
         : settings.inputMode;
     const animation = this.animation;
-    const animationExpression: Record<string, string> = { angry_fire: 'angry', shy: 'shy', phoenix: 'phoenix_eyes' };
+    const animationExpression: Record<string, string> = {
+      angry_fire: 'angry',
+      shy: 'shy',
+      phoenix: 'phoenix_eyes',
+    };
     const expression =
-      (animation && animationExpression[animation.id]) || this.manualExpression ||
+      (animation && animationExpression[animation.id]) ||
+      this.manualExpression ||
       (base === 'sleep' ? 'sleepy' : now < this.touchSmileUntil ? 'smile' : 'default');
     const phoenix =
       animation?.id === 'phoenix'
         ? 'flying'
         : now < this.startledUntil && settings.dragReactionsEnabled !== false
           ? 'ruffled'
-        : base === 'sleep'
-          ? 'sleep'
-          : expression === 'angry' || expression === 'flame_eyes'
-            ? 'ruffled'
-            : expression === 'smile' || expression === 'laugh'
-              ? 'happy'
-              : 'normal';
+          : base === 'sleep'
+            ? 'sleep'
+            : expression === 'angry' || expression === 'flame_eyes'
+              ? 'ruffled'
+              : expression === 'smile' || expression === 'laugh'
+                ? 'happy'
+                : 'normal';
     const factor = settings.motion === 'off' ? 0 : settings.motion === 'low' ? 0.35 : 1;
     const elapsed = Math.max(0, now - this.handUpdatedAt);
     const handBlend = 1 - Math.exp(-elapsed / 45);
@@ -356,17 +377,26 @@ export class PresentationRuntime {
     this.handUpdatedAt = Math.max(now, this.handUpdatedAt);
     const keyboardTarget = now < this.reachUntil ? this.keyboardTarget : 0;
     this.keyboardReach += (keyboardTarget - this.keyboardReach) * handBlend;
-    this.keyboardDepth += ((now < this.reachUntil ? this.depthTarget : 0) - this.keyboardDepth) * handBlend;
-    this.keyboardLanding += ((now < this.reachUntil ? this.landingTarget : 0) - this.keyboardLanding) * handBlend;
+    this.keyboardDepth +=
+      ((now < this.reachUntil ? this.depthTarget : 0) - this.keyboardDepth) * handBlend;
+    this.keyboardLanding +=
+      ((now < this.reachUntil ? this.landingTarget : 0) - this.keyboardLanding) * handBlend;
     const mouseActive = base === 'keyboard_mouse' && now < this.mouseUntil;
     for (const axis of ['x', 'y'] as const) {
       const target = mouseActive ? this.gaze[axis] : 0;
       this.mouseHand[axis] += (target - this.mouseHand[axis]) * handBlend;
     }
-    if (settings.bubblesEnabled !== false && base !== 'sleep' && !this.manualExpression &&
-        !animation && now - this.lastInput >= 45000 && now >= this.nextIdleSpeechAt) {
+    if (
+      settings.bubblesEnabled !== false &&
+      idleInterval > 0 &&
+      base !== 'sleep' &&
+      !this.manualExpression &&
+      !animation &&
+      now - this.lastInput >= 45000 &&
+      now >= this.nextIdleSpeechAt
+    ) {
       if (this.react('idle', now)) this.lastAutomaticSpeechAt = now;
-      this.nextIdleSpeechAt = now + 90000;
+      this.nextIdleSpeechAt = now + idleInterval;
     }
     const visibleBubble = settings.bubblesEnabled === false ? null : this.bubble;
     if (
@@ -410,23 +440,38 @@ export class PresentationRuntime {
     const springElapsed = Math.max(0, now - this.springUpdatedAt);
     this.springUpdatedAt = Math.max(now, this.springUpdatedAt);
     const dragSway = settings.dragReactionsEnabled !== false ? this.dragSway : 0;
+    const gazeFollow = settings.cursorFollowEnabled === false ? 0 : 1;
     const pose = {
-      headX: this.headX.step(springElapsed, this.gaze.x * .45 + this.ambientPose.x - dragSway*.45),
-      headY: this.headY.step(springElapsed, Math.sin(now/710)*.09),
-      headShape: this.headShape.step(springElapsed, Math.sin(now/870)*.08),
-      headRotation: this.headRotation.step(springElapsed, this.gaze.x*.3 + this.ambientPose.tilt/30 + dragSway*.65),
+      headX: this.headX.step(
+        springElapsed,
+        this.gaze.x * gazeFollow * 0.45 + this.ambientPose.x - dragSway * 0.45,
+      ),
+      headY: this.headY.step(springElapsed, Math.sin(now / 710) * 0.09),
+      headShape: this.headShape.step(springElapsed, Math.sin(now / 870) * 0.08),
+      headRotation: this.headRotation.step(
+        springElapsed,
+        this.gaze.x * gazeFollow * 0.3 + this.ambientPose.tilt / 30 + dragSway * 0.65,
+      ),
     };
     // Disabled drag feedback must not leak the drag-start/end spring kicks.
-    const elasticFactor = settings.dragReactionsEnabled === false && (this.dragActive || now < this.dragReleaseUntil) ? 0 : factor;
+    const elasticFactor =
+      settings.dragReactionsEnabled === false && (this.dragActive || now < this.dragReleaseUntil)
+        ? 0
+        : factor * (settings.headElasticity ?? 1);
     const awake = base !== 'sleep' ? factor : 0;
-    const progress = animation ? Math.min(1, Math.max(0, (now - animation.startedAt) / (animation.until - animation.startedAt))) : 0;
+    const progress = animation
+      ? Math.min(
+          1,
+          Math.max(0, (now - animation.startedAt) / (animation.until - animation.startedAt)),
+        )
+      : 0;
     const actionEnvelope = Math.sin(Math.PI * progress) ** 2 * factor;
     if (animation?.id === 'angry_fire') {
-      pose.headX += Math.sin(progress * Math.PI * 10) * actionEnvelope * .4;
-      pose.headShape += Math.sin(progress * Math.PI * 6) * actionEnvelope * .35;
+      pose.headX += Math.sin(progress * Math.PI * 10) * actionEnvelope * 0.4;
+      pose.headShape += Math.sin(progress * Math.PI * 6) * actionEnvelope * 0.35;
     } else if (animation?.id === 'shy') {
-      pose.headRotation += actionEnvelope * .55;
-      pose.headY += actionEnvelope * .16;
+      pose.headRotation += actionEnvelope * 0.55;
+      pose.headY += actionEnvelope * 0.16;
     }
     const blink = this.advanceBlink(now, factor > 0 && base !== 'sleep' && expression !== 'sleepy');
     return {
@@ -449,22 +494,37 @@ export class PresentationRuntime {
         hairSway: Math.sin(now / 1510) * 0.35 * factor,
         ornamentSway: Math.sin(now / 1230) * 0.45 * factor,
         phoenixFloat: Math.sin(now / 660) * 5 * awake,
-        gazeX: factor ? Math.max(-1, Math.min(1, this.gaze.x + this.ambientPose.x)) * factor : 0,
-        gazeY: factor ? Math.max(-1, Math.min(1, this.gaze.y + this.ambientPose.y)) * factor : 0,
+        gazeX: factor
+          ? Math.max(-1, Math.min(1, this.gaze.x * gazeFollow + this.ambientPose.x)) * factor
+          : 0,
+        gazeY: factor
+          ? Math.max(-1, Math.min(1, this.gaze.y * gazeFollow + this.ambientPose.y)) * factor
+          : 0,
         headTilt: factor ? this.ambientPose.tilt * factor : 0,
         headTurn: factor ? this.ambientPose.turn * factor : 0,
-        keyboardReach: this.keyboardReach * factor,
-        keyboardDepth: this.keyboardDepth * factor,
+        keyboardReach: this.keyboardReach * factor * (settings.keyboardMotionScale ?? 1),
+        keyboardDepth: this.keyboardDepth * factor * (settings.keyboardMotionScale ?? 1),
         keyboardLanding: this.keyboardLanding * factor,
-        mouseHandX: base === 'keyboard_mouse' ? this.mouseHand.x * factor : 0,
-        mouseHandY: base === 'keyboard_mouse' ? this.mouseHand.y * factor : 0,
+        mouseHandX:
+          base === 'keyboard_mouse'
+            ? this.mouseHand.x * factor * (settings.mouseMotionScale ?? 1)
+            : 0,
+        mouseHandY:
+          base === 'keyboard_mouse'
+            ? this.mouseHand.y * factor * (settings.mouseMotionScale ?? 1)
+            : 0,
         dragSway: dragSway * factor,
-        headX: pose.headX * elasticFactor, headY: pose.headY * elasticFactor,
-        headShape: pose.headShape * elasticFactor, headRotation: pose.headRotation * elasticFactor,
-        phoenixWing: Math.sin(now / 160) * .44 * awake,
-        phoenixTail: Math.sin(now / 420 + .7) * .36 * awake,
-        phoenixBounce: (Math.sin(now / 410) * .55 + Math.sin(now / 230) * .15) * awake + (animation?.id === 'phoenix' ? actionEnvelope * .75 : 0),
-        flamePhase: now / 220, flameStrength: factor,
+        headX: pose.headX * elasticFactor,
+        headY: pose.headY * elasticFactor,
+        headShape: pose.headShape * elasticFactor,
+        headRotation: pose.headRotation * elasticFactor,
+        phoenixWing: Math.sin(now / 160) * 0.44 * awake,
+        phoenixTail: Math.sin(now / 420 + 0.7) * 0.36 * awake,
+        phoenixBounce:
+          (Math.sin(now / 410) * 0.55 + Math.sin(now / 230) * 0.15) * awake +
+          (animation?.id === 'phoenix' ? actionEnvelope * 0.75 : 0),
+        flamePhase: now / 220,
+        flameStrength: factor,
       },
     };
   }

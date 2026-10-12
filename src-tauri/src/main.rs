@@ -18,6 +18,24 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 struct Settings {
+    #[serde(rename = "settingsTheme")]
+    settings_theme: String,
+    #[serde(rename = "accentColor")]
+    accent_color: String,
+    #[serde(rename = "settingsDensity")]
+    settings_density: String,
+    #[serde(rename = "cursorFollowEnabled")]
+    cursor_follow_enabled: bool,
+    #[serde(rename = "headElasticity")]
+    head_elasticity: f64,
+    #[serde(rename = "keyboardMotionScale")]
+    keyboard_motion_scale: f64,
+    #[serde(rename = "mouseMotionScale")]
+    mouse_motion_scale: f64,
+    #[serde(rename = "bubbleDurationSeconds")]
+    bubble_duration_seconds: f64,
+    #[serde(rename = "bubbleIdleIntervalSeconds")]
+    bubble_idle_interval_seconds: u32,
     #[serde(rename = "dragReactionsEnabled")]
     drag_reactions_enabled: bool,
     #[serde(rename = "fullscreenHideEnabled")]
@@ -67,6 +85,15 @@ struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            settings_theme: "system".into(),
+            accent_color: "coral".into(),
+            settings_density: "comfortable".into(),
+            cursor_follow_enabled: true,
+            head_elasticity: 1.0,
+            keyboard_motion_scale: 1.0,
+            mouse_motion_scale: 1.0,
+            bubble_duration_seconds: 3.0,
+            bubble_idle_interval_seconds: 90,
             drag_reactions_enabled: true,
             fullscreen_hide_enabled: true,
             fullscreen_exceptions: Vec::new(),
@@ -308,6 +335,7 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
     }
     let label = format!("panel-{panel}");
     if let Some(w) = app.get_webview_window(&label) {
+        w.set_always_on_top(true).map_err(|e| e.to_string())?;
         w.show().map_err(|e| e.to_string())?;
         return w.set_focus().map_err(|e| e.to_string());
     }
@@ -317,10 +345,11 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
         WebviewUrl::App(format!("index.html?panel={panel}").into()),
     )
     .title("离火长明 · 桌宠设置")
-    .inner_size(480.0, 760.0)
-    .min_inner_size(360.0, 500.0)
+    .inner_size(560.0, 760.0)
+    .min_inner_size(420.0, 500.0)
     .center()
     .focused(true)
+    .always_on_top(true)
     .build()
     .map_err(|e| e.to_string())?;
     Ok(())
@@ -328,6 +357,16 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
 #[tauri::command]
 fn hide_pet(app: tauri::AppHandle) -> Result<(), String> {
     desktop::manual_visible(&app, false)
+}
+#[tauri::command]
+fn open_project_link(page: String) -> Result<(), String> {
+    let url = match page.as_str() {
+        "home" => "https://github.com/HABAI182/changli-companion",
+        "updates" => "https://github.com/HABAI182/changli-companion/releases",
+        _ => return Err("未知项目链接".into()),
+    };
+    std::process::Command::new("explorer.exe").arg(url).spawn()
+        .map(|_| ()).map_err(|e| format!("打开浏览器失败：{e}"))
 }
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) -> Result<(), String> {
@@ -359,6 +398,13 @@ fn animate(app: tauri::AppHandle, signal: String) -> Result<(), String> {
 fn apply_window(app: &tauri::AppHandle, s: &Settings) -> Result<(), String> {
     let w = app.get_webview_window("pet").ok_or("桌宠窗口不存在")?;
     w.set_always_on_top(s.topmost).map_err(|e| e.to_string())?;
+    // Raising the pet while saving must not cover its own visible settings.
+    if let Some(panel) = app.get_webview_window("panel-settings") {
+        if panel.is_visible().map_err(|e| e.to_string())? {
+            panel.set_always_on_top(true).map_err(|e| e.to_string())?;
+            panel.set_focus().map_err(|e| e.to_string())?;
+        }
+    }
     w.set_size(LogicalSize::new(360.0 * s.scale, 320.0 * s.scale))
         .map_err(|e| e.to_string())?;
     w.set_ignore_cursor_events(s.passthrough)
@@ -394,6 +440,14 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || ![30, 60].contains(&settings.fps)
         || !["keyboard_mouse", "keyboard_only"].contains(&settings.input_mode.as_str())
         || !["full", "low", "off"].contains(&settings.motion.as_str())
+        || !["system", "light", "dark"].contains(&settings.settings_theme.as_str())
+        || !["coral", "blue", "violet", "sage"].contains(&settings.accent_color.as_str())
+        || !["comfortable", "compact"].contains(&settings.settings_density.as_str())
+        || !settings.head_elasticity.is_finite() || !(0.0..=1.5).contains(&settings.head_elasticity)
+        || !settings.keyboard_motion_scale.is_finite() || !(0.5..=1.25).contains(&settings.keyboard_motion_scale)
+        || !settings.mouse_motion_scale.is_finite() || !(0.0..=1.5).contains(&settings.mouse_motion_scale)
+        || !settings.bubble_duration_seconds.is_finite() || !(2.0..=8.0).contains(&settings.bubble_duration_seconds)
+        || ![0, 60, 90, 180].contains(&settings.bubble_idle_interval_seconds)
         || !["auto", "live2d", "layered2d"].contains(&settings.renderer_mode.as_str())
         || ![0, 5, 10, 15].contains(&settings.auto_sleep_minutes)
         || ![250, 500, 1000].contains(&settings.hover_hide_delay_ms)
@@ -530,6 +584,7 @@ fn main() {
             animate,
             reset_position,
             apply_settings,
+            open_project_link,
             preview_scale,
             native_status,
             list_shortcuts,

@@ -6,7 +6,7 @@ const settings = {
   autoSleepMinutes: 0 as const,
 };
 it('摸头短暂开心，重复触摸延长反应，结束后恢复默认', () => {
-  const pet = new PresentationRuntime(0, () => .5);
+  const pet = new PresentationRuntime(0, () => 0.5);
   pet.input('pet', 100);
   expect(pet.snapshot(101, settings).expression).toBe('smile');
   pet.input('pet', 600);
@@ -20,7 +20,7 @@ it('摸头短暂开心，重复触摸延长反应，结束后恢复默认', () =
   expect(pet.snapshot(1901, settings).expression).toBe('smile');
 });
 it('摸头不覆盖手动保持的表情，主动换表情立即取消触摸反应', () => {
-  const pet = new PresentationRuntime(0, () => .5);
+  const pet = new PresentationRuntime(0, () => 0.5);
   pet.expression('surprised', 'hold', true, 50);
   pet.input('pet', 100);
   expect(pet.snapshot(101, settings).expression).toBe('surprised');
@@ -62,18 +62,26 @@ it('输入动作与持续表情可组合，完整动画结束恢复当前表情'
   expect(pet.snapshot(1830, settings).expression).toBe('smile');
 });
 it('四区切换同一只键盘手，前后方向独立平滑，气泡无末尾句号', () => {
-  const pet=new PresentationRuntime(0,()=>.5);
-  pet.input('keyboard_left',100,0,-1);
-  let s=pet.snapshot(200,settings);
-  expect(s.idle.keyboardReach).toBeLessThan(-.8);expect(s.idle.keyboardDepth).toBeLessThan(-.8);
-  pet.input('keyboard_left',220,0,1);s=pet.snapshot(320,settings);
-  expect(s.idle.keyboardReach).toBeLessThan(-.9);expect(s.idle.keyboardDepth).toBeGreaterThan(.7);
-  pet.input('keyboard_right',340,0,-1);s=pet.snapshot(440,settings);
-  expect(s.idle.keyboardReach).toBeGreaterThan(.7);expect(s.idle.keyboardDepth).toBeLessThan(-.7);
-  expect(handAction(s.action!.id,s.base)).toBe('keyboard_right');
-  pet.snapshot(1800,settings);expect(Math.abs(pet.snapshot(2500,settings).idle.keyboardDepth!)).toBeLessThan(.001);
-  pet.setSpeech('又被你发现了。',3000);expect(pet.snapshot(3100,settings).bubble?.text).toBe('又被你发现了');
-  expect(pet.play('wave',4000)).toBe(false);expect(pet.play('sleep',4000)).toBe(false);
+  const pet = new PresentationRuntime(0, () => 0.5);
+  pet.input('keyboard_left', 100, 0, -1);
+  let s = pet.snapshot(200, settings);
+  expect(s.idle.keyboardReach).toBeLessThan(-0.8);
+  expect(s.idle.keyboardDepth).toBeLessThan(-0.8);
+  pet.input('keyboard_left', 220, 0, 1);
+  s = pet.snapshot(320, settings);
+  expect(s.idle.keyboardReach).toBeLessThan(-0.9);
+  expect(s.idle.keyboardDepth).toBeGreaterThan(0.7);
+  pet.input('keyboard_right', 340, 0, -1);
+  s = pet.snapshot(440, settings);
+  expect(s.idle.keyboardReach).toBeGreaterThan(0.7);
+  expect(s.idle.keyboardDepth).toBeLessThan(-0.7);
+  expect(handAction(s.action!.id, s.base)).toBe('keyboard_right');
+  pet.snapshot(1800, settings);
+  expect(Math.abs(pet.snapshot(2500, settings).idle.keyboardDepth!)).toBeLessThan(0.001);
+  pet.setSpeech('又被你发现了。', 3000);
+  expect(pet.snapshot(3100, settings).bubble?.text).toBe('又被你发现了');
+  expect(pet.play('wave', 4000)).toBe(false);
+  expect(pet.play('sleep', 4000)).toBe(false);
 });
 it('hold 松开恢复，toggle 再按关闭', () => {
   const pet = new PresentationRuntime(0);
@@ -106,19 +114,19 @@ it('两种模式的所有键盘区域共用键盘手，鼠标保持独立动作'
   expect(handAction('keyboard_right', 'keyboard_only')).toBe('keyboard_right');
 });
 it('同一键盘手左右移动与空格回中，鼠标独立归位，气泡关闭时不会空口说话', () => {
-  const pet = new PresentationRuntime(0, () => .5);
+  const pet = new PresentationRuntime(0, () => 0.5);
   pet.input('keyboard_left', 100);
-  expect(pet.snapshot(200, settings).idle.keyboardReach).toBeLessThan(-.8);
+  expect(pet.snapshot(200, settings).idle.keyboardReach).toBeLessThan(-0.8);
   pet.input('keyboard_right', 220);
-  expect(pet.snapshot(320, settings).idle.keyboardReach).toBeGreaterThan(.7);
+  expect(pet.snapshot(320, settings).idle.keyboardReach).toBeGreaterThan(0.7);
   pet.input('space', 400);
-  expect(Math.abs(pet.snapshot(600, settings).idle.keyboardReach!)).toBeLessThan(.02);
+  expect(Math.abs(pet.snapshot(600, settings).idle.keyboardReach!)).toBeLessThan(0.02);
   pet.snapshot(1000, settings);
-  expect(Math.abs(pet.snapshot(1800, settings).idle.keyboardReach!)).toBeLessThan(.001);
+  expect(Math.abs(pet.snapshot(1800, settings).idle.keyboardReach!)).toBeLessThan(0.001);
   pet.input('move', 2000, 1, -1);
-  expect(pet.snapshot(2200, settings).idle.mouseHandX).toBeGreaterThan(.5);
+  expect(pet.snapshot(2200, settings).idle.mouseHandX).toBeGreaterThan(0.5);
   pet.snapshot(3000, settings);
-  expect(pet.snapshot(3800, settings).idle.mouseHandX).toBeLessThan(.001);
+  expect(pet.snapshot(3800, settings).idle.mouseHandX).toBeLessThan(0.001);
   pet.react('head', 4000);
   expect(pet.snapshot(4100, { ...settings, bubblesEnabled: false }).mouthOpen).toBe(0);
 });
@@ -137,7 +145,8 @@ it('眨眼完整闭合并短暂停留，睁眼比闭眼慢，30/60/144帧率不�
   for (const fps of [30, 60, 144]) {
     const pet = new PresentationRuntime(0, () => 0);
     let peak = 0;
-    for (let t = 3900; t <= 4300; t += 1000 / fps) peak = Math.max(peak, pet.snapshot(t, settings).idle.blink);
+    for (let t = 3900; t <= 4300; t += 1000 / fps)
+      peak = Math.max(peak, pet.snapshot(t, settings).idle.blink);
     expect(peak).toBe(1);
     expect(pet.snapshot(4300, settings).idle.blink).toBe(0);
   }
@@ -177,6 +186,6 @@ it('点击气泡、拖动回弹和超时清理互不污染输入历史', () => {
   pet.setDragState(false, 400);
   expect(pet.snapshot(401, settings).drag).toBe('release');
   expect(pet.snapshot(921, settings).drag).toBe('idle');
-  expect(pet.snapshot(2000, settings).bubble).toBeNull();
-  expect(pet.snapshot(2000, settings).mouthOpen).toBe(0);
+  expect(pet.snapshot(3200, settings).bubble).toBeNull();
+  expect(pet.snapshot(3200, settings).mouthOpen).toBe(0);
 });

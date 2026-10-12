@@ -714,14 +714,14 @@ export function App() {
       {preview && (
         <header>
           <div className="brand">
-            <img className="brand-pet-icon" src="/assets/changli-icon-v078.png" alt="长离" />
+            <img className="brand-pet-icon" src="/assets/changli-icon-v079.jpg" alt="长离" />
             <div>
               <h1>离火长明</h1>
               <span>CHANGLI · DESKTOP COMPANION</span>
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.8</span>
+            <i /> 浏览器预览 <span>v0.7.9</span>
           </div>
         </header>
       )}

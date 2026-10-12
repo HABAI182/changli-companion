@@ -111,6 +111,7 @@ header {
   align-items: center;
   gap: 16px;
 }
+.brand-pet-icon { width: 52px; height: 52px; object-fit: contain; }
 .seal {
   width: 42px;
   height: 48px;

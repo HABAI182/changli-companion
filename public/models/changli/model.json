@@ -2,7 +2,7 @@
   "schema": 2,
   "name": "Changli",
   "display_name": "长离",
-  "version": "0.12.7",
+  "version": "0.12.8",
   "input_mode": "keyboard_mouse",
   "renderer": {
     "preferred": "live2d",
@@ -66,7 +66,7 @@
         "phoenix_eyes": "PhoenixEyesReaction",
         "flame_eyes": "FlameEyesReaction"
       },
-      "art_status": "v71原生Live2D；0.7.5运行资源：四区键盘、睁眼开心、闭眼困倦、随脸矢量效果；未重新导出CMO3",
+      "art_status": "v71原生Live2D；0.7.8运行资源：完整鼠标、袖口底层、下颌肤色融合；未重新导出CMO3",
       "runtimeOffsets": {
         "leftHand": [
           "ArtMesh10"
@@ -87,24 +87,24 @@
           "mesh": "ArtMesh20",
           "outline": [
             [
-              -5,
-              870
+              -8,
+              865
             ],
             [
-              333,
-              870
+              385,
+              865
             ],
             [
-              365,
-              927
+              392,
+              960
             ],
             [
-              280,
-              1005
+              350,
+              1018
             ],
             [
-              -5,
-              1090
+              -8,
+              1100
             ]
           ]
         },
@@ -113,7 +113,13 @@
             "ArtMesh10",
             "ArtMesh9"
           ],
-          "after": "ArtMesh34"
+          "after": "ArtMesh34",
+          "alsoAfter": [
+            "ArtMesh20",
+            "ArtMesh56",
+            "ArtMesh41",
+            "ArtMesh29"
+          ]
         },
         "contours": {
           "ArtMesh10": [
@@ -315,25 +321,15 @@
               0.11,
               0
             ]
-          },
-          "ArtMesh20": {
-            "bounds": [
-              0.1622,
-              0,
-              0.03994,
-              0.243
-            ],
-            "shift": [
-              0,
-              0
-            ],
-            "erase": true
           }
         },
         "depthPixels": 18,
         "keyboardMesh": "ArtMesh56",
         "keyboardAsset": "assets/keyboard-four-zones.svg",
-        "jawAsset": "assets/jaw-underpaint-v077.svg"
+        "jawAsset": "assets/jaw-underpaint-v078.svg",
+        "mouseAsset": "assets/mouse-complete-v078.svg",
+        "underpaintAsset": "assets/sleeves-underpaint-v078.svg",
+        "jawBlend": true
       }
     }
   },
@@ -342,7 +338,7 @@
     1254,
     1254
   ],
-  "art_status": "v71 native Live2D; 0.7.7 runtime jaw corner and foreground hand-edge repair; no new CMO3 export",
+  "art_status": "v71 native Live2D; 0.7.8 complete mouse, rear sleeve underpaint and blended jaw skin; no new CMO3 export",
   "assets": {
     "base": "assets/changli-cutout.png"
   },

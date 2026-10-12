@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 2048 2048">
+  <!-- Skin is sampled from the native face, only the completed contour is vector. -->
+  <defs><linearGradient id="seam" x1="650" y1="0" x2="710" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#914f4b" stop-opacity="0"/><stop offset="1" stop-color="#914f4b"/></linearGradient></defs>
+  <g transform="translate(12 687.3)"><path d="M650 874 Q673 877 700 875 Q730 877 756 869 Q780 858 801 839" fill="none" stroke="url(#seam)" stroke-width="2.8" stroke-linecap="round"/></g>
+</svg>

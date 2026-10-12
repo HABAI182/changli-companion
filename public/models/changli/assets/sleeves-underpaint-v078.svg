@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254">
+  <!-- Continuous rear sleeves, behind the native head and hand foreground. -->
+  <defs><linearGradient id="fabric" x1="0" y1="807" x2="0" y2="927" gradientUnits="userSpaceOnUse"><stop stop-color="#493b41"/><stop offset="1" stop-color="#302832"/></linearGradient></defs>
+  <path d="M236 830 Q269 794 329 805 Q364 812 390 853 L402 901 Q382 921 345 926 L272 912 L225 882 Z" fill="url(#fabric)" stroke="#302229" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M251 816 Q288 797 324 811 Q354 824 377 858 L361 882 Q347 851 317 832 Q287 818 262 833 Z" fill="#f8eee8" stroke="#7b595d" stroke-width="2.5"/>
+  <path d="M238 837 Q234 868 257 897 L276 910" fill="none" stroke="#ba414e" stroke-width="7"/>
+  <path d="M673 840 Q705 818 750 830 Q793 838 817 865 L848 920 Q820 936 781 931 L699 923 Q674 899 664 868 Z" fill="url(#fabric)" stroke="#302229" stroke-width="3.5"/>
+  <path d="M698 828 Q730 817 763 836 Q791 852 809 884 L792 895 Q773 862 744 847 Q720 835 704 845 Z" fill="#f8eee8" stroke="#7b595d" stroke-width="2.5"/>
+  <path d="M815 862 Q831 887 839 919" fill="none" stroke="#ba414e" stroke-width="7"/>
+</svg>

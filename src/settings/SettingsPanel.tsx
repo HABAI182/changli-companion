@@ -321,7 +321,7 @@ export function SettingsPanel(p: Props) {
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">v0.7.11</span>
+          <span className="model-stage">v0.7.12</span>
         </div>
         <nav className="settings-navigation" aria-label="设置分类">
           {(
@@ -671,7 +671,7 @@ export function SettingsPanel(p: Props) {
           <div className="project-links">
             <span>
               <strong>离火长明</strong>
-              <small>版本 0.7.11 · Windows 桌宠</small>
+              <small>版本 0.7.12 · Windows 桌宠</small>
             </span>
             <div>
               <button type="button" onClick={() => void openProjectLink('updates').catch(p.fail)}>

@@ -42,3 +42,9 @@ public/models/changli/live-left-ornament-v1-candidate/
 /DELIVERY-0.7.0.md
 /DELIVERY-0.7.1.md
 /DELIVERY-0.7.2.md
+
+# Media production and unused art candidates stay local, outside app releases.
+/videos/
+/tools/promo/
+/art-workbench/
+/PROMO-*.md

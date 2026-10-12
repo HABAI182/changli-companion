@@ -595,7 +595,7 @@ export function SettingsPanel(p: Props) {
         >
           <h3 id="advanced-title">启动与运行</h3>
           <div className="settings-card">
-            {toggle('autostart', '开机启动', '登录 Windows 后显示桌宠', true)}
+            {toggle('autostart', '开机启动', '登录系统后自动显示桌宠', true)}
             <div className="recovery-shortcut">
               <label htmlFor="recovery-key">恢复快捷键</label>
               <div>

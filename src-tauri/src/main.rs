@@ -418,7 +418,9 @@ fn apply_window(app: &tauri::AppHandle, s: &Settings) -> Result<(), String> {
     windows::fit(app, None, false)?;
     let manager = app.autolaunch();
     let enabled = manager.is_enabled().map_err(|e| e.to_string())?;
-    if s.autostart && !enabled {
+    // macOS LaunchAgent registration must follow the current app location.
+    // Windows retains its existing enable/disable behavior.
+    if s.autostart && (!enabled || cfg!(target_os = "macos")) {
         manager.enable().map_err(|e| e.to_string())?;
     } else if !s.autostart && enabled {
         manager.disable().map_err(|e| e.to_string())?;
@@ -558,7 +560,12 @@ fn main() {
         return;
     }
     tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::Builder::new().build())
+        .plugin({
+            let builder = tauri_plugin_autostart::Builder::new();
+            #[cfg(target_os = "macos")]
+            let builder = builder.macos_launcher(tauri_plugin_autostart::MacosLauncher::LaunchAgent);
+            builder.build()
+        })
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {

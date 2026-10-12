@@ -552,6 +552,40 @@ export function App() {
   const menuView = (
     <InteractionMenu
       native={native}
+      drag={(e) => {
+        if (e.button !== 0 || (e.target instanceof Element && e.target.closest('button'))) return;
+        e.preventDefault();
+        if (native) {
+          void invoke('drag_pet_menu').catch(fail);
+          return;
+        }
+        const target = e.currentTarget,
+          id = e.pointerId,
+          startX = e.clientX,
+          startY = e.clientY;
+        const bounds = target.closest('.browser-menu-container')!.getBoundingClientRect();
+        target.setPointerCapture(id);
+        const move = (event: PointerEvent) =>
+          setMenuPosition((current) => ({
+            ...current,
+            left: Math.max(
+              8,
+              Math.min(innerWidth - bounds.width - 8, bounds.left + event.clientX - startX),
+            ),
+            top: Math.max(
+              8,
+              Math.min(innerHeight - bounds.height - 8, bounds.top + event.clientY - startY),
+            ),
+          }));
+        const end = () => {
+          target.removeEventListener('pointermove', move);
+          target.removeEventListener('pointerup', end);
+          target.removeEventListener('lostpointercapture', end);
+        };
+        target.addEventListener('pointermove', move);
+        target.addEventListener('pointerup', end);
+        target.addEventListener('lostpointercapture', end);
+      }}
       close={closeMenu}
       action={(kind, id) => {
         if (native) void invoke('menu_action', { kind, id }).catch(fail);
@@ -687,7 +721,7 @@ export function App() {
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.10</span>
+            <i /> 浏览器预览 <span>v0.7.11</span>
           </div>
         </header>
       )}

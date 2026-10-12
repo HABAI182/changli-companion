@@ -68,6 +68,11 @@ pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
     menu.set_focus().map_err(|e| e.to_string())
 }
 #[tauri::command]
+pub fn drag_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
+    app.get_webview_window("pet-menu").ok_or("互动窗口不存在")?
+        .start_dragging().map_err(|e|e.to_string())
+}
+#[tauri::command]
 pub fn close_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("pet-menu") {
         w.hide().map_err(|e| e.to_string())?;

@@ -604,6 +604,7 @@ fn main() {
             apply_settings,
             open_project_link,
             pet_menu::open_pet_menu,
+            pet_menu::drag_pet_menu,
             pet_menu::close_pet_menu,
             pet_menu::menu_action,
             preview_scale,

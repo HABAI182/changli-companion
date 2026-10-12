@@ -317,15 +317,15 @@ header {
   z-index: 15;
   left: 5%;
   top: 6%;
-  min-width: 36px;
+  min-width: 10cqw;
   max-width: 45%;
-  padding: 6px 10px;
-  border: 1px solid #e6b582aa;
-  border-radius: 11px;
+  padding: 1.667cqw 2.778cqw;
+  border: 0.278cqw solid #e6b582aa;
+  border-radius: 3.056cqw;
   background: #382a2bcc;
-  box-shadow: 0 2px 12px #6b303044;
+  box-shadow: 0 0.556cqw 3.333cqw #6b303044;
   color: #fff9ef;
-  font-size: 19px;
+  font-size: 5.278cqw;
   line-height: 1.15;
   font-weight: 700;
   text-align: center;
@@ -367,7 +367,7 @@ header {
 @keyframes key-badge-life {
   0% {
     opacity: 0;
-    transform: translateY(4px) scale(0.85);
+    transform: translateY(1.111cqw) scale(0.85);
   }
   13%,
   64% {
@@ -376,7 +376,7 @@ header {
   }
   100% {
     opacity: 0;
-    transform: translateY(-3px) scale(0.96);
+    transform: translateY(-0.833cqw) scale(0.96);
   }
 }
 .pet {
@@ -1558,6 +1558,12 @@ details:not(.dev-tools) {
 }
 .detached-menu .pet-menu-heading {
   margin-bottom: 12px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.detached-menu .pet-menu-heading:active {
+  cursor: grabbing;
 }
 .detached-menu .pet-menu-heading b {
   font-weight: 600;

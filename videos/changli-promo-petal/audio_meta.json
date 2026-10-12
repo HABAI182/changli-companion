@@ -1,8 +1,0 @@
-{
-  "bgm": {
-    "path": "assets/bgm.wav",
-    "source": "existing-original-local-synthesis",
-    "duration": 45
-  },
-  "voiceover": null
-}

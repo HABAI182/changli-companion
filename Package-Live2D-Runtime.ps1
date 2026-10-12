@@ -5,7 +5,7 @@ $projectRoot = (Resolve-Path -LiteralPath $PSScriptRoot).Path
 $output = Join-Path (Split-Path -Parent $projectRoot) 'changli-live2d-candidate-0.5.0-delivery-source.zip'
 if (Test-Path -LiteralPath $output) { throw "目标源码包已存在：$output" }
 
-$directories = @('src', 'src-tauri/src', 'src-tauri/icons', 'src-tauri/capabilities', 'public', 'tests', 'specs', 'qa', 'tools', 'vendor', 'art-workbench')
+$directories = @('src', 'src-tauri/src', 'src-tauri/icons', 'src-tauri/capabilities', 'public', 'tests', 'specs', 'qa', 'tools', 'vendor')
 $singleFiles = @(
     'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'src-tauri/tauri.conf.json', 'src-tauri/build.rs',
     '.gitignore', '.prettierignore', '.prettierrc.json',

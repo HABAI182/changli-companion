@@ -1,0 +1,21 @@
+{
+  "film": "离火长明 Hyperframes promo v2",
+  "durationSeconds": 45,
+  "fps": 60,
+  "assets": [
+    {"path": "assets/hero.webm", "source": "actual isolated browser session of this repository's Live2D runtime", "model": "v71", "frames": 2700, "nativeWindowsFootage": false},
+    {"path": "assets/settings.webm", "source": "actual settings UI captured while changing the scale slider and theme", "durationSeconds": 4},
+    {"path": "assets/menu.png", "source": "actual interaction menu screenshot"},
+    {"path": "assets/hero.png", "source": "actual Live2D runtime screenshot"},
+    {"path": "assets/icon.png", "source": "public/assets/changli-icon-v0810.png"},
+    {"path": "assets/bgm.wav", "source": "tools/promo/make_music.py, original local additive synthesis", "bpm": 92, "sampledMusicUsed": false},
+    {"path": "assets/NotoSansSC-promo.ttf", "source": "https://github.com/google/fonts/tree/main/ofl/notosanssc", "license": "SIL Open Font License 1.1", "modification": "subset of characters used in this composition", "licenseFile": "assets/OFL-NotoSansSC.txt"},
+    {"path": "assets/gsap.min.js", "source": "GSAP 3.14.2, original library header retained"}
+  ],
+  "reference": {
+    "url": "https://www.bilibili.com/video/BV1AxK6zJEce/",
+    "use": "public preview storyboard inspected for character-focused feature demonstration",
+    "fullVideoOrAudioViewed": false,
+    "mediaCopiedIntoFilm": false
+  }
+}

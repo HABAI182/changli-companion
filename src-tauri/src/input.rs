@@ -4,6 +4,22 @@ use serde::Serialize;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use tauri::{Emitter, Manager};
 pub static ACTIVE: AtomicBool = AtomicBool::new(false);
+static SETTINGS_EDITOR: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+static MENU_EDITOR: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+pub fn register_editor(window: &tauri::WebviewWindow) {
+    #[cfg(windows)]
+    if let Ok(handle) = window.hwnd() {
+        let target = if window.label() == "pet-menu" {
+            &MENU_EDITOR
+        } else {
+            &SETTINGS_EDITOR
+        };
+        target.store(handle.0 as isize, Ordering::Relaxed);
+    }
+}
+fn editor_handle(foreground: isize, settings: isize, menu: isize) -> bool {
+    foreground != 0 && (foreground == settings || foreground == menu)
+}
 // Aggregate semantic events for local troubleshooting; never key codes or text.
 // These counters live only in memory and reset when the process exits.
 static LEFT: AtomicU64 = AtomicU64::new(0);
@@ -112,9 +128,15 @@ mod windows {
     static SEND: OnceLock<SyncSender<Input>> = OnceLock::new();
     thread_local! {static MOVE_TIME:Cell<Option<Instant>>=const{Cell::new(None)};}
     unsafe fn own_editor() -> bool {
+        let foreground = GetForegroundWindow();
         let mut pid = 0;
-        GetWindowThreadProcessId(GetForegroundWindow(), &mut pid);
+        GetWindowThreadProcessId(foreground, &mut pid);
         pid == GetCurrentProcessId()
+            && editor_handle(
+                foreground as isize,
+                SETTINGS_EDITOR.load(Ordering::Relaxed),
+                MENU_EDITOR.load(Ordering::Relaxed),
+            )
     }
     fn send(signal: &'static str, x: f64, y: f64, key: Option<KeyDisplay>) {
         if let Some(tx) = SEND.get() {
@@ -149,8 +171,13 @@ mod windows {
                 WM_RBUTTONDOWN => send("right", 0.0, 0.0, None),
                 WM_MOUSEWHEEL | WM_MOUSEHWHEEL => {
                     let e = &*(l as *const MSLLHOOKSTRUCT);
-                    send("wheel", 0.0, -((e.mouseData >> 16) as i16).signum() as f64, None);
-                },
+                    send(
+                        "wheel",
+                        0.0,
+                        -((e.mouseData >> 16) as i16).signum() as f64,
+                        None,
+                    );
+                }
                 WM_MOUSEMOVE => {
                     let e = &*(l as *const MSLLHOOKSTRUCT);
                     let now = Instant::now();
@@ -234,6 +261,14 @@ pub fn start(app: tauri::AppHandle) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn own_pet_foreground_does_not_block_startup_input() {
+        assert!(!editor_handle(100, 0, 0));
+        assert!(!editor_handle(100, 200, 300));
+        assert!(editor_handle(200, 200, 300));
+        assert!(editor_handle(300, 200, 300));
+        assert!(!editor_handle(0, 0, 0));
+    }
     #[test]
     fn gaze_uses_position_not_mouse_speed_and_supports_negative_monitors() {
         let origin = (-1600.0, 300.0);

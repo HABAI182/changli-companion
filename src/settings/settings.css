@@ -620,3 +620,37 @@
     transition: none;
   }
 }
+/* Compact typography and a restrained brand treatment. */
+.settings-heading {
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.settings-heading .settings-kicker {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.settings-heading h2 {
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+  margin-bottom: 5px;
+  text-shadow: none;
+}
+.settings-heading > div:last-child > p:last-child {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.25px;
+}
+.settings-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 17px;
+  border: 0;
+  background: transparent;
+}
+.runtime-license { margin-top: 16px; color: var(--settings-muted); font-size: 11px; }
+.runtime-license summary { cursor: pointer; }
+.runtime-license pre { font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; max-height: 260px; overflow-y: auto; margin: 12px 0 0; }

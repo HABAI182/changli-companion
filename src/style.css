@@ -111,7 +111,11 @@ header {
   align-items: center;
   gap: 16px;
 }
-.brand-pet-icon { width: 52px; height: 52px; object-fit: contain; }
+.brand-pet-icon {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
 .seal {
   width: 42px;
   height: 48px;
@@ -336,7 +340,7 @@ header {
   right: 2%;
   max-width: 43%;
   padding: 1.95cqw 2.8cqw;
-  border: .6cqw solid #dfab8e;
+  border: 0.6cqw solid #dfab8e;
   border-radius: 4.5cqw 4.5cqw 1.4cqw 4.5cqw;
   background: #fff8f0f5;
   box-shadow: 0 1.4cqw 4cqw #50302d22;
@@ -952,8 +956,18 @@ details:not(.dev-tools) {
   gap: 7px;
   margin-bottom: 7px;
 }
-.pet-motion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; }
-.pet-motion-grid .pet-menu-action { margin: 0; min-height: 28px; padding: 5px; border-radius: 8px; }
+.pet-motion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 6px;
+}
+.pet-motion-grid .pet-menu-action {
+  margin: 0;
+  min-height: 28px;
+  padding: 5px;
+  border-radius: 8px;
+}
 .pet-menu-heading b {
   font-size: 13px;
   color: #633f3b;
@@ -1507,4 +1521,58 @@ details:not(.dev-tools) {
 .art-scale {
   max-width: 95%;
   margin-top: 0;
+}
+/* The menu is a separate native window, so opening it never resizes the pet. */
+.native-menu {
+  width: 100vw;
+  height: 100vh;
+  padding: 6px;
+  background: transparent;
+  overflow: hidden;
+}
+.native-menu .context-menu,
+.browser-menu-container .context-menu {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 100%;
+  max-height: 100%;
+  margin: 0;
+}
+.browser-menu-container {
+  position: fixed;
+  z-index: 100;
+  width: 260px;
+  padding: 6px;
+}
+.native-menu .context-menu {
+  height: calc(100vh - 12px);
+}
+.detached-menu {
+  font-family: 'Segoe UI Variable', 'Microsoft YaHei', sans-serif;
+  border-radius: 16px;
+  background: #fffcf9;
+}
+.detached-menu .pet-menu-navigation {
+  grid-template-columns: 1fr;
+}
+.detached-menu .pet-menu-heading {
+  margin-bottom: 12px;
+}
+.detached-menu .pet-menu-heading b {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.detached-menu button {
+  border-radius: 8px;
+  padding: 8px 9px;
+}
+.detached-menu .pet-menu-footer {
+  margin-top: 12px;
+}
+.browser-menu-container {
+  height: 468px;
+}
+.browser-menu-container .context-menu {
+  height: 100%;
 }

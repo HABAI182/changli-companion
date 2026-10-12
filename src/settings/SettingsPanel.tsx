@@ -4,6 +4,7 @@ import { ScalePreviewQueue } from './scalePreview';
 import { PositionPresets } from './PositionPresets';
 import { openProjectLink } from '../native';
 import './settings.css';
+import runtimeLicense from '../../LICENSE-RUNTIME.txt?raw';
 
 type Props = {
   value: Settings;
@@ -309,18 +310,18 @@ export function SettingsPanel(p: Props) {
       <div className="panel-content">
         <div className="settings-heading">
           <div className="settings-avatar" aria-hidden="true">
-            <img src="/assets/changli-icon-v079.jpg" alt="" />
+            <img src="/assets/changli-icon-v0810.png" alt="" />
           </div>
           <div>
             <p className="settings-kicker">离火长明</p>
-            <h2>设置</h2>
-            <p>按你的习惯，陪在身边</p>
+            <h2>偏好设置</h2>
+            <p>你的桌面，长离相伴</p>
           </div>
         </div>
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">v0.7.9</span>
+          <span className="model-stage">v0.7.10</span>
         </div>
         <nav className="settings-navigation" aria-label="设置分类">
           {(
@@ -670,7 +671,7 @@ export function SettingsPanel(p: Props) {
           <div className="project-links">
             <span>
               <strong>离火长明</strong>
-              <small>版本 0.7.9 · Windows 桌宠</small>
+              <small>版本 0.7.10 · Windows 桌宠</small>
             </span>
             <div>
               <button type="button" onClick={() => void openProjectLink('updates').catch(p.fail)}>
@@ -680,7 +681,11 @@ export function SettingsPanel(p: Props) {
                 项目主页 ↗
               </button>
             </div>
-            <small>私有项目需登录 GitHub，更新从版本页下载</small>
+            <small>从 GitHub 版本页下载更新，附文件校验清单</small>
+            <details className="runtime-license">
+              <summary>许可与隐私说明</summary>
+              <pre>{runtimeLicense}</pre>
+            </details>
           </div>
         </section>
         <p className="settings-footer">自动保存 · 设置窗口优先显示</p>

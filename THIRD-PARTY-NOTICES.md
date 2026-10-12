@@ -1,6 +1,6 @@
 # 第三方与角色素材说明
 
-本项目没有复用 BongoCat 源码或宇痕模型，仅阅读工程/展示说明以确定功能边界。没有下载或复制参考作者的模型、付费资产、语音或 Live2D 工程。长离及《鸣潮》相关权利归相关权利人，程序依赖许可不授予角色 IP 或素材公开发行许可。用户原图作者/许可未确认，不自动认定为本项目原创。
+本项目没有复用 BongoCat 源码或宇痕模型，仅阅读工程/展示说明以确定功能边界。没有下载或复制参考作者的模型、付费资产、语音或 Live2D 工程。长离及《鸣潮》相关权利归相关权利人，程序依赖许可不授予角色 IP 或素材公开发行许可。用户于2026-10-12声明原图及衍生视觉素材均由其生成，未引用他人素材；这是用户来源声明，不代替角色IP授权。
 
 ## 直接依赖
 
@@ -27,7 +27,7 @@
 | rusqlite                        | 0.40.2  | MIT               |
 | windows-sys                     | 0.61.2  | MIT OR Apache-2.0 |
 
-SQLite 随 rusqlite bundled 构建；WebView2 是 Windows 运行时前提，没有把它的二进制捆绑到当前源码交付中。项目现已在用户授权下引入官方 **Live2D Cubism SDK for Web R5** 的 Framework 源码、WebGL shaders 和 Core `live2dcubismcore.min.js`。Framework 使用 [Live2D Open Software License](https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html)，Core 使用 [Live2D Proprietary Software License](https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html)。本地许可副本见 `vendor/live2d/FRAMEWORK-LICENSE.md`、`vendor/live2d/CORE-LICENSE.md`，Core 可再分发文件范围见 `vendor/live2d/CORE-REDISTRIBUTABLE-FILES.txt`。官方示例模型受单独的 Free Material License 和各模型条款约束，本工程没有包含它们。实际发行前须随构建产物整理所有传递依赖的完整许可证文本；本次交付为未发布的开发工程。
+SQLite 随 rusqlite bundled 构建；WebView2 是 Windows 运行时前提，没有把它的二进制捆绑到当前源码交付中。项目现已在用户授权下引入官方 **Live2D Cubism SDK for Web R5** 的 Framework 源码、WebGL shaders 和 Core `live2dcubismcore.min.js`。Framework 使用 [Live2D Open Software License](https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html)，Core 使用 [Live2D Proprietary Software License](https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html)。本地许可副本见 `vendor/live2d/FRAMEWORK-LICENSE.md`、`vendor/live2d/CORE-LICENSE.md`，Core 可再分发文件范围见 `vendor/live2d/CORE-REDISTRIBUTABLE-FILES.txt`。官方示例模型受单独的 Free Material License 和各模型条款约束，本工程没有包含它们。0.7.10随发行附件提供LICENSE-RUNTIME.txt和THIRD-PARTY-LICENSES.txt；后者收集本机依赖源包中的许可文件与元数据，并明确列出没有独立许可文件的包。Core许可和版权未被本项目MIT许可替换。当前为免费公测，后续重新分发仍须遵守SDK协议。
 
 候选模型的离线生成脚本内置了 [enoughdrama/live2d-autorig-claude](https://github.com/enoughdrama/live2d-autorig-claude) 的部分实验性源码，按 MIT 许可使用；许可副本位于 `tools/live2d-authoring/vendor/LICENSE`。该脚本仅在制作阶段运行，未作为桌宠运行时代码加载。
 

@@ -1,7 +1,7 @@
 // Rasterize the editable SVG for Windows packaging; no reference bitmap edits.
 const fs=require('node:fs/promises'),path=require('node:path');
 const {chromium}=require('node:module').createRequire('C:/Users/18769/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/package.json')('playwright');
-(async()=>{const root=path.resolve(__dirname,'../..'),asset=process.argv[2]||'public/assets/changli-icon-v079.jpg';
+(async()=>{const root=path.resolve(__dirname,'../..'),asset=process.argv[2]||'public/assets/changli-icon-v0810.png';
 if(asset.endsWith('.png')){await fs.copyFile(path.join(root,asset),path.join(root,'src-tauri/icons/icon-source.png'));return;}
 if(/\.jpe?g$/i.test(asset)) {
   // Packaging format conversion only: preserve the supplied picture pixels.

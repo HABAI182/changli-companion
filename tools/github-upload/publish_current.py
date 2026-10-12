@@ -1,4 +1,4 @@
-"""Publish the current saved engineering build to the authorized private repo.
+"""Publish the current saved engineering build to the authorized owned repo.
 
 Uses gh's credential store without exposing tokens. No force push, visibility
 changes or replacement of existing binaries. Requires a clean committed source.
@@ -57,8 +57,8 @@ def main():
     if command(['git', 'status', '--porcelain']).stdout.strip():
         raise ValueError('Save and commit intended changes before publishing')
     meta = json.loads(gh('repo', 'view', REPO, '--json', 'url,isPrivate,owner'))
-    if not meta['isPrivate'] or meta['owner']['login'].casefold() != OWNER.casefold():
-        raise ValueError('Destination must remain the owned private repository')
+    if meta['owner']['login'].casefold() != OWNER.casefold():
+        raise ValueError('Destination must remain the authorized owned repository')
     if command(['git', 'remote', 'get-url', 'origin']).stdout.strip() != 'https://github.com/' + REPO + '.git':
         raise ValueError('Unexpected origin')
     artifacts = json.loads((DELIVERY / 'SHA256.json').read_text(encoding='utf-8-sig'))
@@ -78,7 +78,7 @@ def main():
     if not release:
         print(gh('release', 'create', TAG,
                  '--draft', '--repo', REPO, '--target', source,
-                 '--title', '离火长明 ' + VERSION + ' 工程版', '--prerelease',
+                 '--title', '离火长明 ' + VERSION + ' 公测版', '--prerelease',
                  '--notes-file', str(ROOT / ('tools/github-upload/release-notes-' + VERSION + '.md'))))
         release = release_for_tag(required=True)
     if release['draft']:
@@ -103,7 +103,7 @@ def main():
         gh('release', 'edit', TAG, '--repo', REPO, '--draft=false')
         release = release_for_tag()
     source_commit = gh('api', 'repos/' + REPO + '/commits/' + TAG, '--jq', '.sha')
-    result = {'uploaded': True, 'private': True, 'repository': meta['url'],
+    result = {'uploaded': True, 'private': meta['isPrivate'], 'repository': meta['url'],
               'commit': source_commit, 'release': release['html_url'],
               'prerelease': release['prerelease'], 'assets': checks}
     local = ROOT / 'tools/github-upload/local'

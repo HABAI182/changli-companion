@@ -30,7 +30,7 @@ def main():
     evidence = [p for kind in ('expressive', 'interactions', 'installer')
                 for p in (HERE / 'build').glob(kind + '-' + VERSION + '-*') if p.is_dir()]
     for directory in deliveries + evidence:
-        files += [p for p in directory.glob('*') if p.is_file() and p.suffix in ('.json', '.png', '.exe')
+        files += [p for p in directory.glob('*') if p.is_file() and p.suffix in ('.json', '.png', '.exe', '.txt', '.md')
                   and p.name != 'changli-companion-fullscreen-test.exe']
     previous = HERE / 'build/desktop-integration-20261006/CURRENT-RELEASE-RECOVERY.json'
     previous_info = json.loads(previous.read_text(encoding='utf-8')) if previous.exists() else None

@@ -2,12 +2,14 @@
 
 每个版本独立保留，旧版本不覆盖。Release中的程序、安装包和SHA256清单对应各自版本。
 
-已核对全部20个独立Release的程序、安装包及远端SHA256摘要。
+已核对全部22个独立Release的程序、安装包及远端SHA256摘要。
 
 历史源码标签从当时保存的源码检查点恢复，恢复日期不是原开发提交日期，也没有重新构建或重新验收旧版本。0.6.3只有二进制存档；其archive标签只含归档说明，不提供伪造的旧源码。0.6.8使用本版源码检查点，运行模型从使用同一已验证v71原生源的0.6.9恢复包提取，来源单独记录。
 
 | 版本 | 独立Release | 源码情况 | 本地程序目录 |
 | --- | --- | --- | --- |
+| 0.7.11 | [v0.7.11](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.11) | 原Git标签；原生拖动消失问题已标注，推荐更新版 | `deliveries/20261012-desktop-0.7.11` |
+| 0.7.10 | [v0.7.10](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.10) | 原Git标签；冷启动/邻接菜单范围验收 | `deliveries/20261012-desktop-0.7.10` |
 | 0.7.9 | [v0.7.9](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.9) | 原Git标签；UI/WebGL与Windows设置保存通过 | `deliveries/20261012-desktop-0.7.9` |
 | 0.7.8 | [v0.7.8](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.8) | 原Git标签；WebGL通过，实机启动/新图标通过 | `deliveries/20261012-desktop-0.7.8` |
 | 0.7.7 | [v0.7.7](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.7) | 原Git标签；WebGL通过，实机待验收 | `deliveries/20261012-desktop-0.7.7` |

@@ -663,6 +663,95 @@
       "webglRendered": true,
       "windowsDesktopVerified": true,
       "windowsScope": "portable startup, supplied icon, legacy preferences, four settings pages, native accent save and settings kept in front; external GitHub page not accepted"
+    },
+    {
+      "version": "0.7.10",
+      "tag": "v0.7.10",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.10",
+      "localDelivery": "deliveries/20261012-desktop-0.7.10",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.10-x64-setup.exe",
+          "bytes": 51566470,
+          "sha256": "88E07F5A6E67954553E8857ECE91BB6E0FFDD8D64B89217F05EF35AE13FAF5CF",
+          "localPath": "deliveries/20261012-desktop-0.7.10/changli-companion-0.7.10-x64-setup.exe"
+        },
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61037056,
+          "sha256": "76ED836CEAAF9DDEA9F09393B8FA02A69EDE947849978353894F0932A9523200",
+          "localPath": "deliveries/20261012-desktop-0.7.10/changli-companion.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261012-desktop-0.7.10/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "0AD49F107D4F308E73DA580F48DBCB6D0EF90C5F4F973C8C71BEF04BE6153B8A",
+          "localPath": "deliveries/20261012-desktop-0.7.10/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "sourceCommit": "4b5f7e02c1cc4a3bd1ad69778aad3f42718f073b",
+      "remoteAssetsVerified": true,
+      "webglRendered": true,
+      "windowsDesktopVerified": true,
+      "windowsScope": "portable cold-start motion without desktop click; adjacent menu and happy action, inherited settings"
+    },
+    {
+      "version": "0.7.11",
+      "tag": "v0.7.11",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.11",
+      "localDelivery": "deliveries/20261012-desktop-0.7.11",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.11-x64-setup.exe",
+          "bytes": 51567892,
+          "sha256": "FD7BB4CAC96AD1EE7E3369FC2A8667D1581370D509BED5D8A2FD3440729226EB",
+          "localPath": "deliveries/20261012-desktop-0.7.11/changli-companion-0.7.11-x64-setup.exe"
+        },
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61043200,
+          "sha256": "9154F50014F1B5ABE74C7F10EB72CA11AE32B2318CE06BA1F970556439893E31",
+          "localPath": "deliveries/20261012-desktop-0.7.11/changli-companion.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261012-desktop-0.7.11/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "4671C72AD94A86618F8D9191F8B65AE88A83A6C27AFDEE17A7AFE6CAF0594300",
+          "localPath": "deliveries/20261012-desktop-0.7.11/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "sourceCommit": "8d05f478b7ed8c3e96c8c01e05ca2450c80f386d",
+      "remoteAssetsVerified": true,
+      "webglRendered": true,
+      "windowsDesktopVerified": true,
+      "windowsScope": "portable startup and symmetric menu; native drag has known focus-loss disappearance bug",
+      "knownIssues": [
+        "native menu disappears during drag; use 0.7.12 or later"
+      ]
     }
   ],
   "githubArchiveVerified": true

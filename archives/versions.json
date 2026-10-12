@@ -802,5 +802,18 @@
   ],
   "githubArchiveVerified": true,
   "visibility": "public",
-  "visibilityChangedAt": "2026-10-12"
+  "visibilityChangedAt": "2026-10-12",
+  "macosBuilds": [
+    {
+      "build": "0.7.12-macos.1",
+      "upstreamVersion": "0.7.12",
+      "upstreamCommit": "37fce2ef573d52b60ebeb7b4d9d000f943581cbb",
+      "platform": "macOS",
+      "architecture": "arm64",
+      "localDelivery": "deliveries/20261012-desktop-0.7.12-macos.1",
+      "status": "local-preview",
+      "validation": "macos/DELIVERY.md",
+      "published": false
+    }
+  ]
 }

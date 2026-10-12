@@ -35,3 +35,7 @@
 机器可读索引：[archives/versions.json](archives/versions.json)。大体积原生源与完整恢复包保留现有本地副本，不为索引重复复制。
 
 以后发布必须使用新版本号和独立目录；旧tag不移动、Release附件不覆盖、不删除旧版本。源码与美术的未完成状态以各版交付记录为准。
+
+## macOS 本地构建
+
+2026-10-12：`0.7.12-macos.1`，基于上游 0.7.12 的 ARM64 本地构建；没有修改上游业务源码。独立目录 `deliveries/20261012-desktop-0.7.12-macos.1/`，验收范围见 [macOS交付记录](macos/DELIVERY.md)。此项未发布远端 Release，原 Windows 版本记录保持不变。

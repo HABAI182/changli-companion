@@ -7,6 +7,10 @@ await p.addStyleTag({content:'.workspace{display:grid!important;grid-template-co
 await p.getByLabel('主题',{exact:true}).selectOption('light');
 await p.getByRole('region',{name:'桌宠设置'}).screenshot({path:path.join(dir,'settings-light.png')});
 assert.equal(await p.locator('.settings-heading h2').textContent(),'偏好设置');
+await p.getByRole('navigation',{name:'设置分类'}).getByRole('button',{name:'高级',exact:true}).click();
+await p.getByText('许可与隐私说明',{exact:true}).click();assert(await p.locator('.runtime-license pre').isVisible());assert((await p.locator('.runtime-license pre').textContent()).includes('Live2D Proprietary Software License'));
+await p.getByRole('region',{name:'桌宠设置'}).screenshot({path:path.join(dir,'license-advanced.png')});
+await p.getByRole('navigation',{name:'设置分类'}).getByRole('button',{name:'外观',exact:true}).click();
 const before=await p.locator('.pet-wrap').boundingBox();await p.locator('.live2d-renderer').click({button:'right'});
 const menu=p.getByRole('dialog',{name:'长离互动菜单'});await menu.waitFor();const box=await menu.boundingBox();const overlap=Math.max(0,Math.min(before.x+before.width,box.x+box.width)-Math.max(before.x,box.x))*Math.max(0,Math.min(before.y+before.height,box.y+box.height)-Math.max(before.y,box.y));assert.equal(overlap,0);
 await p.screenshot({path:path.join(dir,'adjacent-menu.png')});await menu.getByRole('button',{name:'开心',exact:true}).click();await menu.waitFor({state:'hidden'});await p.locator('.live2d-renderer').screenshot({path:path.join(dir,'happy-keyboard.png')});

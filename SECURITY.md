@@ -5,6 +5,7 @@
 - 完整 Git 历史以 Gitleaks 8.30.1 扫描；唯一排除是公开的 localStorage 名 `changli-companion-v1`，不是凭据。检测报告保留在本机，避免把报告中的个人信息发布出去。
 - npm 依赖中的 source-map-js 已固定升级为 1.2.2，修复 [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)。更新后的 npm audit 为 0 项已知漏洞。
 - Cargo.lock 的 OSV 查询包含非 Windows 依赖。glib 0.18.5 的 [RUSTSEC-2024-0429](https://rustsec.org/advisories/RUSTSEC-2024-0429.html) 不在 Windows 构建依赖树中。proc-macro-error 的停止维护提示也不在此目标依赖树中。
+- 公开后 Dependabot 已报告同一个 glib 问题（GHSA-wrw7-89jp-8q8g，medium，修复版本0.20.0）。保留该告警，没有以Windows不使用为由隐藏它。当前Windows发布不包含该依赖；Linux GTK依赖链仍需上游兼容升级，因此仓库依赖告警不能称为0。
 - Windows 依赖树仍包含五个 UNIC 0.9.0 组件的停止维护提示（RUSTSEC-2025-0075、0080、0081、0098、0100），目前没有对应修复版本。这些是维护状态告警，仍需跟踪上游迁移，不能称 Rust 依赖检查完全无告警。
 - 不发布数据库、凭据、缓存、本机日志或恢复包。GitHub 发布附件保留版本与 SHA256 校验清单，旧版本不会覆盖。
 - 窗口只加载打包的本地页面，使用限制性 CSP；主页/更新命令只允许两个固定 GitHub 地址。没有远程代码执行、自动下载运行更新或任意 shell 命令接口。

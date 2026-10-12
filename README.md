@@ -1,6 +1,6 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-Windows x64 桌面伴侣，当前免费公测版 **0.7.12 / 原生模型 v71**。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+Windows x64 桌面伴侣，当前免费公测版 **0.7.12 / 原生模型 v71**。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。另提供保留原有业务源码的 macOS 编译入口，支持 Apple Silicon 本机构建；功能范围见下方 macOS 说明。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
@@ -41,6 +41,76 @@ npm run desktop
 浏览器预览：`npm run dev`。检查：`npm run typecheck`、`npm test`。Windows打包：`npm run package:windows`。
 
 浏览器只能预览角色和交互；全局输入、透明桌面窗口、托盘、磁吸与全屏避让需要运行Windows程序。
+
+### macOS 编译
+
+需要 macOS、Xcode Command Line Tools、Node.js/npm 和 Rust/Cargo。首次安装 Apple 编译工具可执行 `xcode-select --install`。本次已在 Apple Silicon、macOS 26.5.1、Node.js 26.8.1 和 Rust 1.98.1 上完成构建验证。
+
+在源码根目录执行：
+
+```bash
+./macos/build.sh
+```
+
+脚本会将源码同步到**源码目录旁的独立构建目录**，安装锁定版本的依赖，再编译 macOS 应用和 DMG。以源码目录名 `ChangliCompanion` 为例，目录结构为：
+
+```text
+Project_codex/
+├── ChangliCompanion/                   # 源码，可单独上传
+│   ├── README.md
+│   └── macos/                         # 编译配置和脚本
+└── ChangliCompanion-build/             # 本机生成，不属于源码
+    ├── cache/npm/                     # npm 缓存
+    ├── workspace/                     # 用于编译的源码副本与依赖
+    │   └── src-tauri/target/release/bundle/
+    │       ├── macos/离火长明.app
+    │       └── dmg/离火长明_0.7.12_aarch64.dmg
+    └── deliveries/                    # 本机已有交付存档（若存在）
+```
+
+构建目录名自动使用“源码文件夹名 + `-build`”。`node_modules`、前端 `dist`、Rust `target`、生成的 schema 和安装包均只写入构建副本；Tauri CLI 对 `Cargo.toml` 的自动调整也只发生在副本中。重新上传时只上传源码文件夹。
+
+如果 macOS 同步文件夹给生成的应用附加 Finder 元数据、导致签名失败，脚本会清理生成应用的扩展属性后重试一次；构建日志保留在外部构建目录。若构建进程被强制结束，确认没有构建在运行后可移除外部目录中的空 `.build-lock` 文件夹再运行。
+
+打开编译后的应用，或打开 DMG 将应用拖入“应用程序”：
+
+```bash
+open "../ChangliCompanion-build/workspace/src-tauri/target/release/bundle/macos/离火长明.app"
+```
+
+只生成应用、不生成 DMG：
+
+```bash
+./macos/build.sh --bundles app
+```
+
+运行 Rust 原生测试，同样使用外部构建目录：
+
+```bash
+./macos/test.sh
+```
+
+若本机网络需要代理，请将地址替换为实际配置：
+
+```bash
+HTTPS_PROXY=http://127.0.0.1:7892 \
+HTTP_PROXY=http://127.0.0.1:7892 \
+CARGO_HTTP_PROXY=http://127.0.0.1:7892 \
+npm_config_proxy=http://127.0.0.1:7892 ./macos/build.sh
+```
+
+macOS 配置使用 `.icns` 图标、app/dmg 打包和本地 ad-hoc 签名，并启用当前 Tauri 2.11.6 透明窗口需要的 `macOSPrivateApi` / `macos-private-api` 功能。没有 Apple Developer ID 签名或公证。配置最低系统版本为 macOS 12；旧系统、Intel 和 Universal 构建尚未验证。
+
+此构建已验证 Live2D 显示与摸头气泡交互，86 个前端测试和 11 个 Rust 测试通过。拖动、多屏/DPI、开机自启、全局快捷键和长期运行尚未全面验收。原有 Windows 专用功能的限制如下：
+
+| 功能 | macOS 状态 |
+| --- | --- |
+| 全局键鼠监听、鼠标视线跟随 | 原实现只有 Windows 分支，macOS 不启动监听 |
+| 手柄监听 | 原实现依赖 Windows XInput，macOS 未实现 |
+| 外部全屏应用自动隐藏 | 非 Windows 分支固定返回 false |
+| 设置中的项目主页／更新链接 | 原代码调用 `explorer.exe`，macOS 不可用；可手动打开仓库或 Release 页 |
+
+普通 macOS 桌面 `tauri dev` 会因上游两个 `generate_context!()` 重复嵌入 Info.plist 而编译失败。前端开发可使用 `npm run dev`；桌面验证使用上述发行构建入口。原生测试脚本启用与发行构建一致的 `custom-protocol`，无需修改 Rust 业务源码。
 
 ## 当前完成度
 

@@ -38,4 +38,4 @@
 
 ## macOS 本地构建
 
-2026-10-12：`0.7.12-macos.1`，基于上游 0.7.12 的 ARM64 本地构建；没有修改上游业务源码。独立目录 `deliveries/20261012-desktop-0.7.12-macos.1/`，验收范围见 [macOS交付记录](macos/DELIVERY.md)。此项未发布远端 Release，原 Windows 版本记录保持不变。
+2026-10-12：`0.7.12-macos.1`，基于上游 0.7.12 的 ARM64 本地构建；没有修改上游业务源码。交付已移到源码外的 `../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.1/`，原始验收记录保留在该目录的 `DELIVERY.md`。编译方式和功能范围见 [README 的 macOS 编译说明](README.md#macos-编译)。此项未发布远端 Release，原 Windows 版本记录保持不变。

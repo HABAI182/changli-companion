@@ -1,6 +1,10 @@
 node_modules/
 dist/
 src-tauri/target/
+.macos-cache/
+src-tauri/gen/schemas/macOS-schema.json
+*.app/
+*.dmg
 *.log
 
 # Local secrets, dependencies, authoring caches and generated deliveries.

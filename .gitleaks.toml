@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public localStorage identifier, not an authentication credential"
+regexTarget = "secret"
+regexes = ['''^changli-companion-v1$''']

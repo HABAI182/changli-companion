@@ -3,6 +3,7 @@ mod desktop;
 mod gamepad;
 mod input;
 mod model;
+mod pet_menu;
 mod storage;
 mod windows;
 use serde::{Deserialize, Serialize};
@@ -335,11 +336,12 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
     }
     let label = format!("panel-{panel}");
     if let Some(w) = app.get_webview_window(&label) {
+        input::register_editor(&w);
         w.set_always_on_top(true).map_err(|e| e.to_string())?;
         w.show().map_err(|e| e.to_string())?;
         return w.set_focus().map_err(|e| e.to_string());
     }
-    WebviewWindowBuilder::new(
+    let settings_window = WebviewWindowBuilder::new(
         &app,
         label,
         WebviewUrl::App(format!("index.html?panel={panel}").into()),
@@ -352,6 +354,7 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
     .always_on_top(true)
     .build()
     .map_err(|e| e.to_string())?;
+    input::register_editor(&settings_window);
     Ok(())
 }
 #[tauri::command]
@@ -365,8 +368,11 @@ fn open_project_link(page: String) -> Result<(), String> {
         "updates" => "https://github.com/HABAI182/changli-companion/releases",
         _ => return Err("未知项目链接".into()),
     };
-    std::process::Command::new("explorer.exe").arg(url).spawn()
-        .map(|_| ()).map_err(|e| format!("打开浏览器失败：{e}"))
+    std::process::Command::new("explorer.exe")
+        .arg(url)
+        .spawn()
+        .map(|_| ())
+        .map_err(|e| format!("打开浏览器失败：{e}"))
 }
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) -> Result<(), String> {
@@ -443,10 +449,14 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !["system", "light", "dark"].contains(&settings.settings_theme.as_str())
         || !["coral", "blue", "violet", "sage"].contains(&settings.accent_color.as_str())
         || !["comfortable", "compact"].contains(&settings.settings_density.as_str())
-        || !settings.head_elasticity.is_finite() || !(0.0..=1.5).contains(&settings.head_elasticity)
-        || !settings.keyboard_motion_scale.is_finite() || !(0.5..=1.25).contains(&settings.keyboard_motion_scale)
-        || !settings.mouse_motion_scale.is_finite() || !(0.0..=1.5).contains(&settings.mouse_motion_scale)
-        || !settings.bubble_duration_seconds.is_finite() || !(2.0..=8.0).contains(&settings.bubble_duration_seconds)
+        || !settings.head_elasticity.is_finite()
+        || !(0.0..=1.5).contains(&settings.head_elasticity)
+        || !settings.keyboard_motion_scale.is_finite()
+        || !(0.5..=1.25).contains(&settings.keyboard_motion_scale)
+        || !settings.mouse_motion_scale.is_finite()
+        || !(0.0..=1.5).contains(&settings.mouse_motion_scale)
+        || !settings.bubble_duration_seconds.is_finite()
+        || !(2.0..=8.0).contains(&settings.bubble_duration_seconds)
         || ![0, 60, 90, 180].contains(&settings.bubble_idle_interval_seconds)
         || !["auto", "live2d", "layered2d"].contains(&settings.renderer_mode.as_str())
         || ![0, 5, 10, 15].contains(&settings.auto_sleep_minutes)
@@ -457,7 +467,11 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !settings.voice_volume.is_finite()
         || !(0.0..=1.0).contains(&settings.voice_volume)
         || settings.fullscreen_exceptions.len() > 32
-        || settings.fullscreen_exceptions.iter().any(|e| e.len() > 128 || !e.to_ascii_lowercase().ends_with(".exe") || e.contains(['\\', '/', ':', '*', '?', '"', '<', '>', '|']))
+        || settings.fullscreen_exceptions.iter().any(|e| {
+            e.len() > 128
+                || !e.to_ascii_lowercase().ends_with(".exe")
+                || e.contains(['\\', '/', ':', '*', '?', '"', '<', '>', '|'])
+        })
     {
         return Err("设置值超出范围".into());
     }
@@ -534,8 +548,12 @@ fn native_status(app: tauri::AppHandle) -> String {
     )
 }
 fn main() {
-    if std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
-        .as_deref() == Some("changli-companion-fullscreen-test.exe") {
+    if std::env::current_exe()
+        .ok()
+        .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
+        .as_deref()
+        == Some("changli-companion-fullscreen-test.exe")
+    {
         desktop::run_fullscreen_fixture();
         return;
     }
@@ -585,6 +603,9 @@ fn main() {
             reset_position,
             apply_settings,
             open_project_link,
+            pet_menu::open_pet_menu,
+            pet_menu::close_pet_menu,
+            pet_menu::menu_action,
             preview_scale,
             native_status,
             list_shortcuts,
@@ -625,7 +646,11 @@ fn main() {
                 ],
             )?;
             TrayIconBuilder::new()
-                .icon(app.default_window_icon().expect("bundled Changli icon").clone())
+                .icon(
+                    app.default_window_icon()
+                        .expect("bundled Changli icon")
+                        .clone(),
+                )
                 .tooltip("离火长明 · 恢复桌宠")
                 .menu(&menu)
                 .on_menu_event(|app, event| match event.id.as_ref() {

@@ -1,0 +1,19 @@
+离火长明 — 免费公测使用与许可说明
+
+本程序按现状提供，不保证无缺陷、适用于所有设备或绝对安全。当前为 Windows 免费公测版；请从 HABAI182/changli-companion 的 GitHub Release 下载并核对 SHA256.json。程序尚无商业代码签名，Windows 可能显示信誉提示。
+
+项目自有程序代码采用 MIT 许可，见仓库 LICENSE。该许可不覆盖 Live2D SDK、第三方依赖、角色图像和模型。依赖的各自许可及版权声明须保留。
+
+Live2D Cubism Core 归 Live2D Inc. 所有，适用 Live2D Proprietary Software License：
+https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html
+Core 仅随本应用使用，不取得其所有权或再许可权。不得逆向工程、反编译、拆解 Core，或移除其版权、商标及许可声明；不得篡改、单独销售或以本应用许可替代 Core 许可。重新分发含 Core 的应用时，须继续遵守原协议的分发条件并向最终用户保留同等保护条款。Core 按现状提供，原权利人不承担超出原协议规定的保证或责任。
+
+Live2D Framework 适用 Live2D Open Software License：
+https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html
+完整原声明见仓库 vendor/live2d/FRAMEWORK-LICENSE.md。第三方代码、字体等按各自协议使用，见随附 THIRD-PARTY-LICENSES.txt 和 THIRD-PARTY-NOTICES.md。
+
+用户于 2026-10-12 声明用于本项目的角色原图及衍生视觉素材由其生成，没有引用他人素材。这是素材来源声明，不等于取得长离或《鸣潮》角色 IP 权利。本项目为同人桌宠，与库洛游戏、Live2D 或参考视频作者无官方合作或背书；相关角色、商标等权利仍归各自权利人。
+
+输入反馈使用本机全局键鼠钩子，只将按键标识和鼠标动作临时用于动画，不保存输入文本、逐键历史或上传输入数据。可在设置关闭全局输入监听。偏好与互动统计仅保存在本机。项目主页和更新按钮会打开固定的 GitHub 页面，不会自动下载或执行更新。
+
+再次分发、改编或用于商业用途前，请自行确认第三方 SDK、角色 IP 及相关素材的适用条件。不要把本项目的免费公测声明视为这些权利的授权。

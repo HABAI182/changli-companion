@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { InteractionMenu } from './pet/InteractionMenu';
+import { menuPlacement } from './pet/menuPlacement';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
@@ -66,7 +69,8 @@ const expressions: Record<Expression, string> = {
   flame_eyes: '火焰眼',
 };
 const query = new URLSearchParams(location.search),
-  panelWindow = native && query.has('panel');
+  menuWindow = native && query.has('menu'),
+  panelWindow = native && (query.has('panel') || menuWindow);
 const preview = !native;
 export function App() {
   const [data, setData] = useState<Data>(initialData),
@@ -144,6 +148,7 @@ export function App() {
     setHoverDim(false);
   }, [data.settings.hoverHideEnabled, data.settings.passthrough, menu]);
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
+  const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0, maxHeight: 468 });
   const [technical, setTechnical] = useState(false);
   useEffect(() => {
     if (!native) return;
@@ -169,6 +174,7 @@ export function App() {
           );
       } else if (action.type === 'animation' && pressed) {
         presentation.current.play(action.id, Date.now());
+        if (action.id === 'phoenix') presentation.current.react('phoenix', Date.now());
         redraw((n) => n + 1);
       } else if (action.type === 'effect' && pressed) {
         setEffect(action.id);
@@ -461,11 +467,21 @@ export function App() {
                   }
                 >
                   {ids.map((id) => (
-                    <option value={id} key={id} disabled={slot.action.type === 'expression' &&
-                      !model.renderer.live2d.expressionMap[id] && !model.expressions.find(e => e.id === id)?.asset}>
-                      {slot.action.type === 'expression' ? (expressions[id as Expression] || id) : id}
-                      {slot.action.type === 'expression' && !model.renderer.live2d.expressionMap[id] &&
-                        !model.expressions.find(e => e.id === id)?.asset ? ' · 待制作' : ''}
+                    <option
+                      value={id}
+                      key={id}
+                      disabled={
+                        slot.action.type === 'expression' &&
+                        !model.renderer.live2d.expressionMap[id] &&
+                        !model.expressions.find((e) => e.id === id)?.asset
+                      }
+                    >
+                      {slot.action.type === 'expression' ? expressions[id as Expression] || id : id}
+                      {slot.action.type === 'expression' &&
+                      !model.renderer.live2d.expressionMap[id] &&
+                      !model.expressions.find((e) => e.id === id)?.asset
+                        ? ' · 待制作'
+                        : ''}
                     </option>
                   ))}
                 </select>
@@ -522,11 +538,57 @@ export function App() {
   // The selected default face releases manual override so native touch and
   // sleep reactions remain visible; other explicitly selected faces stay put.
   const characterSnapshot =
-    expression && expression !== 'default' && !renderSnapshot.animation ? { ...renderSnapshot, expression } : renderSnapshot;
+    expression && expression !== 'default' && !renderSnapshot.animation
+      ? { ...renderSnapshot, expression }
+      : renderSnapshot;
   const touch = (area: 'head' | 'body') => {
     signal(area === 'head' ? 'pet' : 'body');
     presentation.current.react(area === 'head' ? 'head' : 'body', Date.now());
   };
+  const closeMenu = () => {
+    setMenu(false);
+    if (native) void invoke('close_pet_menu').catch(fail);
+  };
+  const menuView = (
+    <InteractionMenu
+      native={native}
+      close={closeMenu}
+      action={(kind, id) => {
+        if (native) void invoke('menu_action', { kind, id }).catch(fail);
+        else {
+          if (kind === 'expression') {
+            presentation.current.expression(id, 'toggle', true, Date.now());
+            setExpression(id as Expression);
+          } else {
+            presentation.current.play(id, Date.now());
+            redraw((n) => n + 1);
+          }
+          closeMenu();
+        }
+      }}
+      settings={() => {
+        closeMenu();
+        if (native) void openPanel('settings').catch(fail);
+        else navigate('settings');
+      }}
+      hide={() => {
+        closeMenu();
+        void invoke('hide_pet').catch(fail);
+      }}
+      quit={() => void invoke('quit_app').catch(fail)}
+    />
+  );
+  if (menuWindow)
+    return (
+      <main
+        className="native-menu"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') closeMenu();
+        }}
+      >
+        {menuView}
+      </main>
+    );
   const pet = (
     <div
       className={`pet-wrap${hoverDim ? ' hover-dim' : ''}`}
@@ -545,7 +607,16 @@ export function App() {
       }}
       onContextMenu={(e) => {
         e.preventDefault();
-        setMenu((v) => !v);
+        if (native) void invoke('open_pet_menu').catch(fail);
+        else {
+          setMenuPosition(
+            menuPlacement(e.currentTarget.getBoundingClientRect(), {
+              width: innerWidth,
+              height: innerHeight,
+            }),
+          );
+          setMenu((v) => !v);
+        }
       }}
     >
       {data.settings.keyOverlayEnabled && keyBadge && (
@@ -581,132 +652,27 @@ export function App() {
           className="drag-handle"
           aria-label="拖动桌宠"
           onPointerDown={(e) =>
-            drag(e, fail, (active) => {
-              presentation.current.setDragState(active, Date.now());
-              redraw((n) => n + 1);
-            }, (dx, dy) => presentation.current.dragMove(dx, dy, Date.now()))
+            drag(
+              e,
+              fail,
+              (active) => {
+                presentation.current.setDragState(active, Date.now());
+                redraw((n) => n + 1);
+              },
+              (dx, dy) => presentation.current.dragMove(dx, dy, Date.now()),
+            )
           }
         >
           ⠿
         </button>
       )}
-      {menu && (
-        <div className="context-menu" role="dialog" aria-label="长离互动菜单">
-          <div className="pet-menu-heading">
-            <b>长离 · 互动</b>
-            <span className="pet-menu-badge">试作版</span>
-            <button
-              className="pet-menu-close"
-              aria-label="关闭互动菜单"
-              onClick={() => setMenu(false)}
-            >
-              ×
-            </button>
-          </div>
-          <p className="pet-menu-caption">基础表情</p>
-          <div className="expression-grid">
-            {model.expressions
-              .filter((e) => ['default', 'smile', 'surprised', 'sleepy'].includes(e.id) && (e.asset || model.renderer.live2d.expressionMap[e.id]))
-              .map((e) => (
-                <button
-                  key={e.id}
-                  aria-pressed={(expression || 'default') === e.id}
-                  onClick={() => {
-                    if (e.id === 'default')
-                      presentation.current.expression('default', 'toggle', true, Date.now());
-                    setExpression(e.id as Expression);
-                    setMenu(false);
-                  }}
-                >
-                  {e.name}
-                </button>
-              ))}
-          </div>
-          <div className="pet-motion-grid" aria-label="小动作">
-          {model.animations
-            .filter((a) => model.renderer.live2d.motionMap[a.id])
-            .map((a) => (
-              <button
-                key={a.id}
-                className="pet-menu-action"
-                aria-label={a.name}
-                onClick={() => {
-                  presentation.current.play(a.id, Date.now());
-                  if (a.id === 'phoenix') presentation.current.react('phoenix', Date.now());
-                  setMenu(false);
-                  redraw((n) => n + 1);
-                }}
-              >
-                <span>{a.name}</span>
-              </button>
-            ))}
-          </div>
-          <div className="pet-menu-navigation">
-            <button aria-label="桌宠设置" onClick={() => navigate('settings')}>
-              设置
-            </button>
-          </div>
-          <details className="pet-menu-more">
-            <summary>更多选项</summary>
-            <div className="pet-menu-options">
-              {model.expressions.filter(e => !['default', 'smile', 'surprised', 'sleepy'].includes(e.id) &&
-                (e.asset || model.renderer.live2d.expressionMap[e.id])).map(e => (
-                <button key={e.id} aria-pressed={expression === e.id} onClick={() => {
-                  setExpression(e.id as Expression); setMenu(false);
-                }}>{e.name}</button>
-              ))}
-              <button
-                onClick={() =>
-                  void settings({
-                    inputMode:
-                      data.settings.inputMode === 'keyboard_mouse'
-                        ? 'keyboard_only'
-                        : 'keyboard_mouse',
-                  })
-                }
-              >
-                {data.settings.inputMode === 'keyboard_mouse' ? '切换纯键盘' : '切换键鼠模式'}
-              </button>
-              <button
-                onClick={() => void settings({ topmost: !data.settings.topmost })}
-                disabled={!native}
-              >
-                置顶：{data.settings.topmost ? '开' : '关'}
-              </button>
-              <button
-                onClick={() => void settings({ passthrough: !data.settings.passthrough })}
-                disabled={!native}
-              >
-                鼠标穿透
-              </button>
-              {native && (
-                <button onClick={() => void invoke('reset_position').catch(fail)}>重置位置</button>
-              )}
-              <button
-                onClick={() => {
-                  setRendererEpoch((value) => value + 1);
-                  setMenu(false);
-                }}
-              >
-                刷新角色渲染
-              </button>
-            </div>
-          </details>
-          {native && (
-            <div className="pet-menu-footer">
-              <button
-                onClick={() => {
-                  setMenu(false);
-                  void invoke('hide_pet').catch(fail);
-                }}
-              >
-                隐藏桌宠
-              </button>
-              <button onClick={() => void invoke('quit_app').catch(fail)}>退出桌宠</button>
-            </div>
-          )}
-        </div>
-      )}
+      {menu &&
+        createPortal(
+          <div className="browser-menu-container" style={menuPosition}>
+            {menuView}
+          </div>,
+          document.body,
+        )}
     </div>
   );
   return (
@@ -714,14 +680,14 @@ export function App() {
       {preview && (
         <header>
           <div className="brand">
-            <img className="brand-pet-icon" src="/assets/changli-icon-v079.jpg" alt="长离" />
+            <img className="brand-pet-icon" src="/assets/changli-icon-v0810.png" alt="长离" />
             <div>
               <h1>离火长明</h1>
               <span>CHANGLI · DESKTOP COMPANION</span>
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.9</span>
+            <i /> 浏览器预览 <span>v0.7.10</span>
           </div>
         </header>
       )}
@@ -773,7 +739,9 @@ export function App() {
                 <div className="event-buttons">
                   <button onClick={() => signal('keyboard_left', 0, -1)}>左后区 数字 / Q～T</button>
                   <button onClick={() => signal('keyboard_left', 0, 1)}>左前区 A～G / Z～B</button>
-                  <button onClick={() => signal('keyboard_right', 0, -1)}>右后区 数字 / Y～P</button>
+                  <button onClick={() => signal('keyboard_right', 0, -1)}>
+                    右后区 数字 / Y～P
+                  </button>
                   <button onClick={() => signal('keyboard_right', 0, 1)}>右前区 H～L / N～M</button>
                   {(
                     [

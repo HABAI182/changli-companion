@@ -26,7 +26,14 @@ static LEFT: AtomicU64 = AtomicU64::new(0);
 static RIGHT: AtomicU64 = AtomicU64::new(0);
 static SPECIAL: AtomicU64 = AtomicU64::new(0);
 static MOUSE: AtomicU64 = AtomicU64::new(0);
+#[cfg(target_os = "macos")]
+#[path = "input_macos.rs"]
+mod macos;
 pub fn summary() -> String {
+    #[cfg(target_os = "macos")]
+    if !ACTIVE.load(Ordering::Relaxed) {
+        return macos::status().into();
+    }
     format!(
         "本次运行已发送动作：左键区 {}、右键区 {}、特殊键 {}、鼠标 {}（仅内存计数）。",
         LEFT.load(Ordering::Relaxed),
@@ -254,7 +261,9 @@ mod windows {
 pub fn start(app: tauri::AppHandle) {
     #[cfg(windows)]
     windows::start(app);
-    #[cfg(not(windows))]
+    #[cfg(target_os = "macos")]
+    macos::start(app);
+    #[cfg(not(any(windows, target_os = "macos")))]
     let _ = app;
 }
 

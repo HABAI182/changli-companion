@@ -177,7 +177,7 @@ export function SettingsPanel(p: Props) {
       <div className="panel-content">
         <div className="settings-heading">
           <div className="settings-avatar" aria-hidden="true">
-            <img src="/models/changli/preview.jpg" alt="" />
+            <img src="/assets/changli-icon-v078.png" alt="" />
           </div>
           <div>
             <p className="settings-kicker">离火长明</p>

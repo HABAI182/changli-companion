@@ -11,6 +11,9 @@ export interface RuntimeOffsetRig {
   keyboardMesh?: string;
   keyboardAsset?: string;
   jawAsset?: string;
+  jawBlend?: boolean;
+  mouseAsset?: string;
+  underpaintAsset?: string;
   mousePixels: number;
   mouseRegion?: MouseRegion;
   handOrder?: HandDrawOrder;

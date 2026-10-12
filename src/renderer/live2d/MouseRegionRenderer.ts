@@ -7,7 +7,8 @@ export interface MouseRegion {
 }
 import { partitionMouseMesh } from './MouseMesh';
 import { handDrawOrder, type HandDrawOrder } from './HandDrawOrder';
-import { jawRepairMesh } from './JawRepair';
+import { jawRepairMesh, jawSkinLayers } from './JawRepair';
+import { underpaintMesh } from './UnderpaintMesh';
 import { contourMesh, flameMesh, skinPatchMesh, type SkinPatches, type Contours, type MeshGeometry } from './ContourMesh';
 
 // The mouse and cable share a native foreground quad with the keyboard/body.
@@ -24,7 +25,14 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   private mouthCoverage = 0;
   private keyboard?: {mesh: string; texture: number};
   private jawTexture?: number;
-  setJawTexture(texture: number) { this.jawTexture = texture; }
+  private jawBlend = false;
+  private underpaintTexture?: number;
+  private mouseTexture?: number;
+  private completeMouse?: MeshGeometry;
+  private fixedForeground?: MeshGeometry;
+  setUnderpaintTexture(texture: number) { this.underpaintTexture = texture; }
+  setMouseTexture(texture: number) { this.mouseTexture = texture; }
+  setJawTexture(texture: number, blend = false) { this.jawTexture = texture; this.jawBlend = blend; }
   setKeyboard(mesh: string, texture: number) { this.keyboard={mesh,texture}; }
   setMouthCoverage(value: number) { this.mouthCoverage = value; }
   private contourInfo: Record<string, {nativeVertices: number; renderedVertices: number}> = {};
@@ -32,12 +40,13 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
     private contours?: Contours, private flameId?: string, private skinPatches?: SkinPatches) {super(width,height);}
   setFlameMotion(phase: number, strength: number) { this.flame = {phase, strength}; }
   getContourSnapshot() { return {...this.contourInfo}; }
-  private drawGeometry(model: Readonly<CubismModel>, index: number, g: MeshGeometry, texture?: number) {
+  private drawGeometry(model: Readonly<CubismModel>, index: number, g: MeshGeometry, texture?: number, alpha = 1) {
     const getters: Record<string, unknown> = {
       getDrawableVertexPositions:g.positions,getDrawableVertices:g.positions,
       getDrawableVertexUvs:g.uvs,getDrawableVertexIndices:g.indices,
       getDrawableVertexCount:g.positions.length/2,getDrawableVertexIndexCount:g.indices.length,
       ...(texture === undefined ? {} : {getDrawableTextureIndex:texture}),
+      getDrawableOpacity:model.getDrawableOpacity(index)*alpha,
     };
     const proxy = new Proxy(model as CubismModel, { get(target, property) {
       const original = Reflect.get(target, property);
@@ -47,6 +56,17 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
     super.drawMeshWebGL(proxy, index);
   }
   getDrawOrderSnapshot() { return {...this.lastDrawOrder}; }
+  private drawJawSkin(model: Readonly<CubismModel>, face: number) {
+    if (!this.jawBlend) return;
+    const jaw = model.getModel().drawables.ids.indexOf('ArtMesh29');
+    if (jaw < 0) return;
+    for (const skin of jawSkinLayers(model.getDrawableVertexPositions(jaw), model.getDrawableVertexUvs(jaw), model.getDrawableVertexIndices(jaw))) {
+      this.drawGeometry(model, jaw, skin, model.getDrawableTextureIndex(face), skin.alpha);
+    }
+    if (this.jawTexture !== undefined) {
+      this.drawGeometry(model, jaw, jawRepairMesh(model.getDrawableVertexPositions(jaw), model.getDrawableVertexUvs(jaw), model.getDrawableVertexIndices(jaw)), this.jawTexture);
+    }
+  }
   public override doDrawModel(shaderPath?: string): void {
     const model = this.getModel(), orders = model.getRenderOrders(), saved = orders.slice();
     const ids = [...model.getModel().drawables.ids];
@@ -64,15 +84,32 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
     const delta=(i:number)=>i<0?null:[(g.positions[i*2]-g.base[i*2])*ppu,
       -(g.positions[i*2+1]-g.base[i*2+1])*ppu];
     return {mouseDelta:delta(mouse),staticDelta:delta(fixed),
-      renderedVertices:g.moving.length,mouseVertices:g.moving.filter(Boolean).length};
+      renderedVertices:g.moving.length,mouseVertices:g.moving.filter(Boolean).length,
+      completeMouseLayer:this.mouseTexture !== undefined};
   }
   public override drawMeshWebGL(model: Readonly<CubismModel>,index:number):void {
     const id = model.getModel().drawables.ids[index];
     if (!this.isGeneratingMask()) {
+      if (id === 'ArtMesh29' && this.underpaintTexture !== undefined) {
+        const face=model.getModel().drawables.ids.indexOf('ArtMesh41');
+        if(face >= 0) {
+          const rear=underpaintMesh(model.getDrawableVertexPositions(face),model.getDrawableVertexUvs(face),model.getDrawableVertexIndices(face));
+          this.drawGeometry(model,index,rear,this.underpaintTexture);
+        }
+        // Retain the whole authored sleeve behind the head. Only the clean
+        // palm/cuff foreground is drawn again at the higher hand priority.
+        for (const hand of this.handOrder?.ids || []) {
+          const i=model.getModel().drawables.ids.indexOf(hand);
+          if(i >= 0) this.drawGeometry(model,i,{positions:model.getDrawableVertexPositions(i),uvs:model.getDrawableVertexUvs(i),indices:model.getDrawableVertexIndices(i)});
+        }
+      }
       if (id === 'ArtMesh29' && this.jawTexture !== undefined) {
         super.drawMeshWebGL(model, index);
-        const patch = jawRepairMesh(model.getDrawableVertexPositions(index), model.getDrawableVertexUvs(index), model.getDrawableVertexIndices(index));
-        this.drawGeometry(model, index, patch, this.jawTexture); return;
+        if (!this.jawBlend) {
+          const patch = jawRepairMesh(model.getDrawableVertexPositions(index), model.getDrawableVertexUvs(index), model.getDrawableVertexIndices(index));
+          this.drawGeometry(model, index, patch, this.jawTexture);
+        }
+        return;
       }
       if(id===this.keyboard?.mesh) {
         const v=model.getDrawableVertexPositions(index),xs=[],ys=[];
@@ -98,7 +135,9 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
       }
       if (this.skinPatches?.[id] && id !== this.region?.mesh) {
         const g=skinPatchMesh(model.getDrawableVertexPositions(index),model.getDrawableVertexUvs(index),model.getDrawableVertexIndices(index),this.skinPatches[id]);
-        this.drawGeometry(model,index,g);return;
+        this.drawGeometry(model,index,g);
+        if (id === 'ArtMesh41') this.drawJawSkin(model, index);
+        return;
       }
       if (this.contours?.[id]) {
         const g = contourMesh(model.getDrawableVertexPositions(index), model.getDrawableVertexUvs(index),
@@ -124,6 +163,20 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
       this.geometry=partitionMouseMesh(cleaned?.positions ?? source,cleaned?.uvs ?? model.getDrawableVertexUvs(index),
         cleaned?.indices ?? model.getDrawableVertexIndices(index),this.region.outline,model.getPixelsPerUnit(),
         [info.CanvasOriginX,info.CanvasOriginY]);
+      if (this.mouseTexture !== undefined) {
+        const g=this.geometry, ppu=model.getPixelsPerUnit(), fullUvs=new Float32Array(g.base.length);
+        for(let k=0;k<g.base.length;k+=2) {
+          fullUvs[k]=(g.base[k]*ppu+info.CanvasOriginX)/1254;
+          fullUvs[k+1]=1-(info.CanvasOriginY-g.base[k+1]*ppu)/1254;
+        }
+        const moving:number[]=[],fixed:number[]=[];
+        for(let n=0;n<g.indices.length;n+=3) {
+          const target=g.moving[g.indices[n]] ? moving : fixed;
+          target.push(g.indices[n],g.indices[n+1],g.indices[n+2]);
+        }
+        this.completeMouse={positions:g.positions,uvs:fullUvs,indices:new Uint16Array(moving)};
+        this.fixedForeground={positions:g.positions,uvs:g.uvs,indices:new Uint16Array(fixed)};
+      }
       const getters: Record<string,(index:number)=>unknown>={
         getDrawableVertexPositions:()=>this.geometry!.positions,
         getDrawableVertices:()=>this.geometry!.positions,
@@ -144,6 +197,10 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
       g.positions[i*2]=g.base[i*2]+(g.moving[i]?this.offset.x/ppu:0);
       g.positions[i*2+1]=g.base[i*2+1]-(g.moving[i]?this.offset.y/ppu:0);
     }
-    super.drawMeshWebGL(this.proxy!,index);
+    if(this.mouseTexture !== undefined && this.completeMouse && this.fixedForeground) {
+      // Render a whole mouse beneath the hand, never a hand-shaped hole.
+      if(this.fixedForeground.indices.length) this.drawGeometry(model,index,this.fixedForeground);
+      this.drawGeometry(model,index,this.completeMouse,this.mouseTexture);
+    } else super.drawMeshWebGL(this.proxy!,index);
   }
 }

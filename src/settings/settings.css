@@ -651,6 +651,21 @@
   border: 0;
   background: transparent;
 }
-.runtime-license { margin-top: 16px; color: var(--settings-muted); font-size: 11px; }
-.runtime-license summary { cursor: pointer; }
-.runtime-license pre { font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; max-height: 260px; overflow-y: auto; margin: 12px 0 0; }
+.runtime-license {
+  width: 100%;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.runtime-license summary {
+  cursor: pointer;
+}
+.runtime-license pre {
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 12px 0 0;
+}

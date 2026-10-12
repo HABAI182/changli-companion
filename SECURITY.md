@@ -1,6 +1,6 @@
 # 公测安全与隐私说明
 
-当前安全检查日期：2026-10-12，版本 0.7.10。安全检查是有范围的检查，不是“绝对安全”保证。
+当前安全检查日期：2026-10-12，版本 0.7.12（继承0.7.10依赖修复）。安全检查是有范围的检查，不是“绝对安全”保证。
 
 - 完整 Git 历史以 Gitleaks 8.30.1 扫描；唯一排除是公开的 localStorage 名 `changli-companion-v1`，不是凭据。检测报告保留在本机，避免把报告中的个人信息发布出去。
 - npm 依赖中的 source-map-js 已固定升级为 1.2.2，修复 [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)。更新后的 npm audit 为 0 项已知漏洞。
@@ -12,6 +12,8 @@
 - 本机设置和互动统计保存在用户应用数据目录。外部浏览器访问 GitHub 时适用 GitHub 自身的隐私政策。
 - EXE 暂无商业代码签名，未宣称通过全部杀毒软件或 SmartScreen 认证。校验哈希确认文件一致性，不代表安全认证。
 
-发现敏感数据泄漏时请不要把秘密贴在公开 issue；使用 GitHub 仓库的私密漏洞报告入口（如果该入口可用）。一般界面/模型问题可以提交 issue，请遮挡截图中的个人信息，附版本、Windows 版本、缩放比例与复现步骤。
+GitHub公开仓库已开启密钥扫描、密钥推送保护、依赖告警和私密漏洞报告；只开启免费功能，未开通付费服务。设置项与真实返回状态已核对；这些功能也不能替代代码审查或保证完全无漏洞。机制见[GitHub官方说明](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository)。
+
+发现敏感数据泄漏时请不要把秘密贴在公开 issue；使用[私密漏洞报告入口](https://github.com/HABAI182/changli-companion/security/advisories/new)。一般界面/模型问题可以提交 issue，请遮挡截图中的个人信息，附版本、Windows 版本、缩放比例与复现步骤。
 
 SDK 与素材许可见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 和 [LICENSE-RUNTIME.txt](LICENSE-RUNTIME.txt)。视觉素材来源依据用户声明，项目不代表角色权利人或参考作者。

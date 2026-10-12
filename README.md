@@ -1,6 +1,6 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-Windows x64 桌面伴侣，当前免费公测版 **0.7.12 / 原生模型 v71**。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.12**，macOS 独立公测版 **0.7.12-macos.3**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
@@ -14,7 +14,16 @@ Windows x64 桌面伴侣，当前免费公测版 **0.7.12 / 原生模型 v71**�
 
 ## 使用
 
-下载[当前0.7.12便携EXE或安装包](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.12)，程序无需开发服务器。右键角色打开互动菜单和设置；拖动键位于键盘右下角。历史版本分别留档，见文末版本索引。
+按系统选择下载，程序无需开发服务器：
+
+| 系统 | 下载 | 文件类型 |
+| --- | --- | --- |
+| Windows x64 | [Windows 0.7.12](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.12) | 便携 EXE / EXE 安装包 |
+| macOS Apple Silicon（M 系列） | [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3) | DMG / APP ZIP；最低 macOS 12 |
+
+macOS 版已由用户在 MacBook 实测通过，具体安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.12-macos.3.md)。Release 中带 `source` 的 ZIP 是开发者源码。
+
+右键角色打开互动菜单和设置；拖动键位于键盘右下角。历史版本分别留档，见文末版本索引。
 
 - 键盘都由长离左手按压，按左右/前后四区移动，前后幅度较小；空格单独落点，右手与鼠标本体、线缆联动。
 - 大头弹性回摆，发饰随动，凤凰翅膀、尾羽和火苗持续动态；可选完整、轻柔或关闭动态。

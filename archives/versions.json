@@ -802,5 +802,48 @@
   ],
   "githubArchiveVerified": true,
   "visibility": "public",
-  "visibilityChangedAt": "2026-10-12"
+  "visibilityChangedAt": "2026-10-12",
+  "macosBuilds": [
+    {
+      "build": "0.7.12-macos.3",
+      "platform": "macOS",
+      "architecture": "arm64",
+      "minimumSystemVersion": "12.0",
+      "tag": "macos-0.7.12-preview.3",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3",
+      "sourceCommit": "0bd8af98b4c6ab055447c792d01036d91d9fac95",
+      "sourceBranch": "macos-port",
+      "sourceStatus": "recovered-exact-git-source-from-user-archive",
+      "sourceBranchPushed": true,
+      "localDelivery": "deliveries/20261012-desktop-0.7.12-macos.3",
+      "status": "published-prerelease",
+      "published": true,
+      "remoteAssetsVerified": true,
+      "runtimeValidation": {
+        "reportedBy": "user",
+        "device": "MacBook",
+        "result": "passed",
+        "date": "2026-10-12",
+        "exactOsAndChipNotProvided": true
+      },
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.12-macos.3-arm64.app.zip",
+          "bytes": 54615171,
+          "sha256": "AF265E677D9E730C6F0A2F6164C08555CA9EAD0BAA87EC206149CD522FB5CE06"
+        },
+        {
+          "file": "changli-companion-0.7.12-macos.3-arm64.dmg",
+          "bytes": 57162344,
+          "sha256": "A069357FDE65115DACE7B3EAFCA90C637DD5834C8C7F6E7E66EC2BFB61F4A513"
+        },
+        {
+          "file": "changli-companion-0.7.12-macos.3-source.zip",
+          "bytes": 121300972,
+          "sha256": "030AFFAFF9C2224779A21D44FA995BC89E5D04D26AA603325ED12BA8BE358A1B"
+        }
+      ],
+      "publishedAt": "2026-10-12T10:33:44Z"
+    }
+  ]
 }

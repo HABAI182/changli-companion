@@ -35,3 +35,10 @@
 机器可读索引：[archives/versions.json](archives/versions.json)。大体积原生源与完整恢复包保留现有本地副本，不为索引重复复制。
 
 以后发布必须使用新版本号和独立目录；旧tag不移动、Release附件不覆盖、不删除旧版本。源码与美术的未完成状态以各版交付记录为准。
+
+## macOS 独立发布（2026-10-12）
+
+- `0.7.12-macos.3`：Apple Silicon ARM64，用户已在 MacBook 实测通过。
+- DMG 与 APP ZIP 为安装使用附件；`ChangliCompanion.zip` 是带 Git 的移植工程，已从真实提交 `0bd8af98b4c6ab055447c792d01036d91d9fac95` 导出独立、无 Git 工作区元数据的源码 ZIP。
+- 本地归档：`deliveries/20261012-desktop-0.7.12-macos.3/`，包含校验清单、发布说明和可续传脚本。
+- **已发布并核对全部 5 个附件的远端 SHA256 与体积：** [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3)。源码保留在独立 [macos-port 分支](https://github.com/HABAI182/changli-companion/tree/macos-port)，版本标签指向真实 macOS 提交。Windows 使用单独 Release。

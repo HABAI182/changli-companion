@@ -51,12 +51,8 @@ pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
         .visible(false)
         .build()
         .map_err(|e| e.to_string())?;
-        let weak = w.clone();
-        w.on_window_event(move |e| {
-            if matches!(e, tauri::WindowEvent::Focused(false)) {
-                let _ = weak.hide();
-            }
-        });
+        // A draggable floating palette must survive native move/activation
+        // transitions. Close explicitly through actions, Escape or the X.
         w
     };
     menu.set_position(PhysicalPosition::new(x, y))

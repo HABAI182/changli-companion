@@ -721,7 +721,7 @@ export function App() {
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.11</span>
+            <i /> 浏览器预览 <span>v0.7.12</span>
           </div>
         </header>
       )}

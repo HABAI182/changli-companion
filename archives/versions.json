@@ -601,6 +601,37 @@
       "remoteAssetsVerified": true,
       "webglRendered": true,
       "windowsDesktopVerified": false
+    },
+    {
+      "version": "0.7.8",
+      "tag": "v0.7.8",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.8",
+      "localDelivery": "deliveries/20261012-desktop-0.7.8",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 56872448,
+          "sha256": "140F47F5C189B5B18DB4942DCD580BCF491AB2B898CBA26624F8AAD038382CF8",
+          "localPath": "deliveries/20261012-desktop-0.7.8/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.8-x64-setup.exe",
+          "bytes": 47551054,
+          "sha256": "A17764295B0FCA78AD237D1289169B578EFB3C931AD511351152C40CBC8E4C74",
+          "localPath": "deliveries/20261012-desktop-0.7.8/changli-companion-0.7.8-x64-setup.exe"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "sourceCommit": "98633fed3c50c388bb6bbca0b106be4d05cdd223",
+      "remoteAssetsVerified": true,
+      "webglRendered": true,
+      "windowsDesktopVerified": true,
+      "windowsScope": "portable startup, transparent Live2D window and new titlebar/settings icon; no new full global-input or installer acceptance"
     }
   ],
   "githubArchiveVerified": true

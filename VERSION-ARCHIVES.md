@@ -36,8 +36,9 @@
 
 以后发布必须使用新版本号和独立目录；旧tag不移动、Release附件不覆盖、不删除旧版本。源码与美术的未完成状态以各版交付记录为准。
 
-## macOS 本地构建
+## macOS 构建
 
-2026-10-12：`0.7.12-macos.1`，基于上游 0.7.12 的 ARM64 本地构建；没有修改上游业务源码。交付已移到源码外的 `../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.1/`，原始验收记录保留在该目录的 `DELIVERY.md`。编译方式和功能范围见 [README 的 macOS 编译说明](README.md#macos-编译)。此项未发布远端 Release，原 Windows 版本记录保持不变。
+- `0.7.12-macos.1`：基于上游 0.7.12 的 ARM64 构建。
+- `0.7.12-macos.2`：增加独立 macOS 全局键鼠监听和鼠标视线跟随；Windows 监听模块保持原样。15 项原生测试与 86 项前端测试通过，用户已于 2026-10-12 确认可正常运行。
 
-2026-10-12：`0.7.12-macos.2` 增加独立 macOS 全局键鼠监听和鼠标视线跟随；Windows 监听模块保持原样。15 项原生测试与 86 项前端测试通过；跨应用输入效果待用户授予输入监控权限后验收。交付目录 `../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.2/`，详细记录保留在该目录的 `DELIVERY.md`。未发布远端 Release。
+编译与使用方式见 [README](README.md#macos-编译与使用)。安装包和本机交付记录保存在源码之外，尚未发布远端 Release。

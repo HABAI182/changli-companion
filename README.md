@@ -42,87 +42,19 @@ npm run desktop
 
 浏览器只能预览角色和交互；全局输入、透明桌面窗口、托盘、磁吸与全屏避让需要运行Windows程序。
 
-### macOS 编译
+### macOS 编译与使用
 
-需要 macOS、Xcode Command Line Tools、Node.js/npm 和 Rust/Cargo。首次安装 Apple 编译工具可执行 `xcode-select --install`。本次已在 Apple Silicon、macOS 26.5.1、Node.js 26.8.1 和 Rust 1.98.1 上完成构建验证。
+需要 Node.js/npm、Rust/Cargo 和 Xcode Command Line Tools。首次安装 Apple 编译工具可执行 `xcode-select --install`。
 
-在源码根目录执行：
+在源码根目录运行：
 
 ```bash
 ./macos/build.sh
 ```
 
-脚本会将源码同步到**源码目录旁的独立构建目录**，安装锁定版本的依赖，再编译 macOS 应用和 DMG。以源码目录名 `ChangliCompanion` 为例，目录结构为：
+编译完成后，按终端输出的路径打开 `离火长明.app`，或打开 `.dmg` 将应用拖入“应用程序”。构建产物保存在源码目录之外。当前支持 Apple Silicon Mac。
 
-```text
-Project_codex/
-├── ChangliCompanion/                   # 源码，可单独上传
-│   ├── README.md
-│   └── macos/                         # 编译配置和脚本
-└── ChangliCompanion-build/             # 本机生成，不属于源码
-    ├── cache/npm/                     # npm 缓存
-    ├── workspace/                     # 用于编译的源码副本与依赖
-    │   └── src-tauri/target/release/bundle/
-    │       ├── macos/离火长明.app
-    │       └── dmg/离火长明_0.7.12_aarch64.dmg
-    └── deliveries/                    # 本机已有交付存档（若存在）
-```
-
-构建目录名自动使用“源码文件夹名 + `-build`”。`node_modules`、前端 `dist`、Rust `target`、生成的 schema 和安装包均只写入构建副本；Tauri CLI 对 `Cargo.toml` 的自动调整也只发生在副本中。重新上传时只上传源码文件夹。
-
-如果 macOS 同步文件夹给生成的应用附加 Finder 元数据、导致签名失败，脚本会清理生成应用的扩展属性后重试一次；构建日志保留在外部构建目录。若构建进程被强制结束，确认没有构建在运行后可移除外部目录中的空 `.build-lock` 文件夹再运行。
-
-打开编译后的应用，或打开 DMG 将应用拖入“应用程序”：
-
-```bash
-open "../ChangliCompanion-build/workspace/src-tauri/target/release/bundle/macos/离火长明.app"
-```
-
-只生成应用、不生成 DMG：
-
-```bash
-./macos/build.sh --bundles app
-```
-
-运行 Rust 原生测试，同样使用外部构建目录：
-
-```bash
-./macos/test.sh
-```
-
-若本机网络需要代理，请将地址替换为实际配置：
-
-```bash
-HTTPS_PROXY=http://127.0.0.1:7892 \
-HTTP_PROXY=http://127.0.0.1:7892 \
-CARGO_HTTP_PROXY=http://127.0.0.1:7892 \
-npm_config_proxy=http://127.0.0.1:7892 ./macos/build.sh
-```
-
-macOS 配置使用 `.icns` 图标、app/dmg 打包和本地 ad-hoc 签名，并启用当前 Tauri 2.11.6 透明窗口需要的 `macOSPrivateApi` / `macos-private-api` 功能。没有 Apple Developer ID 签名或公证。配置最低系统版本为 macOS 12；旧系统、Intel 和 Universal 构建尚未验证。
-
-macOS 已增加独立的全局键鼠监听和鼠标视线跟随模块。原有 Windows 监听实现保持原样，只有输入入口增加平台条件分支；macOS 模块不会参与 Windows 编译，Cargo 依赖和前端协议未变。
-
-鼠标视线跟随通过只读轮询系统鼠标位置实现，按桌宠所在屏幕的缩放比例转换坐标。全局键盘、鼠标左右键、滚轮和触控板滚动使用 CoreGraphics 的只读事件监听；物理按键映射为现有按键动画，支持 Cmd、Shift、Option、Control、功能键和数字小键盘，不提取输入文本。设置或互动菜单获得焦点时暂停其输入反馈。
-
-首次使用全局键鼠监听，请完成系统授权：
-
-1. 将编译后的 `离火长明.app` 放到固定位置（例如“应用程序”）并启动。
-2. 打开“系统设置 → 隐私与安全性 → 输入监控”，用 `+` 添加该应用并允许监听。
-3. 如果系统要求重启应用，请退出并重新打开。在桌宠“设置 → 高级”中点击“刷新监听状态”查看结果。
-
-未授予输入监控权限时，应用继续运行，鼠标视线跟随仍可用；状态中会显示授权说明。获得或撤销权限后监听线程会定期检查并重新注册或停止监听。密码框等安全输入场景可能由系统暂停键盘事件。应用不会自动修改系统权限，也不申请屏幕录制权限；只有瞬时动作事件和内存汇总计数，不记录按键历史、不注入或拦截输入。现有“键鼠模式／纯键盘模式”“鼠标视线跟随”“按键浮显”等设置继续生效。
-
-已有 Live2D 显示与摸头气泡交互验收；本次原生测试增加到 15 项。键鼠监听的跨应用实机效果需要在输入监控授权后验收。拖动、多屏/DPI、开机自启、全局快捷键和长期运行尚未全面验收。其余 Windows 专用功能限制如下：
-
-| 功能 | macOS 状态 |
-| --- | --- |
-| 全局键鼠监听、鼠标视线跟随 | 已实现 macOS 独立模块；键盘、点击和滚轮监听需要输入监控授权 |
-| 手柄监听 | 原实现依赖 Windows XInput，macOS 未实现 |
-| 外部全屏应用自动隐藏 | 非 Windows 分支固定返回 false |
-| 设置中的项目主页／更新链接 | 原代码调用 `explorer.exe`，macOS 不可用；可手动打开仓库或 Release 页 |
-
-普通 macOS 桌面 `tauri dev` 会因上游两个 `generate_context!()` 重复嵌入 Info.plist 而编译失败。前端开发可使用 `npm run dev`；桌面验证使用上述发行构建入口。原生测试脚本启用与发行构建一致的 `custom-protocol`，无需修改 Rust 业务源码。
+首次使用全局键鼠互动，请在“系统设置 → 隐私与安全性 → 输入监控”中添加并允许“离火长明”，然后重新启动应用。可在桌宠设置中选择输入模式、开关鼠标视线跟随和按键浮显。
 
 ## 当前完成度
 

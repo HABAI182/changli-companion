@@ -810,10 +810,9 @@
       "upstreamCommit": "37fce2ef573d52b60ebeb7b4d9d000f943581cbb",
       "platform": "macOS",
       "architecture": "arm64",
-      "localDelivery": "../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.1",
       "status": "local-preview",
-      "validation": "../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.1/DELIVERY.md",
-      "published": false
+      "published": false,
+      "artifactsStoredInSource": false
     },
     {
       "build": "0.7.12-macos.2",
@@ -821,17 +820,20 @@
       "upstreamCommit": "37fce2ef573d52b60ebeb7b4d9d000f943581cbb",
       "platform": "macOS",
       "architecture": "arm64",
-      "localDelivery": "../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.2",
       "status": "local-preview",
       "features": [
         "global-keyboard",
         "global-mouse-buttons-and-scroll",
         "cursor-gaze"
       ],
-      "validation": "../ChangliCompanion-build/deliveries/20261012-desktop-0.7.12-macos.2/DELIVERY.md",
       "inputMonitoringPermissionRequired": true,
-      "crossApplicationInputVerified": false,
-      "published": false
+      "published": false,
+      "artifactsStoredInSource": false,
+      "runtimeValidation": {
+        "reportedBy": "user",
+        "result": "normal-operation",
+        "date": "2026-10-12"
+      }
     }
   ]
 }

@@ -752,7 +752,55 @@
       "knownIssues": [
         "native menu disappears during drag; use 0.7.12 or later"
       ]
+    },
+    {
+      "version": "0.7.12",
+      "tag": "v0.7.12",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.12",
+      "localDelivery": "deliveries/20261012-desktop-0.7.12",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.12-x64-setup.exe",
+          "bytes": 51565229,
+          "sha256": "1B44B75401E6DE82DE779BEB1F2C404F87FA9597D6F83A3FFEFAE54EEC9521AD",
+          "localPath": "deliveries/20261012-desktop-0.7.12/changli-companion-0.7.12-x64-setup.exe"
+        },
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61049856,
+          "sha256": "0D90FC416869159DECFDB1181E3370C0483C85E4F99CAB7C2AEDEDF7961CBD1E",
+          "localPath": "deliveries/20261012-desktop-0.7.12/changli-companion.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261012-desktop-0.7.12/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261012-desktop-0.7.12/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "sourceCommit": "a2f29eaba7f78930735c626c1eddf31034c304e2",
+      "remoteAssetsVerified": true,
+      "webglRendered": true,
+      "webglScope": "inherited unchanged badge/menu UI from 0.7.11",
+      "windowsDesktopVerified": true,
+      "windowsScope": "portable startup and menu creation only",
+      "nativeDragVerified": false,
+      "nativeDragPendingReason": "user stopped Computer Use with physical Escape"
     }
   ],
-  "githubArchiveVerified": true
+  "githubArchiveVerified": true,
+  "visibility": "public",
+  "visibilityChangedAt": "2026-10-12"
 }

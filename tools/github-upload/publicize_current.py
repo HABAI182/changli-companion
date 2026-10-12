@@ -3,7 +3,7 @@
 Run only after the immutable release upload and local security checks complete.
 Credentials remain in gh's credential store; anonymous checks send no auth.
 """
-import hashlib,json,subprocess,urllib.request
+import hashlib,json,subprocess,urllib.request,urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
@@ -37,11 +37,23 @@ def main():
     operations={}
     for name,args in [('secretScanning',('api','--method','PATCH','repos/'+REPO,'--input',str(config))),('dependencyAlerts',('api','--method','PUT','repos/'+REPO+'/vulnerability-alerts')),('privateVulnerabilityReporting',('api','--method','PUT','repos/'+REPO+'/private-vulnerability-reporting'))]:
         r=gh(*args,required=False);operations[name]={'success':r.returncode==0,'error':r.stderr.strip() if r.returncode else None}
-    publicMeta=json.loads(anonymous('https://api.github.com/repos/'+REPO)['body'])
+    anonymousApiLimited=False
+    try:
+        publicMeta=json.loads(anonymous('https://api.github.com/repos/'+REPO)['body'])
+    except urllib.error.HTTPError as e:
+        if e.code!=403:raise
+        anonymousApiLimited=True
+        page=anonymous('https://github.com/'+REPO)
+        if page['status']!=200:raise ValueError('Anonymous repository page unavailable')
+        publicMeta=json.loads(gh('api','repos/'+REPO).stdout)
     if publicMeta['private'] or publicMeta['visibility']!='public':raise ValueError('Anonymous repository is not public')
     readme=anonymous('https://raw.githubusercontent.com/'+REPO+'/main/README.md')
     if VERSION.encode() not in readme['body']:raise ValueError('Anonymous source is stale')
-    published=json.loads(anonymous('https://api.github.com/repos/'+REPO+'/releases/tags/v'+VERSION)['body'])
+    if anonymousApiLimited:
+        published=json.loads(gh('api','repos/'+REPO+'/releases/tags/v'+VERSION).stdout)
+        if anonymous(published['html_url'])['status']!=200:raise ValueError('Anonymous release page unavailable')
+    else:
+        published=json.loads(anonymous('https://api.github.com/repos/'+REPO+'/releases/tags/v'+VERSION)['body'])
     if published['draft']:raise ValueError('Anonymous release remains draft')
     assets={x['name']:x for x in published['assets']}
     def check(item):
@@ -54,7 +66,7 @@ def main():
     with ThreadPoolExecutor(max_workers=3) as pool:downloads=list(pool.map(check,upload['assets']))
     security=json.loads(gh('api','repos/'+REPO,'--jq','.security_and_analysis').stdout)
     vulnerability=gh('api','repos/'+REPO+'/private-vulnerability-reporting',required=False)
-    report={'public':True,'anonymousRepositoryVerified':True,'anonymousSourceVerified':True,'anonymousReleaseVerified':True,'anonymousDownloads':downloads,'version':VERSION,'repository':'https://github.com/'+REPO,'release':published['html_url'],'sourceCommit':upload['commit'],'securityOperations':operations,'securityState':security,'privateVulnerabilityReporting':json.loads(vulnerability.stdout) if vulnerability.returncode==0 else None}
+    report={'public':True,'anonymousRepositoryVerified':True,'anonymousSourceVerified':True,'anonymousReleaseVerified':True,'anonymousMetadataApiLimited':anonymousApiLimited,'anonymousDownloads':downloads,'version':VERSION,'repository':'https://github.com/'+REPO,'release':published['html_url'],'sourceCommit':upload['commit'],'securityOperations':operations,'securityState':security,'privateVulnerabilityReporting':json.loads(vulnerability.stdout) if vulnerability.returncode==0 else None}
     (LOCAL/('public-result-'+VERSION+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps(report,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

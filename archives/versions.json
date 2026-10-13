@@ -845,6 +845,54 @@
       "nativeDragVerified": false,
       "nativeOutsideClickVerified": false,
       "completeWindowsAcceptance": false
+    },
+    {
+      "version": "0.7.14",
+      "tag": "v0.7.14",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.14",
+      "localDelivery": "deliveries/20261013-desktop-0.7.14",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61072384,
+          "sha256": "84CDA06DD498E38BEAD42F8109CC3F4F38D1297E6C0BE22074E51A9D28A54BCE",
+          "localPath": "deliveries/20261013-desktop-0.7.14/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.14-x64-setup.exe",
+          "bytes": 51584123,
+          "sha256": "CCED9A393A247BFA6343066B6F81FC35A5E0B9BAAC044CF98939C5B056B11160",
+          "localPath": "deliveries/20261013-desktop-0.7.14/changli-companion-0.7.14-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261013-desktop-0.7.14/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261013-desktop-0.7.14/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "sourceCommit": "833da63ff39e21af42fd19f04e32522e00f619a8",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "hairpin controls, three-dot smaller drag button, keyboard/wireless mouse, 50/100/200% sizes and settings font scaling/persistence",
+      "windowsDesktopVerified": true,
+      "windowsScope": "new EXE/WebGL controls, hidden loading until ready, background Raw Input registration and native font-size persistence",
+      "nativeDragVerified": false,
+      "nativeOutsideClickVerified": false,
+      "wutheringWavesVerified": false,
+      "completeWindowsAcceptance": false
     }
   ],
   "githubArchiveVerified": true,

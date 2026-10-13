@@ -4,6 +4,8 @@
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
+[B站主页](https://space.bilibili.com/1605091088) · [桌宠演示视频](https://www.bilibili.com/video/BV1Pipf6AEQF/)
+
 0.7.13 将键盘左右区分给角色左右手，并镜像到面对用户的画面；右手优先键盘，空闲后回到鼠标。新增键盘手移动速度和可选多按键浮显；Windows 菜单改为点击外部关闭，保留拖动。
 
 ## 公测说明

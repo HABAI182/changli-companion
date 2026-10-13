@@ -798,6 +798,53 @@
       "windowsScope": "portable startup and menu creation only",
       "nativeDragVerified": false,
       "nativeDragPendingReason": "user stopped Computer Use with physical Escape"
+    },
+    {
+      "version": "0.7.13",
+      "tag": "v0.7.13",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.13",
+      "localDelivery": "deliveries/20261013-desktop-0.7.13",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61047296,
+          "sha256": "8E319FD5374A99BA57817B63838014CFA1E3F6BA85D77B2EF5AD5BF7AB03C4C8",
+          "localPath": "deliveries/20261013-desktop-0.7.13/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.13-x64-setup.exe",
+          "bytes": 51572934,
+          "sha256": "B141514225A230C584CC57CD6ABE1C485C5993E20C0EF8133D11320F10A85880",
+          "localPath": "deliveries/20261013-desktop-0.7.13/changli-companion-0.7.13-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261013-desktop-0.7.13/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261013-desktop-0.7.13/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "sourceCommit": "f7e1543d4313a3a68db7e327b3ecc2d975cdf41f",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "mirrored independent hands, four zones, Space, multi-key fade, speed persistence, browser menu drag/outside click",
+      "windowsDesktopVerified": true,
+      "windowsScope": "new EXE startup, WebGL readiness and actual native menu creation/close commands",
+      "nativeDragVerified": false,
+      "nativeOutsideClickVerified": false,
+      "completeWindowsAcceptance": false
     }
   ],
   "githubArchiveVerified": true,

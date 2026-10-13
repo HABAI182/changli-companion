@@ -71,8 +71,11 @@ export class Live2DAdapter {
       'phoenix.tail': (snapshot.idle.phoenixTail || 0) * 30,
       // Clear both bases every frame: interrupted one-hand motions must not
       // retain the other hand's last sampled pressure.
-      'hand.left.press': 0,
-      'hand.right.press': 0,
+      'hand.left.press': Math.max(
+        snapshot.idle.rightKeyboardPress || 0,
+        snapshot.idle.mousePress || 0,
+      ),
+      'hand.right.press': snapshot.idle.leftKeyboardPress || 0,
       'eye.x': snapshot.idle.gazeX,
       'eye.y': cubismGazeY,
       'eye.left.open': 1 - snapshot.idle.blink,
@@ -93,23 +96,39 @@ export class Live2DAdapter {
     for (const [semantic, value] of Object.entries(values))
       if (p[semantic]) this.backend.setParameter(p[semantic], value);
     for (const [name, value] of Object.entries({
+      handInputOwned: snapshot.idle.leftKeyboardPress !== undefined ? 1 : 0,
       keyboardReach: snapshot.idle.keyboardReach || 0,
       keyboardDepth: snapshot.idle.keyboardDepth || 0,
       keyboardLanding: snapshot.idle.keyboardLanding || 0,
-      mouseX: snapshot.idle.mouseHandX || 0, mouseY: snapshot.idle.mouseHandY || 0,
-      headX: snapshot.idle.headX || 0, headY: snapshot.idle.headY || 0,
-      headShape: snapshot.idle.headShape || 0, headRotation: snapshot.idle.headRotation || 0,
+      rightKeyboardReach: snapshot.idle.rightKeyboardReach || 0,
+      rightKeyboardDepth: snapshot.idle.rightKeyboardDepth || 0,
+      rightKeyboardMix: snapshot.idle.rightKeyboardMix || 0,
+      mouseX: snapshot.idle.mouseHandX || 0,
+      mouseY: snapshot.idle.mouseHandY || 0,
+      headX: snapshot.idle.headX || 0,
+      headY: snapshot.idle.headY || 0,
+      headShape: snapshot.idle.headShape || 0,
+      headRotation: snapshot.idle.headRotation || 0,
       phoenixBounce: snapshot.idle.phoenixBounce || 0,
-      flamePhase: snapshot.idle.flamePhase || 0, flameStrength: snapshot.idle.flameStrength || 0,
-    })) this.backend.setParameter(`__gesture.${name}`, value);
+      flamePhase: snapshot.idle.flamePhase || 0,
+      flameStrength: snapshot.idle.flameStrength || 0,
+    }))
+      this.backend.setParameter(`__gesture.${name}`, value);
     // Each input has its own start time: consecutive keys must retrigger the
     // press even when their action id stays the same. Unauthored animations
     // should also leave the available input motions usable.
-    const trigger = this.dragging ? null :
-      snapshot.animation && this.config.motionMap[snapshot.animation.id]
+    const inputOwned = snapshot.idle.leftKeyboardPress !== undefined;
+    const trigger = this.dragging
+      ? null
+      : snapshot.animation && this.config.motionMap[snapshot.animation.id]
         ? snapshot.animation
-        : snapshot.action;
-    const actionId = trigger && (trigger === snapshot.action ? handAction(trigger.id, snapshot.base) : trigger.id);
+        : inputOwned &&
+            snapshot.action &&
+            /^(keyboard_|space|enter|backspace|rapid|mouse_|wheel)/.test(snapshot.action.id)
+          ? null
+          : snapshot.action;
+    const actionId =
+      trigger && (trigger === snapshot.action ? handAction(trigger.id, snapshot.base) : trigger.id);
     const mapped = actionId && this.config.motionMap[actionId];
     const motionKey = mapped ? `${trigger.id}:${trigger.startedAt}` : '';
     if (!motionKey) this.activeMotion = '';

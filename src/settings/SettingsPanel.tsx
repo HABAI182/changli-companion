@@ -3,6 +3,9 @@ import type { Settings } from '../domain';
 import { ScalePreviewQueue } from './scalePreview';
 import { PositionPresets } from './PositionPresets';
 import { openProjectLink } from '../native';
+import { useDesktopPlatform } from '../platform';
+import { validFullscreenExceptions } from './fullscreenExceptions';
+import packageInfo from '../../package.json';
 import './settings.css';
 import runtimeLicense from '../../LICENSE-RUNTIME.txt?raw';
 
@@ -142,10 +145,12 @@ function SizeControl({
   );
 }
 function FullscreenExceptions({
+  macos,
   value,
   update,
   fail,
 }: {
+  macos: boolean;
   value: string[];
   update: Props['update'];
   fail: Props['fail'];
@@ -163,8 +168,14 @@ function FullscreenExceptions({
           .filter(Boolean),
       ),
     ];
-    if (items.length > 32 || items.some((v) => !/^[^\\/:*?"<>|]{1,120}\.exe$/i.test(v))) {
-      fail(new Error('填写程序文件名，例如 game.exe；最多 32 个，用逗号分隔'));
+    if (!validFullscreenExceptions(items, macos)) {
+      fail(
+        new Error(
+          macos
+            ? '填写应用名或 Bundle ID，例如 Safari.app 或 com.apple.Safari；最多 32 个'
+            : '填写程序文件名，例如 game.exe；最多 32 个，用逗号分隔',
+        ),
+      );
       return;
     }
     if (items.join(',') !== value.join(',')) void update({ fullscreenExceptions: items });
@@ -176,14 +187,16 @@ function FullscreenExceptions({
         id="fullscreen-exceptions"
         aria-label="全屏避让例外"
         value={draft}
-        placeholder="例如 game.exe, player.exe"
+        placeholder={macos ? '例如 Safari.app, com.apple.Safari' : '例如 game.exe, player.exe'}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={save}
         onKeyDown={(e) => {
           if (e.key === 'Enter') e.currentTarget.blur();
         }}
       />
-      <small>输入程序文件名，用逗号分隔；留空则全部避让。</small>
+      <small>
+        {macos ? '输入应用名或 Bundle ID' : '输入程序文件名'}，用逗号分隔；留空则全部避让。
+      </small>
     </div>
   );
 }
@@ -253,6 +266,8 @@ function PreferenceRange({
   );
 }
 export function SettingsPanel(p: Props) {
+  const platform = useDesktopPlatform();
+  const macos = platform === 'macos';
   const s = p.value;
   const [page, setPage] = useState<'appearance' | 'interaction' | 'desktop' | 'advanced'>(
     'appearance',
@@ -268,7 +283,13 @@ export function SettingsPanel(p: Props) {
   }, []);
   const theme = s.settingsTheme === 'system' ? (systemDark ? 'dark' : 'light') : s.settingsTheme;
   const range = (
-    key: 'headElasticity' | 'keyboardMotionScale' | 'mouseMotionScale' | 'bubbleDurationSeconds',
+    key:
+      | 'headElasticity'
+      | 'settingsTextScale'
+      | 'keyboardMotionScale'
+      | 'keyboardHandSpeed'
+      | 'mouseMotionScale'
+      | 'bubbleDurationSeconds',
     title: string,
     description: string,
     min: number,
@@ -305,6 +326,7 @@ export function SettingsPanel(p: Props) {
       data-theme={theme}
       data-accent={s.accentColor}
       data-density={s.settingsDensity}
+      style={{ '--settings-text-scale': s.settingsTextScale ?? 1 } as CSSProperties}
       aria-label="桌宠设置"
     >
       <div className="panel-content">
@@ -312,16 +334,15 @@ export function SettingsPanel(p: Props) {
           <div className="settings-avatar" aria-hidden="true">
             <img src="/assets/changli-icon-v0810.png" alt="" />
           </div>
-          <div>
-            <p className="settings-kicker">离火长明</p>
-            <h2>偏好设置</h2>
-            <p>你的桌面，长离相伴</p>
+          <div className="settings-heading-copy">
+            <h2>离火长明</h2>
+            <p>桌宠设置</p>
           </div>
+          <span className="settings-version">v0.7.15</span>
         </div>
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">v0.7.12</span>
         </div>
         <nav className="settings-navigation" aria-label="设置分类">
           {(
@@ -350,6 +371,7 @@ export function SettingsPanel(p: Props) {
         >
           <h3 id="theme-title">界面外观</h3>
           <div className="settings-card">
+            {range('settingsTextScale', '设置文字大小', '只调整设置界面的文字', 85, 130)}
             <Row title="主题" description="设置界面的明暗风格">
               <select
                 aria-label="主题"
@@ -443,8 +465,8 @@ export function SettingsPanel(p: Props) {
               title="输入模式"
               description={
                 s.inputMode === 'keyboard_mouse'
-                  ? '左手跟随键盘四区，前后移动较轻；右手响应鼠标'
-                  : '左手跟随键盘四区，空格单独落点；不响应鼠标'
+                  ? '左右手分别响应键盘左右区；右手优先键盘，空闲时回到鼠标。面对你时画面左右为镜像'
+                  : '左右手分别响应键盘左右区，空格由左手按下；画面左右为镜像'
               }
             >
               <select
@@ -460,6 +482,31 @@ export function SettingsPanel(p: Props) {
               </select>
             </Row>
             {toggle('keyOverlayEnabled', '按键浮显', '短暂显示按键，不记录输入内容')}
+            {s.keyOverlayEnabled &&
+              toggle(
+                'multiKeyOverlayEnabled',
+                '同时显示多个按键',
+                '显示多个最近按键，各自停留后淡出，不保存记录',
+              )}
+            {s.keyOverlayEnabled && s.multiKeyOverlayEnabled && (
+              <PreferenceRange
+                title="同时显示按键上限"
+                description="保留最近的 1～6 个按键"
+                value={s.keyOverlayMaxKeys}
+                min={1}
+                max={6}
+                step={1}
+                unit=" 个"
+                busy={p.busy}
+                update={(value) => p.update({ keyOverlayMaxKeys: value })}
+              />
+            )}
+            {s.keyOverlayEnabled &&
+              toggle(
+                'keyOverlayRepeatEnabled',
+                '长按重复浮现',
+                '关闭时一次长按只浮现一次，手部仍保持长按响应',
+              )}
             {toggle('cursorFollowEnabled', '鼠标视线跟随', '随鼠标转头与转眼，不影响鼠标手动作')}
             {range(
               'keyboardMotionScale',
@@ -469,6 +516,13 @@ export function SettingsPanel(p: Props) {
               125,
             )}
             {range('mouseMotionScale', '鼠标移动幅度', '右手、鼠标与线缆一起移动', 0, 150)}
+            {range(
+              'keyboardHandSpeed',
+              '键盘手移动速度',
+              '调节伸手和回位速度，50% 舒缓，200% 迅捷',
+              50,
+              200,
+            )}
             {range(
               'bubbleDurationSeconds',
               '气泡显示时长',
@@ -522,6 +576,13 @@ export function SettingsPanel(p: Props) {
         >
           <h3 id="desktop-title">桌面陪伴</h3>
           <div className="settings-card">
+            {platform === 'windows' &&
+              toggle(
+                'elevatedInputModeEnabled',
+                '高权限兼容启动',
+                '默认开启；下次启动请求 Windows 确认，兼容以管理员身份运行的游戏',
+                true,
+              )}
             {toggle('topmost', '窗口置顶', '显示在其他窗口上方', true)}
             {toggle(
               'fullscreenHideEnabled',
@@ -531,6 +592,7 @@ export function SettingsPanel(p: Props) {
             )}
             {s.fullscreenHideEnabled && (
               <FullscreenExceptions
+                macos={macos}
                 value={s.fullscreenExceptions || []}
                 update={p.update}
                 fail={p.fail}
@@ -584,7 +646,7 @@ export function SettingsPanel(p: Props) {
           </div>
           {!p.native && (
             <p className="setting-hint">
-              置顶、穿透、全屏避让、磁吸、常用位置和开机启动在 Windows 桌宠中可用。
+              置顶、穿透、全屏避让、磁吸、常用位置和开机启动需要桌面应用。
             </p>
           )}
         </section>
@@ -646,8 +708,11 @@ export function SettingsPanel(p: Props) {
               重新加载角色渲染
             </button>
             <details className="settings-extra">
-              <summary>手柄与音效</summary>
-              {toggle('gamepadEnabled', '手柄互动', '可与键鼠同时使用', true)}
+              <summary>
+                {platform === 'windows' || platform === 'browser' ? '手柄与音效' : '音效'}
+              </summary>
+              {(platform === 'windows' || platform === 'browser') &&
+                toggle('gamepadEnabled', '手柄互动', '可与键鼠同时使用', true)}
               {toggle('sfxEnabled', '互动音效', '原创占位音，默认关闭')}
               <Row title={`音效音量 ${Math.round(s.sfxVolume * 100)}%`}>
                 <input
@@ -671,7 +736,10 @@ export function SettingsPanel(p: Props) {
           <div className="project-links">
             <span>
               <strong>离火长明</strong>
-              <small>版本 0.7.12 · Windows 桌宠</small>
+              <small>
+                版本 {packageInfo.version} ·{' '}
+                {macos ? 'macOS' : platform === 'windows' ? 'Windows' : '桌面'} 桌宠
+              </small>
             </span>
             <div>
               <button type="button" onClick={() => void openProjectLink('updates').catch(p.fail)}>

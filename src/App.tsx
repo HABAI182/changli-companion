@@ -29,7 +29,10 @@ import { mapGamepadInput } from './pet/gamepad';
 import { AudioManager } from './audio/AudioManager';
 import { model, type ShortcutSlot } from './model';
 import { SettingsPanel } from './settings/SettingsPanel';
-import { KEY_BADGE_MS, nextKeyBadge, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
+import { KEY_BADGE_MS, nextKeyBadges, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
+import { ChangliEmblem } from './overlay/ChangliEmblem';
+import { inputHealth } from './inputDiagnostics';
+import { useDesktopPlatform } from './platform';
 
 const names: Record<string, string> = {
   keyboard_left: '左键区',
@@ -73,6 +76,7 @@ const query = new URLSearchParams(location.search),
   panelWindow = native && (query.has('panel') || menuWindow);
 const preview = !native;
 export function App() {
+  const platform = useDesktopPlatform();
   const [data, setData] = useState<Data>(initialData),
     [ready, setReady] = useState(false),
     [error, setError] = useState(''),
@@ -82,7 +86,7 @@ export function App() {
   const [expression, setExpression] = useState<Expression | undefined>(),
     [menu, setMenu] = useState(false),
     [busy, setBusy] = useState(false);
-  const [keyBadge, setKeyBadge] = useState<KeyBadge | undefined>();
+  const [keyBadges, setKeyBadges] = useState<KeyBadge[]>([]);
   const [effect, setEffect] = useState<string | undefined>();
   const [hoverDim, setHoverDim] = useState(false);
   const [rendererEpoch, setRendererEpoch] = useState(0);
@@ -120,28 +124,51 @@ export function App() {
         ['move', 'left', 'right', 'wheel'].includes(s)
       )
         return;
-      m.current.signal(s, Date.now(), x, y);
+      if (key?.phase !== 'up' && !key?.repeat) m.current.signal(s, Date.now(), x, y);
       presentation.current.input(
         s,
         Date.now(),
         x,
         y,
         source === 'gamepad' ? 'keyboard_mouse' : data.settings.inputMode,
+        key,
       );
-      if (data.settings.keyOverlayEnabled && key)
-        setKeyBadge((current) => nextKeyBadge(key, Date.now(), current));
+      if (data.settings.keyOverlayEnabled && key?.phase === 'down')
+        setKeyBadges((current) =>
+          nextKeyBadges(
+            key,
+            Date.now(),
+            current,
+            data.settings.multiKeyOverlayEnabled,
+            data.settings.keyOverlayRepeatEnabled,
+            data.settings.keyOverlayMaxKeys,
+          ),
+        );
       redraw((n) => n + 1);
     },
-    [data.settings.inputMode, data.settings.keyOverlayEnabled],
+    [
+      data.settings.inputMode,
+      data.settings.keyOverlayEnabled,
+      data.settings.multiKeyOverlayEnabled,
+      data.settings.keyOverlayMaxKeys,
+      data.settings.keyOverlayRepeatEnabled,
+    ],
   );
   useEffect(() => {
-    if (!keyBadge) return;
+    if (!keyBadges.length) return;
     const timer = window.setTimeout(
-      () => setKeyBadge((current) => (current?.id === keyBadge.id ? undefined : current)),
-      KEY_BADGE_MS,
+      () => setKeyBadges((current) => current.filter((item) => item.expiresAt > Date.now())),
+      Math.max(0, Math.min(...keyBadges.map((item) => item.expiresAt)) - Date.now()),
     );
     return () => window.clearTimeout(timer);
-  }, [keyBadge]);
+  }, [keyBadges]);
+  useEffect(() => {
+    setKeyBadges([]);
+  }, [
+    data.settings.keyOverlayEnabled,
+    data.settings.multiKeyOverlayEnabled,
+    data.settings.keyOverlayMaxKeys,
+  ]);
   useEffect(() => {
     if (data.settings.hoverHideEnabled && !data.settings.passthrough && !menu) return;
     window.clearTimeout(hoverTimer.current);
@@ -254,6 +281,13 @@ export function App() {
       clean?.();
     };
   }, [signal]);
+  useEffect(() => {
+    if (!native || panelWindow) return;
+    const timer = setInterval(() => {
+      void invoke('input_frontend_heartbeat', inputHealth()).catch(console.error);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [panelWindow]);
   useEffect(() => {
     if (!native || panelWindow || !data.settings.gamepadEnabled) return;
     let clean: (() => void) | undefined,
@@ -516,18 +550,38 @@ export function App() {
       <details className="runtime-information">
         <summary>查看运行信息</summary>
         <div className="capabilities">
-          <strong>{preview ? '浏览器预览模式' : 'Windows 原生模式'}</strong>
+          <strong>
+            {preview
+              ? '浏览器预览模式'
+              : platform === 'macos'
+                ? 'macOS 原生模式'
+                : platform === 'windows'
+                  ? 'Windows 原生模式'
+                  : '桌面原生模式'}
+          </strong>
           {!preview && <p>{nativeStatus || '正在读取原生状态…'}</p>}
           <p>
             当前渲染：{renderInfo.actual}；{renderInfo.live2d}。
           </p>
           <p>备用分层素材：{renderInfo.layers}。</p>
           {native && (
-            <button
-              onClick={() => void invoke<string>('native_status').then(setNativeStatus).catch(fail)}
-            >
-              刷新监听状态
-            </button>
+            <>
+              <button
+                onClick={() =>
+                  void invoke<string>('native_status').then(setNativeStatus).catch(fail)
+                }
+              >
+                刷新监听状态
+              </button>
+              {platform === 'windows' && (
+                <>
+                  <button onClick={() => void invoke('restart_input_compatibility').catch(fail)}>
+                    以管理员身份重启
+                  </button>
+                  <p>仅用于高权限游戏的输入兼容；Windows 会要求确认，取消后桌宠继续运行</p>
+                </>
+              )}
+            </>
           )}
         </div>
       </details>
@@ -653,9 +707,19 @@ export function App() {
         }
       }}
     >
-      {data.settings.keyOverlayEnabled && keyBadge && (
-        <div className="key-badge" key={keyBadge.id} aria-label={`当前按键 ${keyBadge.label}`}>
-          {keyBadge.label}
+      {data.settings.keyOverlayEnabled && keyBadges.length > 0 && (
+        <div className="key-badges" aria-label="按键浮显">
+          {keyBadges.map((badge) => (
+            <div
+              className="key-badge changli-control"
+              key={badge.id}
+              style={{ animationDuration: `${KEY_BADGE_MS}ms` }}
+              aria-label={`当前按键 ${badge.label}`}
+            >
+              <span className="key-badge-label">{badge.label}</span>
+              <ChangliEmblem />
+            </div>
+          ))}
         </div>
       )}
       {effect && (
@@ -683,8 +747,9 @@ export function App() {
       />
       {!panelWindow && (
         <button
-          className="drag-handle"
+          className="drag-handle changli-control"
           aria-label="拖动桌宠"
+          title="拖动桌宠"
           onPointerDown={(e) =>
             drag(
               e,
@@ -697,7 +762,12 @@ export function App() {
             )
           }
         >
-          ⠿
+          <ChangliEmblem />
+          <svg className="drag-grip" viewBox="0 0 12 4" aria-hidden="true">
+            {[2, 6, 10].map((x) => (
+              <circle key={x} cx={x} cy="2" r="0.65" fill="currentColor" />
+            ))}
+          </svg>
         </button>
       )}
       {menu &&
@@ -721,7 +791,7 @@ export function App() {
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.12</span>
+            <i /> 浏览器预览 <span>v0.7.15</span>
           </div>
         </header>
       )}

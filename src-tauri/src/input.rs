@@ -1,12 +1,118 @@
-//! Native-only semantic conversion. Show one physical key label transiently;
+//! Native-only semantic conversion. Show physical key labels transiently;
 //! never translate keys to text, log keycodes, intercept, or inject input.
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use tauri::{Emitter, Manager};
 pub static ACTIVE: AtomicBool = AtomicBool::new(false);
+pub static RAW_ACTIVE: AtomicBool = AtomicBool::new(false);
+pub static POLL_ACTIVE: AtomicBool = AtomicBool::new(false);
+pub static ELEVATED: AtomicBool = AtomicBool::new(false);
+pub fn elevate_at_startup(identifier: &str) -> bool {
+    #[cfg(windows)]
+    {
+        windows::elevate_at_startup(identifier)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = identifier;
+        false
+    }
+}
+#[tauri::command]
+pub async fn restart_input_compatibility(app: tauri::AppHandle) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        tauri::async_runtime::spawn_blocking(windows::launch_elevated)
+            .await
+            .map_err(|e| e.to_string())??;
+        // UAC cancellation returns an error and leaves this instance running.
+        app.exit(0);
+        Ok(())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = app;
+        Err("仅 Windows 需要管理员输入兼容模式".into())
+    }
+}
+static RAW_KEYS: AtomicU64 = AtomicU64::new(0);
+static RAW_MOUSE: AtomicU64 = AtomicU64::new(0);
+static POLL_KEYS: AtomicU64 = AtomicU64::new(0);
+static POLL_MOUSE: AtomicU64 = AtomicU64::new(0);
+static DROPPED: AtomicU64 = AtomicU64::new(0);
+static FRONTEND_INPUT: AtomicU64 = AtomicU64::new(0);
+static FRONTEND_FRAMES: AtomicU64 = AtomicU64::new(0);
+static FRAME_AGE: AtomicU64 = AtomicU64::new(0);
+static HEARTBEAT_AT: AtomicU64 = AtomicU64::new(0);
+// Latest external foreground permission comparison, not app names or history.
+static HIGHER_FOREGROUND: AtomicBool = AtomicBool::new(false);
+fn uptime_ms() -> u64 {
+    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    START
+        .get_or_init(std::time::Instant::now)
+        .elapsed()
+        .as_millis() as u64
+}
+#[tauri::command]
+pub fn input_frontend_heartbeat(
+    window: tauri::WebviewWindow,
+    received: u64,
+    frames: u64,
+    frame_age_ms: u64,
+) {
+    if window.label() != "pet" {
+        return;
+    }
+    FRONTEND_INPUT.store(received, Ordering::Relaxed);
+    FRONTEND_FRAMES.store(frames, Ordering::Relaxed);
+    FRAME_AGE.store(frame_age_ms, Ordering::Relaxed);
+    HEARTBEAT_AT.store(uptime_ms().max(1), Ordering::Relaxed);
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InputDiagnostics {
+    raw_active: bool,
+    poll_active: bool,
+    raw_keyboard: u64,
+    raw_mouse: u64,
+    poll_keyboard: u64,
+    poll_mouse: u64,
+    emitted: u64,
+    dropped: u64,
+    frontend_received: u64,
+    rendered_frames: u64,
+    heartbeat_age_ms: Option<u64>,
+    frame_age_ms: Option<u64>,
+    higher_foreground: bool,
+}
+#[tauri::command]
+pub fn input_diagnostics() -> InputDiagnostics {
+    let heartbeat = HEARTBEAT_AT.load(Ordering::Relaxed);
+    let age = (heartbeat != 0).then(|| uptime_ms().saturating_sub(heartbeat));
+    InputDiagnostics {
+        raw_active: RAW_ACTIVE.load(Ordering::Relaxed),
+        poll_active: POLL_ACTIVE.load(Ordering::Relaxed),
+        raw_keyboard: RAW_KEYS.load(Ordering::Relaxed),
+        raw_mouse: RAW_MOUSE.load(Ordering::Relaxed),
+        poll_keyboard: POLL_KEYS.load(Ordering::Relaxed),
+        poll_mouse: POLL_MOUSE.load(Ordering::Relaxed),
+        emitted: LEFT.load(Ordering::Relaxed)
+            + RIGHT.load(Ordering::Relaxed)
+            + SPECIAL.load(Ordering::Relaxed)
+            + MOUSE.load(Ordering::Relaxed),
+        dropped: DROPPED.load(Ordering::Relaxed),
+        frontend_received: FRONTEND_INPUT.load(Ordering::Relaxed),
+        rendered_frames: FRONTEND_FRAMES.load(Ordering::Relaxed),
+        heartbeat_age_ms: age,
+        frame_age_ms: age.map(|age| FRAME_AGE.load(Ordering::Relaxed).saturating_add(age)),
+        higher_foreground: HIGHER_FOREGROUND.load(Ordering::Relaxed),
+    }
+}
 static SETTINGS_EDITOR: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
 static MENU_EDITOR: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
 pub fn register_editor(window: &tauri::WebviewWindow) {
+    #[cfg(not(windows))]
+    let _ = window;
     #[cfg(windows)]
     if let Ok(handle) = window.hwnd() {
         let target = if window.label() == "pet-menu" {
@@ -31,17 +137,23 @@ static MOUSE: AtomicU64 = AtomicU64::new(0);
 mod macos;
 pub fn summary() -> String {
     #[cfg(target_os = "macos")]
-    if !ACTIVE.load(Ordering::Relaxed) {
-        return macos::status().into();
-    }
-    format!(
-        "本次运行已发送动作：左键区 {}、右键区 {}、特殊键 {}、鼠标 {}（仅内存计数）。",
+    return macos::summary();
+    #[cfg(not(target_os = "macos"))]
+    {
+        let diagnostics = input_diagnostics();
+        format!(
+        "本次运行已发送动作：左键区 {}、右键区 {}、特殊键 {}、鼠标 {}。原始接收：键盘 {}、鼠标 {}；备用接收：键盘 {}、鼠标 {}；画面收到 {}、绘制 {} 帧（仅内存计数）。{}{}",
         LEFT.load(Ordering::Relaxed),
         RIGHT.load(Ordering::Relaxed),
         SPECIAL.load(Ordering::Relaxed),
-        MOUSE.load(Ordering::Relaxed)
+        MOUSE.load(Ordering::Relaxed), diagnostics.raw_keyboard, diagnostics.raw_mouse,
+        diagnostics.poll_keyboard, diagnostics.poll_mouse, diagnostics.frontend_received, diagnostics.rendered_frames,
+        if diagnostics.higher_foreground { " 前台程序权限高于桌宠；Windows可能限制输入读取，可尝试以管理员身份运行桌宠。" } else { "" },
+        if ELEVATED.load(Ordering::Relaxed) { " 当前为管理员兼容模式。" } else { " 当前为普通权限模式。" }
     )
+    }
 }
+
 #[derive(Clone, Serialize)]
 pub struct Input {
     signal: &'static str,
@@ -54,11 +166,13 @@ pub struct Input {
 pub struct KeyDisplay {
     label: &'static str,
     phase: &'static str,
+    repeat: bool,
+    code: u32,
 }
 
 // Physical coordinates and the pet's physical bounds share the same DPI space.
 // Looking at a stationary cursor must not depend on how fast it got there.
-fn cursor_gaze(point: (f64, f64), origin: (f64, f64), size: (f64, f64)) -> (f64, f64) {
+pub(crate) fn cursor_gaze(point: (f64, f64), origin: (f64, f64), size: (f64, f64)) -> (f64, f64) {
     let center = (origin.0 + size.0 / 2.0, origin.1 + size.1 / 2.0);
     let radius = (size.0 * 1.4).max(240.0);
     (
@@ -118,6 +232,7 @@ pub fn key_label(vk: u32) -> Option<&'static str> {
 #[cfg(windows)]
 mod windows {
     use super::*;
+    use crate::input_merge::InputMerge;
     use std::{
         cell::Cell,
         ptr::null_mut,
@@ -127,13 +242,140 @@ mod windows {
         },
         time::{Duration, Instant},
     };
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::GetAsyncKeyState;
     use windows_sys::Win32::{
         Foundation::*,
-        System::{LibraryLoader::GetModuleHandleW, Threading::GetCurrentProcessId},
-        UI::WindowsAndMessaging::*,
+        Security::*,
+        System::{LibraryLoader::GetModuleHandleW, Threading::*},
+        UI::{Input::*, WindowsAndMessaging::*},
     };
+    static MERGE: OnceLock<std::sync::Mutex<InputMerge>> = OnceLock::new();
+    static RAW_MOVE_AT: AtomicU64 = AtomicU64::new(0);
+    static HELD: [AtomicBool; 256] = [const { AtomicBool::new(false) }; 256];
+    fn key_index(vk: u32) -> usize {
+        (match vk {
+            0xa0 | 0xa1 => 0x10,
+            0xa2 | 0xa3 => 0x11,
+            0xa4 | 0xa5 => 0x12,
+            _ => vk.min(255),
+        }) as usize
+    }
+    pub fn elevate_at_startup(identifier: &str) -> bool {
+        let elevated =
+            unsafe { integrity_level(GetCurrentProcessId()) }.is_some_and(|level| level >= 0x3000);
+        ELEVATED.store(elevated, Ordering::Relaxed);
+        if elevated || std::env::args().any(|arg| arg == "--elevation-attempted") {
+            return false;
+        }
+        let mut folder = [0u16; 260];
+        let preference = unsafe {
+            use windows_sys::Win32::UI::Shell::{
+                SHGetFolderPathW, CSIDL_APPDATA, SHGFP_TYPE_CURRENT,
+            };
+            if SHGetFolderPathW(
+                null_mut(),
+                CSIDL_APPDATA as i32,
+                null_mut(),
+                SHGFP_TYPE_CURRENT as u32,
+                folder.as_mut_ptr(),
+            ) < 0
+            {
+                Some(false)
+            } else {
+                let length = folder.iter().position(|c| *c == 0).unwrap_or(folder.len());
+                let path = std::path::PathBuf::from(String::from_utf16_lossy(&folder[..length]))
+                    .join(identifier)
+                    .join("companion.sqlite3");
+                if !path.exists() {
+                    Some(true)
+                } else {
+                    Some(
+                        rusqlite::Connection::open_with_flags(
+                            path,
+                            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+                        )
+                        .ok()
+                        .and_then(|db| {
+                            db.query_row("SELECT json FROM state WHERE id=1", [], |row| {
+                                row.get::<_, String>(0)
+                            })
+                            .ok()
+                        })
+                        .and_then(|raw| serde_json::from_str::<serde_json::Value>(&raw).ok())
+                        .map(|data| {
+                            data["settings"]["elevatedInputModeEnabled"]
+                                .as_bool()
+                                .unwrap_or(true)
+                        })
+                        .unwrap_or(false),
+                    )
+                }
+            }
+        };
+        // An existing opt-out wins; missing preference uses the requested
+        // default. UAC cancellation continues ordinary desktop mode.
+        preference.unwrap_or(true) && launch_elevated().is_ok()
+    }
+    pub fn launch_elevated() -> Result<(), String> {
+        use std::os::windows::ffi::OsStrExt;
+        use windows_sys::Win32::UI::Shell::ShellExecuteW;
+        let executable = std::env::current_exe().map_err(|e| e.to_string())?;
+        let file: Vec<u16> = executable
+            .as_os_str()
+            .encode_wide()
+            .chain(Some(0))
+            .collect();
+        let directory: Vec<u16> = executable
+            .parent()
+            .ok_or("程序目录不存在")?
+            .as_os_str()
+            .encode_wide()
+            .chain(Some(0))
+            .collect();
+        let verb: Vec<u16> = "runas\0".encode_utf16().collect();
+        // Carry only our opt-in local diagnostics flag. Never shell-compose
+        // arbitrary caller arguments or change autostart elevation settings.
+        let parameters: Vec<u16> =
+            if std::env::args().any(|arg| arg == "--local-input-diagnostics") {
+                "--elevation-attempted --local-input-diagnostics\0"
+            } else {
+                "--elevation-attempted\0"
+            }
+            .encode_utf16()
+            .collect();
+        let result = unsafe {
+            ShellExecuteW(
+                null_mut(),
+                verb.as_ptr(),
+                file.as_ptr(),
+                parameters.as_ptr(),
+                directory.as_ptr(),
+                SW_SHOWNORMAL,
+            )
+        };
+        if result as usize <= 32 {
+            return Err("管理员重启未完成或 UAC 已取消；当前桌宠继续运行".into());
+        }
+        Ok(())
+    }
+    fn raw_edge(vk: u32, down: bool) -> bool {
+        if !down {
+            release_key(vk);
+        }
+        let vk = match vk {
+            0xa0 | 0xa1 => 0x10,
+            0xa2 | 0xa3 => 0x11,
+            0xa4 | 0xa5 => 0x12,
+            _ => vk,
+        };
+        MERGE
+            .get_or_init(Default::default)
+            .lock()
+            .is_ok_and(|mut merge| merge.raw(vk as usize, down, uptime_ms()))
+    }
     static SEND: OnceLock<SyncSender<Input>> = OnceLock::new();
     thread_local! {static MOVE_TIME:Cell<Option<Instant>>=const{Cell::new(None)};}
+    thread_local! {static RAW_CURSOR:Cell<Option<((i32,i32),Instant,(f64,f64))>>=const{Cell::new(None)};}
     unsafe fn own_editor() -> bool {
         let foreground = GetForegroundWindow();
         let mut pid = 0;
@@ -147,35 +389,447 @@ mod windows {
     }
     fn send(signal: &'static str, x: f64, y: f64, key: Option<KeyDisplay>) {
         if let Some(tx) = SEND.get() {
-            let _ = tx.try_send(Input { signal, x, y, key });
+            if tx.try_send(Input { signal, x, y, key }).is_err() {
+                DROPPED.fetch_add(1, Ordering::Relaxed);
+            }
         }
     }
-    unsafe extern "system" fn keyboard(code: i32, w: WPARAM, l: LPARAM) -> LRESULT {
-        if code >= 0 && (w as u32 == WM_KEYDOWN || w as u32 == WM_SYSKEYDOWN) && !own_editor() {
-            let event = &*(l as *const KBDLLHOOKSTRUCT);
-            let signal = match event.vkCode {
-                0x0d => "enter",
-                0x08 => "backspace",
-                0x20 => "space",
-                vk => crate::model::key_region(vk),
-            };
-            send(
-                signal,
-                0.0,
-                crate::model::key_depth(event.vkCode),
-                key_label(event.vkCode).map(|label| KeyDisplay {
-                    label,
-                    phase: "down",
-                }),
+    fn key_signal(vk: u32) -> &'static str {
+        match vk {
+            0x0d => "enter",
+            0x08 => "backspace",
+            0x20 => "space",
+            vk => crate::model::key_region(vk),
+        }
+    }
+    fn send_key(vk: u32) {
+        send(
+            key_signal(vk),
+            0.0,
+            crate::model::key_depth(vk),
+            Some(KeyDisplay {
+                label: key_label(vk).unwrap_or("Key"),
+                phase: "down",
+                repeat: HELD[key_index(vk)].swap(true, Ordering::Relaxed),
+                code: key_index(vk) as u32,
+            }),
+        );
+    }
+    fn release_key(vk: u32) {
+        if !HELD[key_index(vk)].swap(false, Ordering::Relaxed) {
+            return;
+        }
+        send(
+            key_signal(vk),
+            0.0,
+            crate::model::key_depth(vk),
+            Some(KeyDisplay {
+                label: key_label(vk).unwrap_or("Key"),
+                phase: "up",
+                repeat: false,
+                code: key_index(vk) as u32,
+            }),
+        );
+    }
+    fn raw_key_down(event: &RAWKEYBOARD) -> bool {
+        event.VKey != 255
+            && event.Flags as u32 & RI_KEY_BREAK == 0
+            && (event.Message == WM_KEYDOWN || event.Message == WM_SYSKEYDOWN)
+    }
+    unsafe extern "system" fn raw_window(
+        window: HWND,
+        message: u32,
+        w: WPARAM,
+        l: LPARAM,
+    ) -> LRESULT {
+        if message == WM_INPUT {
+            let mut event = RAWINPUT::default();
+            let mut size = std::mem::size_of::<RAWINPUT>() as u32;
+            let read = GetRawInputData(
+                l as HRAWINPUT,
+                RID_INPUT,
+                &mut event as *mut _ as *mut _,
+                &mut size,
+                std::mem::size_of::<RAWINPUTHEADER>() as u32,
             );
+            if read != u32::MAX && read >= std::mem::size_of::<RAWINPUTHEADER>() as u32 {
+                match event.header.dwType {
+                    RIM_TYPEKEYBOARD => {
+                        RAW_KEYS.fetch_add(1, Ordering::Relaxed);
+                        let key = event.data.keyboard;
+                        if key.VKey != 255 {
+                            let down = raw_key_down(&key);
+                            if raw_edge(key.VKey as u32, down) && !own_editor() {
+                                send_key(key.VKey as u32);
+                            }
+                        }
+                    }
+                    RIM_TYPEMOUSE => {
+                        RAW_MOUSE.fetch_add(1, Ordering::Relaxed);
+                        let mouse = event.data.mouse;
+                        let buttons = mouse.Anonymous.Anonymous;
+                        if crate::pet_menu::is_open()
+                            && buttons.usButtonFlags as u32
+                                & (RI_MOUSE_LEFT_BUTTON_DOWN
+                                    | RI_MOUSE_RIGHT_BUTTON_DOWN
+                                    | RI_MOUSE_MIDDLE_BUTTON_DOWN)
+                                != 0
+                        {
+                            let mut point = POINT::default();
+                            if GetCursorPos(&mut point) != 0 {
+                                send(
+                                    if buttons.usButtonFlags as u32 & RI_MOUSE_RIGHT_BUTTON_DOWN
+                                        != 0
+                                    {
+                                        "__menu_outside_right"
+                                    } else {
+                                        "__menu_outside_click"
+                                    },
+                                    point.x as f64,
+                                    point.y as f64,
+                                    None,
+                                );
+                            }
+                        }
+                        for (vk, down, up, signal) in [
+                            (
+                                1,
+                                RI_MOUSE_LEFT_BUTTON_DOWN,
+                                RI_MOUSE_LEFT_BUTTON_UP,
+                                "left",
+                            ),
+                            (
+                                2,
+                                RI_MOUSE_RIGHT_BUTTON_DOWN,
+                                RI_MOUSE_RIGHT_BUTTON_UP,
+                                "right",
+                            ),
+                            (
+                                4,
+                                RI_MOUSE_MIDDLE_BUTTON_DOWN,
+                                RI_MOUSE_MIDDLE_BUTTON_UP,
+                                "mouse",
+                            ),
+                        ] {
+                            if buttons.usButtonFlags as u32 & up != 0 {
+                                raw_edge(vk, false);
+                            }
+                            if buttons.usButtonFlags as u32 & down != 0
+                                && raw_edge(vk, true)
+                                && !own_editor()
+                            {
+                                send(signal, 0.0, 0.0, None);
+                            }
+                        }
+                        if own_editor() {
+                            return DefWindowProcW(window, message, w, l);
+                        }
+                        if buttons.usButtonFlags as u32 & (RI_MOUSE_WHEEL | RI_MOUSE_HWHEEL) != 0 {
+                            send(
+                                "wheel",
+                                0.0,
+                                -(buttons.usButtonData as i16).signum() as f64,
+                                None,
+                            );
+                        }
+                        if mouse.lLastX != 0 || mouse.lLastY != 0 {
+                            RAW_MOVE_AT.store(uptime_ms().max(1), Ordering::Relaxed);
+                            let now = Instant::now();
+                            MOVE_TIME.with(|time| {
+                                if time.get().is_some_and(|last| {
+                                    now.duration_since(last) < Duration::from_millis(33)
+                                }) {
+                                    return;
+                                }
+                                time.set(Some(now));
+                                let mut point = POINT::default();
+                                if GetCursorPos(&mut point) == 0 {
+                                    return;
+                                }
+                                RAW_CURSOR.with(|state| {
+                                    let current = (point.x, point.y);
+                                    let (last, since, mut offset) =
+                                        state.get().unwrap_or((current, now, (0.0, 0.0)));
+                                    if current == last
+                                        && mouse.usFlags & MOUSE_MOVE_ABSOLUTE == 0
+                                        && now.duration_since(since) >= Duration::from_millis(100)
+                                    {
+                                        // Games can lock the cursor while physical mouse deltas continue.
+                                        offset = (
+                                            (offset.0 + mouse.lLastX as f64 / 240.0)
+                                                .clamp(-1.0, 1.0),
+                                            (offset.1 + mouse.lLastY as f64 / 240.0)
+                                                .clamp(-1.0, 1.0),
+                                        );
+                                        state.set(Some((current, since, offset)));
+                                        send("__relative_move", offset.0, offset.1, None);
+                                    } else {
+                                        state.set(Some((
+                                            current,
+                                            if current == last { since } else { now },
+                                            (0.0, 0.0),
+                                        )));
+                                        send("move", point.x as f64, point.y as f64, None);
+                                    }
+                                });
+                            });
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        // Never consume or inject input into the foreground game.
+        DefWindowProcW(window, message, w, l)
+    }
+    unsafe fn integrity_level(pid: u32) -> Option<u32> {
+        let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if process.is_null() {
+            return None;
+        }
+        let mut token = null_mut();
+        let opened = OpenProcessToken(process, TOKEN_QUERY, &mut token) != 0;
+        CloseHandle(process);
+        if !opened {
+            return None;
+        }
+        let mut size = 0;
+        GetTokenInformation(token, TokenIntegrityLevel, null_mut(), 0, &mut size);
+        // u64 storage supplies the alignment required by TOKEN_MANDATORY_LABEL.
+        let mut buffer = vec![0u64; (size as usize).div_ceil(8)];
+        let result = if size > 0
+            && GetTokenInformation(
+                token,
+                TokenIntegrityLevel,
+                buffer.as_mut_ptr().cast(),
+                size,
+                &mut size,
+            ) != 0
+        {
+            let label = &*buffer.as_ptr().cast::<TOKEN_MANDATORY_LABEL>();
+            let count = *GetSidSubAuthorityCount(label.Label.Sid);
+            (count > 0).then(|| *GetSidSubAuthority(label.Label.Sid, count as u32 - 1))
+        } else {
+            None
+        };
+        CloseHandle(token);
+        result
+    }
+    fn start_polling() {
+        std::thread::spawn(move || unsafe {
+            // Observe the current high bit only. The "recent press" low bit is
+            // shared with other processes and cannot be used reliably.
+            let keys: Vec<u32> = (8..=254).filter(|vk| !matches!(vk, 0xa0..=0xa5)).collect();
+            let mut cursor = POINT::default();
+            GetCursorPos(&mut cursor);
+            let mut next_permission = 0;
+            let mut polled = [false; 256];
+            let own_level = integrity_level(GetCurrentProcessId());
+            POLL_ACTIVE.store(true, Ordering::Relaxed);
+            ACTIVE.store(true, Ordering::Relaxed);
+            loop {
+                let now = uptime_ms();
+                let editing = own_editor();
+                for vk in keys.iter().copied().chain([1, 2, 4]) {
+                    let down = GetAsyncKeyState(vk as i32) < 0;
+                    if polled[vk as usize] && !down {
+                        if vk >= 8 {
+                            release_key(vk);
+                        }
+                    }
+                    polled[vk as usize] = down;
+                    let edge = MERGE
+                        .get_or_init(Default::default)
+                        .lock()
+                        .is_ok_and(|mut merge| merge.poll(vk as usize, down, now, vk >= 8));
+                    if !edge {
+                        continue;
+                    }
+                    if vk >= 8 {
+                        if !editing {
+                            POLL_KEYS.fetch_add(1, Ordering::Relaxed);
+                            send_key(vk);
+                        }
+                    } else {
+                        let swapped = GetSystemMetrics(SM_SWAPBUTTON) != 0;
+                        let right = (vk == 2) ^ (swapped && vk != 4);
+                        let mut point = POINT::default();
+                        if crate::pet_menu::is_open() && GetCursorPos(&mut point) != 0 {
+                            send(
+                                if right {
+                                    "__menu_outside_right"
+                                } else {
+                                    "__menu_outside_click"
+                                },
+                                point.x as f64,
+                                point.y as f64,
+                                None,
+                            );
+                        }
+                        if !editing {
+                            POLL_MOUSE.fetch_add(1, Ordering::Relaxed);
+                            send(
+                                if vk == 4 {
+                                    "mouse"
+                                } else if right {
+                                    "right"
+                                } else {
+                                    "left"
+                                },
+                                0.0,
+                                0.0,
+                                None,
+                            );
+                        }
+                    }
+                }
+                let mut point = POINT::default();
+                if GetCursorPos(&mut point) != 0 && (point.x != cursor.x || point.y != cursor.y) {
+                    cursor = point;
+                    // Use raw relative movement when available, especially
+                    // when a game locks/recenters its cursor.
+                    if !editing && now.saturating_sub(RAW_MOVE_AT.load(Ordering::Relaxed)) > 100 {
+                        POLL_MOUSE.fetch_add(1, Ordering::Relaxed);
+                        send("move", point.x as f64, point.y as f64, None);
+                    }
+                }
+                if now >= next_permission {
+                    next_permission = now + 500;
+                    let mut pid = 0;
+                    GetWindowThreadProcessId(GetForegroundWindow(), &mut pid);
+                    if pid != 0 && pid != GetCurrentProcessId() {
+                        HIGHER_FOREGROUND.store(
+                            own_level
+                                .zip(integrity_level(pid))
+                                .is_some_and(|(own, front)| front > own),
+                            Ordering::Relaxed,
+                        );
+                    }
+                }
+                std::thread::sleep(Duration::from_millis(12));
+            }
+        });
+    }
+    unsafe fn register_raw_sink(module: HINSTANCE) -> HWND {
+        let name: Vec<u16> = "ChangliBackgroundInput\0".encode_utf16().collect();
+        let class = WNDCLASSW {
+            lpfnWndProc: Some(raw_window),
+            hInstance: module,
+            lpszClassName: name.as_ptr(),
+            ..Default::default()
+        };
+        if RegisterClassW(&class) == 0 {
+            return null_mut();
+        }
+        let window = CreateWindowExW(
+            0,
+            name.as_ptr(),
+            name.as_ptr(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            HWND_MESSAGE,
+            null_mut(),
+            module,
+            null_mut(),
+        );
+        if window.is_null() {
+            return window;
+        }
+        // INPUTSINK observes only. Do not use NOLEGACY/CAPTUREMOUSE/NOHOTKEYS.
+        let devices = [
+            RAWINPUTDEVICE {
+                usUsagePage: 1,
+                usUsage: 6,
+                dwFlags: RIDEV_INPUTSINK,
+                hwndTarget: window,
+            },
+            RAWINPUTDEVICE {
+                usUsagePage: 1,
+                usUsage: 2,
+                dwFlags: RIDEV_INPUTSINK,
+                hwndTarget: window,
+            },
+        ];
+        if RegisterRawInputDevices(
+            devices.as_ptr(),
+            devices.len() as u32,
+            std::mem::size_of::<RAWINPUTDEVICE>() as u32,
+        ) == 0
+        {
+            DestroyWindow(window);
+            return null_mut();
+        }
+        window
+    }
+    unsafe extern "system" fn keyboard(code: i32, w: WPARAM, l: LPARAM) -> LRESULT {
+        if code >= 0 && [WM_KEYDOWN, WM_SYSKEYDOWN, WM_KEYUP, WM_SYSKEYUP].contains(&(w as u32)) {
+            let event = &*(l as *const KBDLLHOOKSTRUCT);
+            let down = w as u32 == WM_KEYDOWN || w as u32 == WM_SYSKEYDOWN;
+            if raw_edge(event.vkCode, down) && !own_editor() {
+                send_key(event.vkCode);
+            }
         }
         CallNextHookEx(null_mut(), code, w, l)
     }
     unsafe extern "system" fn mouse(code: i32, w: WPARAM, l: LPARAM) -> LRESULT {
-        if code >= 0 && !own_editor() {
+        // Fresh clicks outside dismiss the palette; drag moves and releases
+        // do not. Queue before own_editor: foreground can still be the menu.
+        if code >= 0
+            && [WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN].contains(&(w as u32))
+            && crate::pet_menu::is_open()
+        {
+            let event = &*(l as *const MSLLHOOKSTRUCT);
+            send(
+                if w as u32 == WM_RBUTTONDOWN {
+                    "__menu_outside_right"
+                } else {
+                    "__menu_outside_click"
+                },
+                event.pt.x as f64,
+                event.pt.y as f64,
+                None,
+            );
+        }
+        if !RAW_ACTIVE.load(Ordering::Relaxed) && code >= 0 && !own_editor() {
             match w as u32 {
-                WM_LBUTTONDOWN => send("left", 0.0, 0.0, None),
-                WM_RBUTTONDOWN => send("right", 0.0, 0.0, None),
+                WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => {
+                    let vk = if w as u32 == WM_LBUTTONDOWN {
+                        1
+                    } else if w as u32 == WM_RBUTTONDOWN {
+                        2
+                    } else {
+                        4
+                    };
+                    if raw_edge(vk, true) {
+                        send(
+                            if vk == 1 {
+                                "left"
+                            } else if vk == 2 {
+                                "right"
+                            } else {
+                                "mouse"
+                            },
+                            0.0,
+                            0.0,
+                            None,
+                        );
+                    }
+                }
+                WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => {
+                    raw_edge(
+                        if w as u32 == WM_LBUTTONUP {
+                            1
+                        } else if w as u32 == WM_RBUTTONUP {
+                            2
+                        } else {
+                            4
+                        },
+                        false,
+                    );
+                }
                 WM_MOUSEWHEEL | WM_MOUSEHWHEEL => {
                     let e = &*(l as *const MSLLHOOKSTRUCT);
                     send(
@@ -207,9 +861,25 @@ mod windows {
     pub fn start(app: tauri::AppHandle) {
         let (tx, rx) = sync_channel::<Input>(64);
         let _ = SEND.set(tx);
+        // Registration success does not prove events continue arriving while
+        // a game owns foreground input. Keep an independent observer alive.
+        start_polling();
         std::thread::spawn(move || {
             for mut signal in rx {
-                if signal.signal == "move" {
+                if signal.signal == "__menu_outside_click"
+                    || signal.signal == "__menu_outside_right"
+                {
+                    crate::pet_menu::dismiss_if_outside(
+                        &app,
+                        signal.x as i32,
+                        signal.y as i32,
+                        signal.signal == "__menu_outside_right",
+                    );
+                    continue;
+                }
+                if signal.signal == "__relative_move" {
+                    signal.signal = "move";
+                } else if signal.signal == "move" {
                     let Some(pet) = app.get_webview_window("pet") else {
                         continue;
                     };
@@ -235,9 +905,20 @@ mod windows {
         });
         std::thread::spawn(move || unsafe {
             let module = GetModuleHandleW(std::ptr::null());
-            let key = SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard), module, 0);
-            let mouse_hook = SetWindowsHookExW(WH_MOUSE_LL, Some(mouse), module, 0);
-            if key.is_null() || mouse_hook.is_null() {
+            let raw_window = register_raw_sink(module);
+            let raw = !raw_window.is_null();
+            RAW_ACTIVE.store(raw, Ordering::Relaxed);
+            let key = if raw {
+                null_mut()
+            } else {
+                SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard), module, 0)
+            };
+            let mouse_hook = if raw {
+                null_mut()
+            } else {
+                SetWindowsHookExW(WH_MOUSE_LL, Some(mouse), module, 0)
+            };
+            if !raw && (key.is_null() || mouse_hook.is_null()) {
                 if !key.is_null() {
                     UnhookWindowsHookEx(key);
                 }
@@ -252,10 +933,40 @@ mod windows {
                 TranslateMessage(&msg);
                 DispatchMessageW(&msg);
             }
-            UnhookWindowsHookEx(key);
-            UnhookWindowsHookEx(mouse_hook);
+            if !key.is_null() {
+                UnhookWindowsHookEx(key);
+            }
+            if !mouse_hook.is_null() {
+                UnhookWindowsHookEx(mouse_hook);
+            }
+            if raw {
+                DestroyWindow(raw_window);
+            }
+            RAW_ACTIVE.store(false, Ordering::Relaxed);
             ACTIVE.store(false, Ordering::Relaxed);
         });
+    }
+    #[cfg(test)]
+    mod raw_tests {
+        use super::*;
+        #[test]
+        fn raw_keys_ignore_release_and_invalid_device_keys() {
+            let key = RAWKEYBOARD {
+                VKey: 0x51,
+                Message: WM_KEYDOWN,
+                ..Default::default()
+            };
+            assert!(raw_key_down(&key));
+            assert!(!raw_key_down(&RAWKEYBOARD {
+                Flags: RI_KEY_BREAK as u16,
+                ..key
+            }));
+            assert!(!raw_key_down(&RAWKEYBOARD {
+                Message: WM_KEYUP,
+                ..key
+            }));
+            assert!(!raw_key_down(&RAWKEYBOARD { VKey: 255, ..key }));
+        }
     }
 }
 pub fn start(app: tauri::AppHandle) {
@@ -317,6 +1028,8 @@ mod tests {
             key: Some(KeyDisplay {
                 label: "Z",
                 phase: "down",
+                repeat: false,
+                code: 0x5a,
             }),
         })
         .unwrap();

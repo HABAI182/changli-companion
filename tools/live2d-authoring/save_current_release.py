@@ -22,7 +22,8 @@ def main():
         raise ValueError('Commit intended source first')
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode('utf-8').split('\0')
     files = [ROOT / p for p in tracked if p]
-    progress = sorted(ROOT.glob('PROGRESS-CHECKPOINT-*.md'))[-1]
+    # Dated engineering checkpoints only; promo checkpoints are a separate task.
+    progress = sorted(ROOT.glob('PROGRESS-CHECKPOINT-20*.md'))[-1]
     files += [progress]
     deliveries = list((ROOT / 'deliveries').glob('*-desktop-' + VERSION))
     if len(deliveries) != 1:

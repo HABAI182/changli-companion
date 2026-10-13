@@ -2,6 +2,7 @@
 //! input injection, disk logs, or additional Cargo dependencies.
 use super::*;
 use std::{
+    collections::BTreeMap,
     ffi::c_void,
     ptr,
     sync::{
@@ -34,6 +35,7 @@ extern "C" {
     fn CGEventTapIsEnabled(tap: Ref) -> bool;
     fn CGEventGetIntegerValueField(event: Ref, field: u32) -> i64;
     fn CGEventGetFlags(event: Ref) -> u64;
+    fn CGEventSourceKeyState(state: i32, key: u16) -> bool;
     fn CGEventCreate(source: Ref) -> Ref;
     fn CGEventGetLocation(event: Ref) -> Point;
 }
@@ -46,8 +48,9 @@ extern "C" {
     fn CFRunLoopRemoveSource(runloop: Ref, source: Ref, mode: Ref);
     fn CFRunLoopRunInMode(mode: Ref, seconds: f64, return_after_source: bool) -> i32;
     fn CFMachPortInvalidate(port: Ref);
-    fn CFRelease(value: Ref);
+    fn CFRelease(value: *const c_void);
 }
+static RESET: AtomicU64 = AtomicU64::new(0);
 // 0: starting; 1: awaiting Input Monitoring; 2: tap unavailable.
 static STATUS: AtomicU8 = AtomicU8::new(0);
 pub fn status() -> &'static str {
@@ -56,6 +59,17 @@ pub fn status() -> &'static str {
         2 => "macOS 鼠标视线跟随可用；全局监听注册失败，正在重试。请检查输入监控权限；安全输入期间 macOS 可能暂停键盘事件。",
         _ => "macOS 输入监听正在初始化。",
     }
+}
+
+pub fn summary() -> String {
+    if !ACTIVE.load(Ordering::Relaxed) {
+        return status().into();
+    }
+    let d = input_diagnostics();
+    format!(
+        "macOS 输入监控已启动；原生接收：键盘 {}、鼠标 {}；画面收到 {}、绘制 {} 帧。仅内存计数。",
+        d.raw_keyboard, d.raw_mouse, d.frontend_received, d.rendered_frames
+    )
 }
 
 // Carbon hardware key codes -> the existing physical-key semantic layout.
@@ -180,7 +194,7 @@ fn physical_label(vk: u32) -> Option<&'static str> {
         _ => key_label(vk),
     }
 }
-fn keyboard_input(code: i64) -> Option<Input> {
+fn keyboard_input(code: i64, phase: &'static str, repeat: bool) -> Option<Input> {
     let vk = virtual_key(code)?;
     Some(Input {
         signal: match vk {
@@ -199,40 +213,44 @@ fn keyboard_input(code: i64) -> Option<Input> {
         },
         key: physical_label(vk).map(|label| KeyDisplay {
             label,
-            phase: "down",
+            phase,
+            repeat,
+            code: code as u32,
         }),
     })
 }
-fn modifier_pressed(code: i64, previous: u64, current: u64) -> bool {
-    let mask = match code {
-        57 => 1 << 16,
-        56 | 60 => 1 << 17,
-        59 | 62 => 1 << 18,
-        58 | 61 => 1 << 19,
-        54 | 55 => 1 << 20,
-        63 => 1 << 23,
+fn modifier_down(code: i64, current: u64, held: bool) -> bool {
+    let (mask, device) = match code {
+        56 => (1 << 17, 0x2),
+        60 => (1 << 17, 0x4),
+        59 => (1 << 18, 0x1),
+        62 => (1 << 18, 0x2000),
+        58 => (1 << 19, 0x20),
+        61 => (1 << 19, 0x40),
+        55 => (1 << 20, 0x8),
+        54 => (1 << 20, 0x10),
+        63 => (1 << 23, 0),
         _ => return false,
     };
-    if code == 57 {
-        (previous ^ current) & mask != 0
-    } else {
-        previous & mask == 0 && current & mask != 0
-    }
+    current & mask != 0 && (current & device != 0 || !held)
 }
 struct Event {
     input: Input,
     target_pid: i64,
+    point: Option<crate::macos::Point>,
 }
 struct Tap {
     sender: SyncSender<Event>,
     port: Ref,
-    flags: u64,
+    held: [bool; 128],
 }
 unsafe extern "C" fn callback(_: Ref, kind: u32, event: Ref, context: Ref) -> Ref {
     let tap = &mut *(context as *mut Tap);
     if kind == 0xfffffffe || kind == 0xffffffff {
         // A slow listener can be disabled by macOS. Re-enable only while the
         // user still permits monitoring; never request permissions here.
+        RESET.fetch_add(1, Ordering::Relaxed);
+        tap.held.fill(false);
         if CGPreflightListenEventAccess() {
             CGEventTapEnable(tap.port, true);
         }
@@ -242,17 +260,22 @@ unsafe extern "C" fn callback(_: Ref, kind: u32, event: Ref, context: Ref) -> Re
         return event;
     }
     let input = match kind {
-        10 => keyboard_input(CGEventGetIntegerValueField(event, 9)),
-        12 => {
-            let flags = CGEventGetFlags(event);
+        10 | 11 | 12 => {
             let code = CGEventGetIntegerValueField(event, 9);
-            let pressed = modifier_pressed(code, tap.flags, flags);
-            tap.flags = flags;
-            if pressed {
-                keyboard_input(code)
-            } else {
-                None
+            if !(0..128).contains(&code) {
+                return event;
             }
+            let down = if kind == 12 {
+                // Caps Lock is a toggle, so display one complete press per toggle.
+                code == 57 || modifier_down(code, CGEventGetFlags(event), tap.held[code as usize])
+            } else {
+                kind == 10
+            };
+            let repeat = down
+                && (tap.held[code as usize]
+                    || (kind == 10 && CGEventGetIntegerValueField(event, 8) != 0));
+            tap.held[code as usize] = down;
+            keyboard_input(code, if down { "down" } else { "up" }, repeat)
         }
         1 | 3 => Some(Input {
             signal: if kind == 1 { "left" } else { "right" },
@@ -278,11 +301,49 @@ unsafe extern "C" fn callback(_: Ref, kind: u32, event: Ref, context: Ref) -> Re
         _ => None,
     };
     if let Some(input) = input {
-        // Bounded, nonblocking delivery: never stall the user's input stream.
-        let _ = tap.sender.try_send(Event {
-            input,
-            target_pid: CGEventGetIntegerValueField(event, 40),
-        });
+        let point = if matches!(kind, 1 | 3) {
+            let p = CGEventGetLocation(event);
+            Some(crate::macos::Point { x: p.x, y: p.y })
+        } else {
+            None
+        };
+        if input.key.is_some() {
+            RAW_KEYS.fetch_add(1, Ordering::Relaxed);
+        } else {
+            RAW_MOUSE.fetch_add(1, Ordering::Relaxed);
+        }
+        let target_pid = CGEventGetIntegerValueField(event, 40);
+        let caps_lock = kind == 12 && CGEventGetIntegerValueField(event, 9) == 57;
+        // Losing even one key-up must not leave the new held-hand pose stuck.
+        if tap
+            .sender
+            .try_send(Event {
+                input,
+                target_pid,
+                point,
+            })
+            .is_err()
+        {
+            DROPPED.fetch_add(1, Ordering::Relaxed);
+            RESET.fetch_add(1, Ordering::Relaxed);
+        }
+        if caps_lock {
+            tap.held[57] = false;
+            if let Some(input) = keyboard_input(57, "up", false) {
+                if tap
+                    .sender
+                    .try_send(Event {
+                        input,
+                        target_pid,
+                        point: None,
+                    })
+                    .is_err()
+                {
+                    DROPPED.fetch_add(1, Ordering::Relaxed);
+                    RESET.fetch_add(1, Ordering::Relaxed);
+                }
+            }
+        }
     }
     // The tap is listen-only; returning the original event cannot swallow it.
     event
@@ -303,27 +364,59 @@ fn emit(app: &tauri::AppHandle, input: Input) {
         counter.fetch_add(1, Ordering::Relaxed);
     }
 }
-fn gaze_from_points(
-    point: Point,
-    position: (f64, f64),
-    size: (f64, f64),
-    scale: f64,
-) -> (f64, f64) {
-    // CGEvent locations use desktop points, Tauri outer bounds use physical
-    // pixels. Both origins are the top-left of the main screen, including
-    // negative coordinates. Scale with the pet's screen, never the main DPI.
-    cursor_gaze((point.x * scale, point.y * scale), position, size)
+fn release_all(app: &tauri::AppHandle, held: &mut BTreeMap<u32, Input>) {
+    for (_, mut input) in std::mem::take(held) {
+        if let Some(key) = &mut input.key {
+            key.phase = "up";
+            key.repeat = false;
+        }
+        emit(app, input);
+    }
 }
 pub fn start(app: tauri::AppHandle) {
     let (sender, receiver) = sync_channel::<Event>(64);
     std::thread::spawn(move || {
         let mut previous_gaze = None;
+        let mut held = BTreeMap::new();
+        let mut reset = RESET.load(Ordering::Relaxed);
         let mut last_poll = Instant::now() - Duration::from_millis(33);
         loop {
-            if let Ok(event) = receiver.recv_timeout(Duration::from_millis(16)) {
+            let next = receiver.recv_timeout(Duration::from_millis(16));
+            let generation = RESET.load(Ordering::Relaxed);
+            let editor = own_editor(&app);
+            if reset != generation {
+                release_all(&app, &mut held);
+                reset = generation;
+                for _ in 0..64 {
+                    if receiver.try_recv().is_err() {
+                        break;
+                    }
+                }
+                continue;
+            }
+            if !ACTIVE.load(Ordering::Relaxed) || editor {
+                release_all(&app, &mut held);
+                reset = generation;
+            }
+            if let Ok(event) = next {
+                if let Some(point) = event.point {
+                    crate::macos::dismiss_menu(&app, point, event.input.signal == "right");
+                }
                 let own = (event.target_pid == 0 || event.target_pid == std::process::id() as i64)
-                    && own_editor(&app);
-                if !own {
+                    && editor;
+                let tracked_release = event
+                    .input
+                    .key
+                    .as_ref()
+                    .is_some_and(|key| key.phase == "up" && held.contains_key(&key.code));
+                if !own || tracked_release {
+                    if let Some(key) = &event.input.key {
+                        if key.phase == "up" {
+                            held.remove(&key.code);
+                        } else {
+                            held.insert(key.code, event.input.clone());
+                        }
+                    }
                     emit(&app, event.input);
                 }
             }
@@ -331,17 +424,25 @@ pub fn start(app: tauri::AppHandle) {
                 continue;
             }
             last_poll = Instant::now();
+            // Reconcile the physical state if macOS suppresses a release event
+            // (for example during a secure-input transition).
+            let released: Vec<_> = held
+                .keys()
+                .copied()
+                .filter(|code| unsafe { !CGEventSourceKeyState(0, *code as u16) })
+                .collect();
+            for code in released {
+                if let Some(mut input) = held.remove(&code) {
+                    if let Some(key) = &mut input.key {
+                        key.phase = "up";
+                        key.repeat = false;
+                    }
+                    emit(&app, input);
+                }
+            }
             if own_editor(&app) {
                 continue;
             }
-            let Some(pet) = app.get_webview_window("pet") else {
-                continue;
-            };
-            let (Ok(position), Ok(size), Ok(scale)) =
-                (pet.outer_position(), pet.outer_size(), pet.scale_factor())
-            else {
-                continue;
-            };
             let point = unsafe {
                 let event = CGEventCreate(ptr::null_mut());
                 if event.is_null() {
@@ -351,12 +452,15 @@ pub fn start(app: tauri::AppHandle) {
                 CFRelease(event);
                 point
             };
-            let gaze = gaze_from_points(
-                point,
-                (position.x as f64, position.y as f64),
-                (size.width as f64, size.height as f64),
-                scale,
-            );
+            let Some(gaze) = crate::macos::gaze(
+                &app,
+                crate::macos::Point {
+                    x: point.x,
+                    y: point.y,
+                },
+            ) else {
+                continue;
+            };
             if previous_gaze != Some(gaze) {
                 previous_gaze = Some(gaze);
                 emit(
@@ -379,20 +483,12 @@ pub fn start(app: tauri::AppHandle) {
                 std::thread::sleep(Duration::from_secs(2));
                 continue;
             }
-            let initial = CGEventCreate(ptr::null_mut());
-            let flags = if initial.is_null() {
-                0
-            } else {
-                let flags = CGEventGetFlags(initial);
-                CFRelease(initial);
-                flags
-            };
             let mut tap = Box::new(Tap {
                 sender: sender.clone(),
                 port: ptr::null_mut(),
-                flags,
+                held: [false; 128],
             });
-            let mask = [1, 3, 10, 12, 22]
+            let mask = [1, 3, 10, 11, 12, 22]
                 .iter()
                 .fold(0u64, |mask, kind| mask | (1u64 << kind));
             // Annotated session tap, tail placement, kCGEventTapOptionListenOnly.
@@ -419,6 +515,7 @@ pub fn start(app: tauri::AppHandle) {
                 CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, false);
             }
             ACTIVE.store(false, Ordering::Relaxed);
+            RESET.fetch_add(1, Ordering::Relaxed);
             CFRunLoopRemoveSource(runloop, source, kCFRunLoopDefaultMode);
             CFMachPortInvalidate(port);
             CFRelease(source);
@@ -448,55 +545,65 @@ mod tests {
             (111, 123),
         ] {
             assert_eq!(virtual_key(code), Some(vk));
-            assert_eq!(keyboard_input(code).unwrap().y, crate::model::key_depth(vk));
+            assert_eq!(
+                keyboard_input(code, "down", false).unwrap().y,
+                crate::model::key_depth(vk)
+            );
         }
-        assert_eq!(keyboard_input(36).unwrap().signal, "enter");
-        assert_eq!(keyboard_input(51).unwrap().signal, "backspace");
-        assert_eq!(keyboard_input(49).unwrap().signal, "space");
-        assert_eq!(keyboard_input(55).unwrap().signal, "keyboard_left");
-        assert_eq!(keyboard_input(54).unwrap().signal, "keyboard_right");
-        assert_eq!(keyboard_input(55).unwrap().y, 1.0);
-        assert!(keyboard_input(999).is_none());
+        assert_eq!(keyboard_input(36, "down", false).unwrap().signal, "enter");
+        assert_eq!(
+            keyboard_input(51, "down", false).unwrap().signal,
+            "backspace"
+        );
+        assert_eq!(keyboard_input(49, "down", false).unwrap().signal, "space");
+        assert_eq!(
+            keyboard_input(55, "down", false).unwrap().signal,
+            "keyboard_left"
+        );
+        assert_eq!(
+            keyboard_input(54, "down", false).unwrap().signal,
+            "keyboard_right"
+        );
+        assert_eq!(keyboard_input(55, "down", false).unwrap().y, 1.0);
+        assert!(keyboard_input(999, "down", false).is_none());
     }
     #[test]
     fn labels_are_physical_and_payload_has_no_text() {
-        assert_eq!(keyboard_input(55).unwrap().key.unwrap().label, "Cmd");
-        assert_eq!(keyboard_input(83).unwrap().key.unwrap().label, "1");
-        let payload = serde_json::to_value(keyboard_input(0).unwrap()).unwrap();
+        assert_eq!(
+            keyboard_input(55, "down", false)
+                .unwrap()
+                .key
+                .unwrap()
+                .label,
+            "Cmd"
+        );
+        assert_eq!(
+            keyboard_input(83, "down", false)
+                .unwrap()
+                .key
+                .unwrap()
+                .label,
+            "1"
+        );
+        let payload = serde_json::to_value(keyboard_input(0, "down", false).unwrap()).unwrap();
         assert_eq!(payload["key"]["label"], "A");
         assert!(payload.get("text").is_none());
         assert!(payload.get("keycode").is_none());
     }
     #[test]
-    fn modifier_release_and_repeats_do_not_generate_presses() {
-        assert!(modifier_pressed(56, 0, 1 << 17));
-        assert!(!modifier_pressed(56, 1 << 17, 0));
-        assert!(!modifier_pressed(56, 1 << 17, 1 << 17));
-        assert!(modifier_pressed(55, 0, 1 << 20));
-        assert!(modifier_pressed(57, 1 << 16, 0));
-        assert!(!modifier_pressed(999, 0, u64::MAX));
-    }
-    #[test]
-    fn retina_and_negative_screen_coordinates_match_pet_bounds() {
-        let point = Point {
-            x: -1168.0,
-            y: 460.0,
-        };
-        let one = gaze_from_points(point, (-1600.0, 300.0), (360.0, 320.0), 1.0);
-        let two = gaze_from_points(point, (-3200.0, 600.0), (720.0, 640.0), 2.0);
-        assert_eq!(one, two);
-        assert!((one.0 - 0.5).abs() < 1e-12);
-        assert_eq!(
-            gaze_from_points(
-                Point {
-                    x: -1420.0,
-                    y: 460.0
-                },
-                (-3200.0, 600.0),
-                (720.0, 640.0),
-                2.0
-            ),
-            (0.0, 0.0)
+    fn modifier_sides_and_key_releases_have_distinct_identity() {
+        assert!(modifier_down(56, (1 << 17) | 2, false));
+        assert!(!modifier_down(56, (1 << 17) | 4, true));
+        assert!(modifier_down(60, (1 << 17) | 4, false));
+        assert!(!modifier_down(56, 0, true));
+        let down = keyboard_input(76, "down", false).unwrap().key.unwrap();
+        let up = keyboard_input(76, "up", false).unwrap().key.unwrap();
+        assert_eq!(down.code, up.code);
+        assert_eq!(up.phase, "up");
+        assert_ne!(
+            down.code,
+            keyboard_input(36, "down", false).unwrap().key.unwrap().code
         );
+        assert!(keyboard_input(0, "down", true).unwrap().key.unwrap().repeat);
     }
 }

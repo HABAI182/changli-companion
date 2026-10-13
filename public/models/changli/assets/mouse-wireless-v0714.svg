@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254">
+  <!-- Whole mouse, including the surface previously hidden by the hand. -->
+  <defs><linearGradient id="shell" x1="205" y1="907" x2="278" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#51444b"/><stop offset="1" stop-color="#362d36"/></linearGradient></defs>
+  <path d="M146 964 Q156 930 205 910 L267 899 Q324 894 354 921 L338 965 Q330 993 285 998 L172 995 Q141 990 146 964 Z" fill="url(#shell)" stroke="#281f26" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M315 902 Q341 906 354 922 L333 968 L320 974 L339 920 Q330 910 315 909 Z" fill="#c24750"/>
+  <path d="M266 904 Q235 929 214 956 L193 989" fill="none" stroke="#807178" stroke-width="2" opacity=".75"/>
+  <path d="M178 976 Q227 989 291 981 Q312 978 324 967" fill="none" stroke="#70626b" stroke-width="2.5" opacity=".65"/>
+  <path d="M205 928 Q211 916 221 916 L227 924 L216 942 L210 941 L215 930 Z" fill="#f15b5c" stroke="#9c303a" stroke-width="2"/>
+  <rect x="262" y="916" width="9" height="19" rx="4.5" transform="rotate(26 266 925)" fill="#2d242b" stroke="#bfa47e" stroke-width="1.7"/>
+  <g fill="#d6b685" transform="translate(242 963) rotate(17)">
+    <path d="M0 10 Q-18 6-21-11 Q-10-8-1 2 Q-4-11 6-20 Q11-6 3 4 Q15-6 26-8 Q21 6 5 10 Q12 12 18 19 Q5 18 1 12 Q-5 20-15 20 Q-13 12 0 10 Z"/>
+    <path d="M1 10 Q0 16-2 22" fill="none" stroke="#d6b685" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

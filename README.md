@@ -1,6 +1,6 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.15**，macOS 当前源码适配版 **0.7.15-macos.1**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.15**，macOS 当前适配版 **0.7.15-macos.1**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
@@ -21,7 +21,7 @@
 | 系统 | 当前版本与获取方式 | 文件类型 |
 | --- | --- | --- |
 | Windows x64 | [Windows 0.7.15](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15) | 便携 EXE / EXE 安装包 |
-| macOS Apple Silicon（M 系列） | 0.7.15-macos.1 · [源码编译](#macos-编译与使用) | APP / DMG（编译生成）；最低 macOS 12 |
+| macOS Apple Silicon（M 系列） | [macOS 0.7.15-macos.1](https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1) · [源码编译](#macos-编译与使用) | DMG / APP ZIP；最低 macOS 12 |
 
 右键角色打开互动菜单和设置；拖动键位于键盘右下角。历史版本分别留档，见文末版本索引。
 

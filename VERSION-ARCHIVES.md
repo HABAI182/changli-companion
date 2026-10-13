@@ -46,8 +46,8 @@
 - 本地归档：`deliveries/20261012-desktop-0.7.12-macos.3/`，包含校验清单、发布说明和可续传脚本。
 - **已发布并核对全部 5 个附件的远端 SHA256 与体积：** [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3)。源码保留在独立 [macos-port 分支](https://github.com/HABAI182/changli-companion/tree/macos-port)，版本标签指向真实 macOS 提交。Windows 使用单独 Release。
 
-## macOS 0.7.15 适配预览
+## macOS 0.7.15 适配版
 
 - `0.7.15-macos.1`：基于 `main` 的 0.7.15，共享双手键盘动作、长按与重复键、浮显数量、新素材、设置缩放和首帧显示。
 - Apple Silicon ARM64；保留全局键鼠、视线跟随与 LaunchAgent 登录自启动，新增同屏前台全屏窗口避让及应用例外。macOS 不提供手柄与 Windows 管理员兼容模式。
-- 本版为本地预览，尚未发布；构建产物、源码快照和校验清单保存在源码之外，旧版安装包与发布保持独立。编译与使用见 [README](README.md#macos-编译与使用)。
+- 独立预发布：[0.7.15-macos.1](https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1)，提供 ARM64 DMG、APP ZIP 和 SHA256 清单。源码由 `macos-0.7.15-preview.1` 标签保留；构建产物保存在源码之外。编译与使用见 [README](README.md#macos-编译与使用)。

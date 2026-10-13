@@ -1035,8 +1035,8 @@
       "platform": "macOS",
       "architecture": "arm64",
       "minimumSystemVersion": "12.0",
-      "status": "local-preview",
-      "published": false,
+      "status": "published-prerelease",
+      "published": true,
       "artifactsStoredInSource": false,
       "features": [
         "global-keyboard-down-up-repeat",
@@ -1045,6 +1045,23 @@
         "login-autostart",
         "fullscreen-avoidance",
         "fullscreen-app-exceptions"
+      ],
+      "tag": "macos-0.7.15-preview.1",
+      "releaseUrl": "https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1",
+      "releaseRepository": "Kyusakino/changli-companion-macos",
+      "sourceBranch": "macos-0.7.15",
+      "binaryBuildCommit": "9cb269dfe1f1f12977249fd73483b2e95c72481a",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.15-macos.1-arm64.app.zip",
+          "bytes": 54658859,
+          "sha256": "9aaa01b957e120985291955ca6af8ac3fdd38ca5e836747b4faa138bed9f60b1"
+        },
+        {
+          "file": "changli-companion-0.7.15-macos.1-arm64.dmg",
+          "bytes": 57244637,
+          "sha256": "97810ea73842ba9d4cd71e482b88d62f4cbba2cca09aebea8eba82863059b900"
+        }
       ]
     }
   ]

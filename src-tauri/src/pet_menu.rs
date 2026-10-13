@@ -1,4 +1,26 @@
 use tauri::{Emitter, LogicalSize, Manager, PhysicalPosition, WebviewUrl, WebviewWindowBuilder};
+use std::sync::atomic::{AtomicBool, Ordering};
+static MENU_OPEN: AtomicBool = AtomicBool::new(false);
+pub fn is_open() -> bool { MENU_OPEN.load(Ordering::Relaxed) }
+fn inside(point: (i32, i32), origin: (i32, i32), size: (u32, u32)) -> bool {
+    point.0 >= origin.0 && point.1 >= origin.1 &&
+    point.0 < origin.0.saturating_add_unsigned(size.0) && point.1 < origin.1.saturating_add_unsigned(size.1)
+}
+pub fn dismiss_if_outside(app: &tauri::AppHandle, x: i32, y: i32, right_click: bool) {
+    if !is_open() { return; }
+    let Some(menu) = app.get_webview_window("pet-menu") else { return; };
+    // Right-clicking the pet is an intentional reopen/reposition gesture.
+    if right_click {
+        if let Some(pet) = app.get_webview_window("pet") {
+            if let (Ok(p), Ok(s)) = (pet.outer_position(), pet.outer_size()) {
+                if inside((x, y), (p.x, p.y), (s.width, s.height)) { return; }
+            }
+        }
+    }
+    if let (Ok(p), Ok(s)) = (menu.outer_position(), menu.outer_size()) {
+        if !inside((x, y), (p.x, p.y), (s.width, s.height)) { let _ = close_pet_menu(app.clone()); }
+    }
+}
 
 #[tauri::command]
 pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
@@ -61,6 +83,7 @@ pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
     menu.set_size(LogicalSize::new(260.0, height as f64 / f))
         .map_err(|e| e.to_string())?;
     menu.show().map_err(|e| e.to_string())?;
+    MENU_OPEN.store(true, Ordering::Relaxed);
     menu.set_focus().map_err(|e| e.to_string())
 }
 #[tauri::command]
@@ -73,7 +96,20 @@ pub fn close_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("pet-menu") {
         w.hide().map_err(|e| e.to_string())?;
     }
+    MENU_OPEN.store(false, Ordering::Relaxed);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::inside;
+    #[test]
+    fn outside_click_uses_physical_bounds_even_on_negative_monitor_coordinates() {
+        assert!(inside((-200, 10), (-300, -50), (260, 468)));
+        assert!(!inside((-301, 10), (-300, -50), (260, 468)));
+        assert!(!inside((-40, 10), (-300, -50), (260, 468)));
+        assert!(!inside((-200, 418), (-300, -50), (260, 468)));
+    }
 }
 #[tauri::command]
 pub fn menu_action(app: tauri::AppHandle, kind: String, id: String) -> Result<(), String> {

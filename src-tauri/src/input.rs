@@ -1,4 +1,4 @@
-//! Native-only semantic conversion. Show one physical key label transiently;
+//! Native-only semantic conversion. Show physical key labels transiently;
 //! never translate keys to text, log keycodes, intercept, or inject input.
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -165,6 +165,12 @@ mod windows {
         CallNextHookEx(null_mut(), code, w, l)
     }
     unsafe extern "system" fn mouse(code: i32, w: WPARAM, l: LPARAM) -> LRESULT {
+        // Fresh clicks outside dismiss the palette; drag moves and releases
+        // do not. Queue before own_editor: foreground can still be the menu.
+        if code >= 0 && [WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN].contains(&(w as u32)) && crate::pet_menu::is_open() {
+            let event = &*(l as *const MSLLHOOKSTRUCT);
+            send(if w as u32 == WM_RBUTTONDOWN { "__menu_outside_right" } else { "__menu_outside_click" }, event.pt.x as f64, event.pt.y as f64, None);
+        }
         if code >= 0 && !own_editor() {
             match w as u32 {
                 WM_LBUTTONDOWN => send("left", 0.0, 0.0, None),
@@ -202,6 +208,10 @@ mod windows {
         let _ = SEND.set(tx);
         std::thread::spawn(move || {
             for mut signal in rx {
+                if signal.signal == "__menu_outside_click" || signal.signal == "__menu_outside_right" {
+                    crate::pet_menu::dismiss_if_outside(&app, signal.x as i32, signal.y as i32, signal.signal == "__menu_outside_right");
+                    continue;
+                }
                 if signal.signal == "move" {
                     let Some(pet) = app.get_webview_window("pet") else {
                         continue;

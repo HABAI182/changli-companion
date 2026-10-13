@@ -268,7 +268,12 @@ export function SettingsPanel(p: Props) {
   }, []);
   const theme = s.settingsTheme === 'system' ? (systemDark ? 'dark' : 'light') : s.settingsTheme;
   const range = (
-    key: 'headElasticity' | 'keyboardMotionScale' | 'mouseMotionScale' | 'bubbleDurationSeconds',
+    key:
+      | 'headElasticity'
+      | 'keyboardMotionScale'
+      | 'keyboardHandSpeed'
+      | 'mouseMotionScale'
+      | 'bubbleDurationSeconds',
     title: string,
     description: string,
     min: number,
@@ -321,7 +326,7 @@ export function SettingsPanel(p: Props) {
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">v0.7.12</span>
+          <span className="model-stage">v0.7.13</span>
         </div>
         <nav className="settings-navigation" aria-label="设置分类">
           {(
@@ -443,8 +448,8 @@ export function SettingsPanel(p: Props) {
               title="输入模式"
               description={
                 s.inputMode === 'keyboard_mouse'
-                  ? '左手跟随键盘四区，前后移动较轻；右手响应鼠标'
-                  : '左手跟随键盘四区，空格单独落点；不响应鼠标'
+                  ? '左右手分别响应键盘左右区；右手优先键盘，空闲时回到鼠标。面对你时画面左右为镜像'
+                  : '左右手分别响应键盘左右区，空格由左手按下；画面左右为镜像'
               }
             >
               <select
@@ -460,6 +465,12 @@ export function SettingsPanel(p: Props) {
               </select>
             </Row>
             {toggle('keyOverlayEnabled', '按键浮显', '短暂显示按键，不记录输入内容')}
+            {s.keyOverlayEnabled &&
+              toggle(
+                'multiKeyOverlayEnabled',
+                '同时显示多个按键',
+                '最多显示最近 6 个按键，各自停留后淡出，不保存记录',
+              )}
             {toggle('cursorFollowEnabled', '鼠标视线跟随', '随鼠标转头与转眼，不影响鼠标手动作')}
             {range(
               'keyboardMotionScale',
@@ -469,6 +480,13 @@ export function SettingsPanel(p: Props) {
               125,
             )}
             {range('mouseMotionScale', '鼠标移动幅度', '右手、鼠标与线缆一起移动', 0, 150)}
+            {range(
+              'keyboardHandSpeed',
+              '键盘手移动速度',
+              '调节伸手和回位速度，50% 舒缓，200% 迅捷',
+              50,
+              200,
+            )}
             {range(
               'bubbleDurationSeconds',
               '气泡显示时长',

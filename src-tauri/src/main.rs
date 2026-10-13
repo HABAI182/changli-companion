@@ -31,6 +31,8 @@ struct Settings {
     head_elasticity: f64,
     #[serde(rename = "keyboardMotionScale")]
     keyboard_motion_scale: f64,
+    #[serde(rename = "keyboardHandSpeed")]
+    keyboard_hand_speed: f64,
     #[serde(rename = "mouseMotionScale")]
     mouse_motion_scale: f64,
     #[serde(rename = "bubbleDurationSeconds")]
@@ -62,6 +64,8 @@ struct Settings {
     input_mode: String,
     #[serde(rename = "keyOverlayEnabled")]
     key_overlay_enabled: bool,
+    #[serde(rename = "multiKeyOverlayEnabled")]
+    multi_key_overlay_enabled: bool,
     #[serde(rename = "autoSleepMinutes")]
     auto_sleep_minutes: u32,
     #[serde(rename = "hoverHideEnabled")]
@@ -92,6 +96,7 @@ impl Default for Settings {
             cursor_follow_enabled: true,
             head_elasticity: 1.0,
             keyboard_motion_scale: 1.0,
+            keyboard_hand_speed: 1.0,
             mouse_motion_scale: 1.0,
             bubble_duration_seconds: 3.0,
             bubble_idle_interval_seconds: 90,
@@ -111,6 +116,7 @@ impl Default for Settings {
             shortcut: "Ctrl+Shift+F10".into(),
             input_mode: "keyboard_mouse".into(),
             key_overlay_enabled: true,
+            multi_key_overlay_enabled: false,
             auto_sleep_minutes: 0,
             hover_hide_enabled: false,
             hover_hide_delay_ms: 500,
@@ -453,6 +459,8 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !(0.0..=1.5).contains(&settings.head_elasticity)
         || !settings.keyboard_motion_scale.is_finite()
         || !(0.5..=1.25).contains(&settings.keyboard_motion_scale)
+        || !settings.keyboard_hand_speed.is_finite()
+        || !(0.5..=2.0).contains(&settings.keyboard_hand_speed)
         || !settings.mouse_motion_scale.is_finite()
         || !(0.0..=1.5).contains(&settings.mouse_motion_scale)
         || !settings.bubble_duration_seconds.is_finite()

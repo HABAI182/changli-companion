@@ -29,7 +29,7 @@ import { mapGamepadInput } from './pet/gamepad';
 import { AudioManager } from './audio/AudioManager';
 import { model, type ShortcutSlot } from './model';
 import { SettingsPanel } from './settings/SettingsPanel';
-import { KEY_BADGE_MS, nextKeyBadge, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
+import { KEY_BADGE_MS, nextKeyBadges, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
 
 const names: Record<string, string> = {
   keyboard_left: '左键区',
@@ -82,7 +82,7 @@ export function App() {
   const [expression, setExpression] = useState<Expression | undefined>(),
     [menu, setMenu] = useState(false),
     [busy, setBusy] = useState(false);
-  const [keyBadge, setKeyBadge] = useState<KeyBadge | undefined>();
+  const [keyBadges, setKeyBadges] = useState<KeyBadge[]>([]);
   const [effect, setEffect] = useState<string | undefined>();
   const [hoverDim, setHoverDim] = useState(false);
   const [rendererEpoch, setRendererEpoch] = useState(0);
@@ -129,19 +129,28 @@ export function App() {
         source === 'gamepad' ? 'keyboard_mouse' : data.settings.inputMode,
       );
       if (data.settings.keyOverlayEnabled && key)
-        setKeyBadge((current) => nextKeyBadge(key, Date.now(), current));
+        setKeyBadges((current) =>
+          nextKeyBadges(key, Date.now(), current, data.settings.multiKeyOverlayEnabled),
+        );
       redraw((n) => n + 1);
     },
-    [data.settings.inputMode, data.settings.keyOverlayEnabled],
+    [
+      data.settings.inputMode,
+      data.settings.keyOverlayEnabled,
+      data.settings.multiKeyOverlayEnabled,
+    ],
   );
   useEffect(() => {
-    if (!keyBadge) return;
+    if (!keyBadges.length) return;
     const timer = window.setTimeout(
-      () => setKeyBadge((current) => (current?.id === keyBadge.id ? undefined : current)),
-      KEY_BADGE_MS,
+      () => setKeyBadges((current) => current.filter((item) => item.expiresAt > Date.now())),
+      Math.max(0, Math.min(...keyBadges.map((item) => item.expiresAt)) - Date.now()),
     );
     return () => window.clearTimeout(timer);
-  }, [keyBadge]);
+  }, [keyBadges]);
+  useEffect(() => {
+    setKeyBadges([]);
+  }, [data.settings.keyOverlayEnabled, data.settings.multiKeyOverlayEnabled]);
   useEffect(() => {
     if (data.settings.hoverHideEnabled && !data.settings.passthrough && !menu) return;
     window.clearTimeout(hoverTimer.current);
@@ -653,9 +662,18 @@ export function App() {
         }
       }}
     >
-      {data.settings.keyOverlayEnabled && keyBadge && (
-        <div className="key-badge" key={keyBadge.id} aria-label={`当前按键 ${keyBadge.label}`}>
-          {keyBadge.label}
+      {data.settings.keyOverlayEnabled && keyBadges.length > 0 && (
+        <div className="key-badges" aria-label="按键浮显">
+          {keyBadges.map((badge) => (
+            <div
+              className="key-badge"
+              key={badge.id}
+              style={{ animationDuration: `${KEY_BADGE_MS}ms` }}
+              aria-label={`当前按键 ${badge.label}`}
+            >
+              {badge.label}
+            </div>
+          ))}
         </div>
       )}
       {effect && (

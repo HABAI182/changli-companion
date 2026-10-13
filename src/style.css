@@ -312,13 +312,20 @@ header {
   object-fit: contain;
   pointer-events: none;
 }
-.key-badge {
+.key-badges {
   position: absolute;
   z-index: 15;
   left: 5%;
   top: 6%;
+  max-width: 90%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4cqw;
+  pointer-events: none;
+}
+.key-badge {
   min-width: 10cqw;
-  max-width: 45%;
+  max-width: 100%;
   padding: 1.667cqw 2.778cqw;
   border: 0.278cqw solid #e6b582aa;
   border-radius: 3.056cqw;
@@ -331,7 +338,7 @@ header {
   text-align: center;
   white-space: nowrap;
   pointer-events: none;
-  animation: key-badge-life 680ms ease-out both;
+  animation: key-badge-life 1500ms ease-out both;
 }
 .pet-bubble {
   position: absolute;
@@ -369,8 +376,8 @@ header {
     opacity: 0;
     transform: translateY(1.111cqw) scale(0.85);
   }
-  13%,
-  64% {
+  8%,
+  76% {
     opacity: 0.94;
     transform: translateY(0) scale(1);
   }
@@ -1079,7 +1086,7 @@ details:not(.dev-tools) {
   width: min(100vw, 112.5vh);
 }
 .native-pet .pet-bubble,
-.native-pet .key-badge {
+.native-pet .key-badges {
   /* The square model extends above the shorter desktop window. Keep text
      overlays inside the window instead of anchoring them to that cropped edge. */
   top: max(8px, calc((min(100vw, 112.5vh) - 100vh) / 2 + 8px));

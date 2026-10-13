@@ -471,8 +471,21 @@ export function SettingsPanel(p: Props) {
               toggle(
                 'multiKeyOverlayEnabled',
                 '同时显示多个按键',
-                '最多显示最近 6 个按键，各自停留后淡出，不保存记录',
+                '显示多个最近按键，各自停留后淡出，不保存记录',
               )}
+            {s.keyOverlayEnabled && s.multiKeyOverlayEnabled && (
+              <PreferenceRange
+                title="同时显示按键上限"
+                description="保留最近的 1～6 个按键"
+                value={s.keyOverlayMaxKeys}
+                min={1}
+                max={6}
+                step={1}
+                unit=" 个"
+                busy={p.busy}
+                update={(value) => p.update({ keyOverlayMaxKeys: value })}
+              />
+            )}
             {s.keyOverlayEnabled &&
               toggle(
                 'keyOverlayRepeatEnabled',

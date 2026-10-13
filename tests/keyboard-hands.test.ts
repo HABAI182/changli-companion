@@ -4,6 +4,70 @@ import { PresentationRuntime } from '../src/pet/presentation';
 import { initialData } from '../src/domain';
 import { nextKeyBadges, KEY_BADGE_MS } from '../src/overlay/keyOverlay';
 
+it('长按保持落键，自动重复不抖动，松开后平滑回位', () => {
+  const hands = new KeyboardHands(0);
+  hands.input('keyboard_left', 100, -1, { label: 'W', phase: 'down' });
+  let previous = hands.advance(500).leftKeyboardPress;
+  for (let now = 600; now <= 2600; now += 75) {
+    hands.input('keyboard_left', now, -1, { label: 'W', phase: 'down', repeat: true });
+    const state = hands.advance(now);
+    expect(state.leftKeyboardPress).toBeGreaterThan(0.99);
+    expect(Math.abs(state.leftKeyboardPress - previous)).toBeLessThan(0.001);
+    expect(state.keyboardLanding).toBeGreaterThan(0.99);
+    previous = state.leftKeyboardPress;
+  }
+  hands.input('keyboard_left', 2700, -1, { label: 'W', phase: 'up' });
+  const released = hands.advance(3000);
+  expect(released.leftKeyboardPress).toBeLessThan(0.001);
+  expect(released.keyboardLanding).toBeLessThan(0.02);
+  hands.input('keyboard_left', 3100, -1, { label: 'W', phase: 'down' });
+  expect(hands.advance(3200).leftKeyboardPress).toBeGreaterThan(0.9);
+});
+
+it('同一只手按住两个键，松开一个仍保持另一个键区', () => {
+  const hands = new KeyboardHands(0);
+  hands.input('keyboard_left', 100, -1, { label: 'W', phase: 'down' });
+  hands.input('space', 200, 1, { label: 'Space', phase: 'down' });
+  hands.advance(500);
+  hands.input('space', 600, 1, { label: 'Space', phase: 'up' });
+  const state = hands.advance(1000);
+  expect(state.keyboardReach).toBeGreaterThan(0.99);
+  expect(state.keyboardDepth).toBeLessThan(-0.99);
+  expect(state.leftKeyboardPress).toBeGreaterThan(0.99);
+  hands.input('keyboard_left', 1100, -1, { label: 'W', phase: 'up' });
+  expect(hands.advance(1500).keyboardLanding).toBeLessThan(0.01);
+});
+
+it('系统重复按下只维持手部，不能重启头部弹簧或动作', () => {
+  const held = new PresentationRuntime(0);
+  const once = new PresentationRuntime(0);
+  const settings = initialData().settings;
+  for (const runtime of [held, once])
+    runtime.input('keyboard_left', 100, 0, -1, 'keyboard_mouse', { label: 'W', phase: 'down' });
+  for (let now = 150; now < 1500; now += 50) {
+    held.input('keyboard_left', now, 0, -1, 'keyboard_mouse', {
+      label: 'W',
+      phase: 'down',
+      repeat: true,
+    });
+    const repeated = held.snapshot(now, settings);
+    const original = once.snapshot(now, settings);
+    expect(repeated.action).toEqual(original.action);
+    expect(repeated.idle.headY).toBeCloseTo(original.idle.headY!, 10);
+    expect(repeated.idle.headShape).toBeCloseTo(original.idle.headShape!, 10);
+  }
+});
+
+it('多键浮现上限可设为1～6，并只保留最新按键', () => {
+  for (const limit of [1, 3, 6]) {
+    let badges: ReturnType<typeof nextKeyBadges> = [];
+    for (const [index, label] of ['A', 'B', 'C', 'D', 'E', 'F', 'G'].entries())
+      badges = nextKeyBadges({ label, phase: 'down' }, 100 + index, badges, true, false, limit);
+    expect(badges).toHaveLength(limit);
+    expect(badges.at(-1)?.label).toBe('G');
+  }
+});
+
 it('长按默认只浮现一次，开启重复浮现后恢复；松开再按可重新浮现', () => {
   const first = nextKeyBadges({ label: 'W', phase: 'down' }, 100, [], true);
   const held = nextKeyBadges({ label: 'W', phase: 'down', repeat: true }, 200, first, true);

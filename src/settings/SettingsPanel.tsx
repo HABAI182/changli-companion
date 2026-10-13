@@ -326,7 +326,7 @@ export function SettingsPanel(p: Props) {
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">v0.7.13</span>
+          <span className="model-stage">v0.7.14</span>
         </div>
         <nav className="settings-navigation" aria-label="设置分类">
           {(

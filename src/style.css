@@ -323,15 +323,47 @@ header {
   gap: 1.4cqw;
   pointer-events: none;
 }
+.changli-control {
+  --control-gold: #edc78b;
+  --control-radius: 2.7cqw;
+  position: relative;
+  isolation: isolate;
+  border: clamp(1px, 0.32cqw, 2px) solid var(--control-gold);
+  border-radius: var(--control-radius);
+  background: linear-gradient(145deg, #50383f, #29232d 80%);
+  box-shadow:
+    inset 0 0 0 0.3cqw #271e26,
+    0 0.8cqw 2.8cqw #21151d33;
+  color: #fff2de;
+}
+.changli-control::before {
+  content: '';
+  position: absolute;
+  inset: 0.85cqw;
+  border: clamp(0.6px, 0.18cqw, 1.3px) solid #d5857190;
+  border-radius: max(3px, calc(var(--control-radius) - 0.85cqw));
+  pointer-events: none;
+}
+.changli-control::after {
+  content: '';
+  position: absolute;
+  top: -0.12cqw;
+  left: 1.3cqw;
+  width: 4.3cqw;
+  height: 0.85cqw;
+  border-radius: 0 0 0.5cqw 0.5cqw;
+  background: #f27d72;
+  pointer-events: none;
+}
+.changli-emblem {
+  display: block;
+  color: var(--control-gold);
+  pointer-events: none;
+}
 .key-badge {
   min-width: 10cqw;
   max-width: 100%;
   padding: 1.667cqw 2.778cqw;
-  border: 0.278cqw solid #e6b582aa;
-  border-radius: 3.056cqw;
-  background: #382a2bcc;
-  box-shadow: 0 0.556cqw 3.333cqw #6b303044;
-  color: #fff9ef;
   font-size: 5.278cqw;
   line-height: 1.15;
   font-weight: 700;
@@ -339,6 +371,19 @@ header {
   white-space: nowrap;
   pointer-events: none;
   animation: key-badge-life 1500ms ease-out both;
+}
+.key-badge-label {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0.3cqw 0.4cqw #19141c66;
+}
+.key-badge .changli-emblem {
+  position: absolute;
+  right: -0.7cqw;
+  bottom: -0.7cqw;
+  width: 4.9cqw;
+  height: 4.9cqw;
+  filter: drop-shadow(0 0.2cqw 0.25cqw #2a182866);
 }
 .pet-bubble {
   position: absolute;
@@ -1105,14 +1150,44 @@ details:not(.dev-tools) {
   top: 75.5%;
   right: 1%;
   left: auto;
-  border-radius: 8px;
-  border: 0;
-  padding: 5px 7px;
-  background: #f2e6d599;
-  color: #8d7761;
-  font-size: 13px;
-  cursor: move;
+  --control-radius: clamp(7px, 2.6cqw, 16px);
+  width: clamp(28px, 10cqw, 60px);
+  height: clamp(28px, 9.4cqw, 56px);
+  padding: clamp(3px, 0.85cqw, 6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6cqw;
+  cursor: grab;
   line-height: 1;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.drag-handle .changli-emblem {
+  width: clamp(14px, 5.5cqw, 32px);
+  height: clamp(14px, 5.5cqw, 32px);
+  flex: none;
+}
+.drag-grip {
+  width: clamp(5px, 1.5cqw, 9px);
+  height: clamp(10px, 3cqw, 18px);
+  color: #eb9b88;
+  pointer-events: none;
+}
+.drag-handle:hover {
+  background: linear-gradient(145deg, #65444a, #322934 80%);
+  border-color: #ffe2a8;
+  box-shadow:
+    inset 0 0 0 0.3cqw #271e26,
+    0 0.8cqw 3cqw #df725955;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+.drag-handle:focus-visible {
+  outline: 2px solid #ffe2a8;
+  outline-offset: 3px;
 }
 .native-panel {
   min-height: 100vh;

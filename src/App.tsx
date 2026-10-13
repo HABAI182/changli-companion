@@ -30,6 +30,7 @@ import { AudioManager } from './audio/AudioManager';
 import { model, type ShortcutSlot } from './model';
 import { SettingsPanel } from './settings/SettingsPanel';
 import { KEY_BADGE_MS, nextKeyBadges, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
+import { ChangliEmblem } from './overlay/ChangliEmblem';
 
 const names: Record<string, string> = {
   keyboard_left: '左键区',
@@ -666,12 +667,13 @@ export function App() {
         <div className="key-badges" aria-label="按键浮显">
           {keyBadges.map((badge) => (
             <div
-              className="key-badge"
+              className="key-badge changli-control"
               key={badge.id}
               style={{ animationDuration: `${KEY_BADGE_MS}ms` }}
               aria-label={`当前按键 ${badge.label}`}
             >
-              {badge.label}
+              <span className="key-badge-label">{badge.label}</span>
+              <ChangliEmblem />
             </div>
           ))}
         </div>
@@ -701,8 +703,9 @@ export function App() {
       />
       {!panelWindow && (
         <button
-          className="drag-handle"
+          className="drag-handle changli-control"
           aria-label="拖动桌宠"
+          title="拖动桌宠"
           onPointerDown={(e) =>
             drag(
               e,
@@ -715,7 +718,14 @@ export function App() {
             )
           }
         >
-          ⠿
+          <ChangliEmblem />
+          <svg className="drag-grip" viewBox="0 0 6 12" aria-hidden="true">
+            {[2, 6, 10].flatMap((y) =>
+              [1, 5].map((x) => (
+                <circle key={`${x}-${y}`} cx={x} cy={y} r="0.8" fill="currentColor" />
+              )),
+            )}
+          </svg>
         </button>
       )}
       {menu &&

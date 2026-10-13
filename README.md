@@ -1,12 +1,12 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.13**，macOS 独立公测版 **0.7.12-macos.3**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.14**，macOS 独立公测版 **0.7.12-macos.3**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
 [B站主页](https://space.bilibili.com/1605091088) · [桌宠演示视频](https://www.bilibili.com/video/BV1Pipf6AEQF/)
 
-0.7.13 将键盘左右区分给角色左右手，并镜像到面对用户的画面；右手优先键盘，空闲后回到鼠标。新增键盘手移动速度和可选多按键浮显；Windows 菜单改为点击外部关闭，保留拖动。
+0.7.14 为按键浮显与拖动键加入统一的长离风格金边、珊瑚红点缀和凤羽纹样，随桌宠尺寸调整。保留0.7.13的双手镜像键盘分区、手部速度、多按键浮显与Windows菜单外部关闭。
 
 ## 公测说明
 
@@ -20,7 +20,7 @@
 
 | 系统 | 下载 | 文件类型 |
 | --- | --- | --- |
-| Windows x64 | [Windows 0.7.13](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.13) | 便携 EXE / EXE 安装包 |
+| Windows x64 | [Windows 0.7.14](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.14) | 便携 EXE / EXE 安装包 |
 | macOS Apple Silicon（M 系列） | [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3) | DMG / APP ZIP；最低 macOS 12 |
 
 macOS 版已由用户在 MacBook 实测通过，具体安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.12-macos.3.md)。Release 中带 `source` 的 ZIP 是开发者源码。
@@ -58,7 +58,7 @@ npm run desktop
 
 0.7.5通过81个前端测试、12个原生测试、39个Live2D引用检查。实际App WebGL检查9种按键、开心/困倦/生气冒火、移除动作、气泡50%/100%/200%比例；Windows便携EXE实测全局Q/A/U/H四区、透明模型、开心/困倦、气泡、新图标和设置。EXE及NSIS安装包构建成功；本版安装包没有重复安装/卸载验收。多屏/DPI尚未全面验证。
 
-程序和当前运行资源可用。新增表情由原生Cubism参数与运行时矢量美术组合；动态和轮廓修整部分在运行时实现，未写回CMO3，未产生新的MOC3导出。独立精细原生表情、完整抬臂挥手与袖口/发束最终美术验收仍未全部完成，不能称完整美术正式版，也未宣称达到参考作者同等完成度。详见[交付记录](DELIVERY-0.7.13.md)。
+程序和当前运行资源可用。新增表情由原生Cubism参数与运行时矢量美术组合；动态和轮廓修整部分在运行时实现，未写回CMO3，未产生新的MOC3导出。独立精细原生表情、完整抬臂挥手与袖口/发束最终美术验收仍未全部完成，不能称完整美术正式版，也未宣称达到参考作者同等完成度。详见[交付记录](DELIVERY-0.7.14.md)。
 
 已验证Cubism源位于[authoring](authoring/README.md)，当前模型位于`public/models/changli/live-reference-repair-v71-candidate/`。历代模型、编译缓存、本机日志和旧交付留在本机，不进入仓库。历史制作脚本可能依赖这些本机资源。
 

@@ -116,6 +116,7 @@ export async function subscribeInput(
   const editable = (target: EventTarget | null) =>
     target instanceof HTMLElement &&
     Boolean(target.closest('input,textarea,select,button,[contenteditable]'));
+  const held = new Map<string, { signal: Signal; depth: number; display: KeyDisplay }>();
   const key = (e: KeyboardEvent) => {
     if (!editable(e.target) && !e.isComposing) {
       const special: Signal | undefined =
@@ -126,13 +127,30 @@ export async function subscribeInput(
             : e.code === 'Space'
               ? 'space'
               : undefined;
-      fn(
-        special || (keyRegion(browserVirtualKey(e.code)) as Signal),
-        0,
-        keyDepth(browserVirtualKey(e.code)),
-        { label: browserKeyLabel(e.code), phase: 'down', repeat: e.repeat },
-      );
+      const input = {
+        signal: special || (keyRegion(browserVirtualKey(e.code)) as Signal),
+        depth: keyDepth(browserVirtualKey(e.code)),
+        display: {
+          label: browserKeyLabel(e.code),
+          phase: 'down',
+          repeat: e.repeat,
+          code: browserVirtualKey(e.code),
+        } as KeyDisplay,
+      };
+      held.set(e.code, input);
+      fn(input.signal, 0, input.depth, input.display);
     }
+  };
+  const release = (e: KeyboardEvent) => {
+    const input = held.get(e.code);
+    if (!input) return;
+    held.delete(e.code);
+    fn(input.signal, 0, input.depth, { ...input.display, phase: 'up', repeat: false });
+  };
+  const releaseAll = () => {
+    for (const input of held.values())
+      fn(input.signal, 0, input.depth, { ...input.display, phase: 'up', repeat: false });
+    held.clear();
   };
   const move = (e: MouseEvent) =>
     fn('move', (e.clientX / innerWidth - 0.5) * 2, (e.clientY / innerHeight - 0.5) * 2);
@@ -143,11 +161,15 @@ export async function subscribeInput(
     if (!editable(e.target)) fn('wheel', 0, Math.sign(e.deltaY));
   };
   window.addEventListener('keydown', key);
+  window.addEventListener('keyup', release);
+  window.addEventListener('blur', releaseAll);
   window.addEventListener('mousemove', move);
   window.addEventListener('mousedown', mouse);
   window.addEventListener('wheel', wheel, { passive: true });
   return () => {
     window.removeEventListener('keydown', key);
+    window.removeEventListener('keyup', release);
+    window.removeEventListener('blur', releaseAll);
     window.removeEventListener('mousemove', move);
     window.removeEventListener('mousedown', mouse);
     window.removeEventListener('wheel', wheel);

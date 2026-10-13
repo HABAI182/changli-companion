@@ -122,15 +122,16 @@ export function App() {
         ['move', 'left', 'right', 'wheel'].includes(s)
       )
         return;
-      m.current.signal(s, Date.now(), x, y);
+      if (key?.phase !== 'up' && !key?.repeat) m.current.signal(s, Date.now(), x, y);
       presentation.current.input(
         s,
         Date.now(),
         x,
         y,
         source === 'gamepad' ? 'keyboard_mouse' : data.settings.inputMode,
+        key,
       );
-      if (data.settings.keyOverlayEnabled && key)
+      if (data.settings.keyOverlayEnabled && key?.phase === 'down')
         setKeyBadges((current) =>
           nextKeyBadges(
             key,
@@ -138,6 +139,7 @@ export function App() {
             current,
             data.settings.multiKeyOverlayEnabled,
             data.settings.keyOverlayRepeatEnabled,
+            data.settings.keyOverlayMaxKeys,
           ),
         );
       redraw((n) => n + 1);
@@ -146,6 +148,7 @@ export function App() {
       data.settings.inputMode,
       data.settings.keyOverlayEnabled,
       data.settings.multiKeyOverlayEnabled,
+      data.settings.keyOverlayMaxKeys,
       data.settings.keyOverlayRepeatEnabled,
     ],
   );
@@ -159,7 +162,11 @@ export function App() {
   }, [keyBadges]);
   useEffect(() => {
     setKeyBadges([]);
-  }, [data.settings.keyOverlayEnabled, data.settings.multiKeyOverlayEnabled]);
+  }, [
+    data.settings.keyOverlayEnabled,
+    data.settings.multiKeyOverlayEnabled,
+    data.settings.keyOverlayMaxKeys,
+  ]);
   useEffect(() => {
     if (data.settings.hoverHideEnabled && !data.settings.passthrough && !menu) return;
     window.clearTimeout(hoverTimer.current);

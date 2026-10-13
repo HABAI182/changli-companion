@@ -3,6 +3,7 @@ import { model } from '../model';
 import { ResponseDeck, type ResponseTopic } from './responses';
 import { ElasticSpring } from './ElasticSpring';
 import { KeyboardHands } from './KeyboardHands';
+import type { KeyDisplay } from '../overlay/keyOverlay';
 
 export type ActionId =
   | 'keyboard_left'
@@ -188,11 +189,25 @@ export class PresentationRuntime {
   get activeAnimationId() {
     return this.animation?.id;
   }
-  input(signal: Signal, now: number, x = 0, y = 0, mode: Settings['inputMode'] = 'keyboard_mouse') {
+  input(
+    signal: Signal,
+    now: number,
+    x = 0,
+    y = 0,
+    mode: Settings['inputMode'] = 'keyboard_mouse',
+    key?: KeyDisplay,
+  ) {
     this.tick(now);
     if (this.dragActive) return;
     if (mode === 'keyboard_only' && mouseSignals.includes(signal)) return;
-    this.hands.input(signal, now, y);
+    this.hands.input(signal, now, y, key);
+    // OS autorepeat does not mean another physical press. Keep the held pose,
+    // without restarting authored motions, spring impulses or typing bursts.
+    if (key?.phase === 'up') return;
+    if (key?.repeat) {
+      this.lastInput = now;
+      return;
+    }
     if (signal === 'complete') {
       this.touchSmileUntil = now + 900;
       return;

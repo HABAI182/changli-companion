@@ -156,6 +156,7 @@ pub struct KeyDisplay {
     label: &'static str,
     phase: &'static str,
     repeat: bool,
+    code: u32,
 }
 
 // Physical coordinates and the pet's physical bounds share the same DPI space.
@@ -348,7 +349,7 @@ mod windows {
     }
     fn raw_edge(vk: u32, down: bool) -> bool {
         if !down {
-            HELD[key_index(vk)].store(false, Ordering::Relaxed);
+            release_key(vk);
         }
         let vk = match vk {
             0xa0 | 0xa1 => 0x10,
@@ -382,21 +383,40 @@ mod windows {
             }
         }
     }
-    fn send_key(vk: u32) {
-        let signal = match vk {
+    fn key_signal(vk: u32) -> &'static str {
+        match vk {
             0x0d => "enter",
             0x08 => "backspace",
             0x20 => "space",
             vk => crate::model::key_region(vk),
-        };
+        }
+    }
+    fn send_key(vk: u32) {
         send(
-            signal,
+            key_signal(vk),
             0.0,
             crate::model::key_depth(vk),
-            key_label(vk).map(|label| KeyDisplay {
-                label,
+            Some(KeyDisplay {
+                label: key_label(vk).unwrap_or("Key"),
                 phase: "down",
                 repeat: HELD[key_index(vk)].swap(true, Ordering::Relaxed),
+                code: key_index(vk) as u32,
+            }),
+        );
+    }
+    fn release_key(vk: u32) {
+        if !HELD[key_index(vk)].swap(false, Ordering::Relaxed) {
+            return;
+        }
+        send(
+            key_signal(vk),
+            0.0,
+            crate::model::key_depth(vk),
+            Some(KeyDisplay {
+                label: key_label(vk).unwrap_or("Key"),
+                phase: "up",
+                repeat: false,
+                code: key_index(vk) as u32,
             }),
         );
     }
@@ -602,7 +622,9 @@ mod windows {
                 for vk in keys.iter().copied().chain([1, 2, 4]) {
                     let down = GetAsyncKeyState(vk as i32) < 0;
                     if polled[vk as usize] && !down {
-                        HELD[key_index(vk)].store(false, Ordering::Relaxed);
+                        if vk >= 8 {
+                            release_key(vk);
+                        }
                     }
                     polled[vk as usize] = down;
                     let edge = MERGE
@@ -994,6 +1016,7 @@ mod tests {
                 label: "Z",
                 phase: "down",
                 repeat: false,
+                code: 0x5a,
             }),
         })
         .unwrap();

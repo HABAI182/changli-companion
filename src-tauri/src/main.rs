@@ -70,6 +70,8 @@ struct Settings {
     key_overlay_enabled: bool,
     #[serde(rename = "multiKeyOverlayEnabled")]
     multi_key_overlay_enabled: bool,
+    #[serde(rename = "keyOverlayMaxKeys")]
+    key_overlay_max_keys: u32,
     #[serde(rename = "keyOverlayRepeatEnabled")]
     key_overlay_repeat_enabled: bool,
     #[serde(rename = "elevatedInputModeEnabled")]
@@ -126,6 +128,7 @@ impl Default for Settings {
             input_mode: "keyboard_mouse".into(),
             key_overlay_enabled: true,
             multi_key_overlay_enabled: false,
+            key_overlay_max_keys: 1,
             key_overlay_repeat_enabled: false,
             elevated_input_mode_enabled: true,
             auto_sleep_minutes: 0,
@@ -464,6 +467,7 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || settings.scale < 0.5
         || settings.scale > 2.0
         || ![30, 60].contains(&settings.fps)
+        || !(1..=6).contains(&settings.key_overlay_max_keys)
         || !["keyboard_mouse", "keyboard_only"].contains(&settings.input_mode.as_str())
         || !["full", "low", "off"].contains(&settings.motion.as_str())
         || !["system", "light", "dark"].contains(&settings.settings_theme.as_str())

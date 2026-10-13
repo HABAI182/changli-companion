@@ -893,6 +893,63 @@
       "nativeOutsideClickVerified": false,
       "wutheringWavesVerified": false,
       "completeWindowsAcceptance": false
+    },
+    {
+      "version": "0.7.15",
+      "tag": "v0.7.15",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15",
+      "localDelivery": "deliveries/20261013-desktop-0.7.15",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61183488,
+          "sha256": "F15AF6434B3A32962288E37CFF80AD8EA059270952B33C2B4FB179DAFBBEE0DB",
+          "localPath": "deliveries/20261013-desktop-0.7.15/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.15-x64-setup.exe",
+          "bytes": 51610375,
+          "sha256": "971C41DC589B3466D9B1FDDDA27CC7C2D9BB7E18FCBD3CBA6CF6A15BEDAA2E89",
+          "localPath": "deliveries/20261013-desktop-0.7.15/changli-companion-0.7.15-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261013-desktop-0.7.15/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261013-desktop-0.7.15/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "sourceCommit": "82e7791ff1f17d4be82f7026b1419745b2ae2764",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "actual final EXE Cubism held/release parameters; synthetic repeats do not retrigger poses or badges; max1/6 settings persisted",
+      "windowsDesktopVerified": true,
+      "windowsScope": "default elevated startup, common child WebView2 arguments, native settings persistence and final built EXE rendered model",
+      "wutheringWavesVerified": true,
+      "wutheringWavesTestedBuild": "0.7.15-local.2 elevated candidate",
+      "wutheringWavesScope": "user physically controlled character using keyboard and mouse in borderless mode; not only login/settings",
+      "physicalLongHoldUserReport": "按下弹一下，之后不动；测试后仅改变显示上限默认值为1",
+      "defaultKeyOverlayMaxKeys": 1,
+      "nativeDragVerified": false,
+      "nativeOutsideClickVerified": false,
+      "completeWindowsAcceptance": false,
+      "prepublicationArchive": {
+        "path": "deliveries/20261013-desktop-0.7.15-prepublication-01",
+        "sourceCommit": "a16e650c60f3952a6ae6af1bae855cfb70e30acc",
+        "published": false
+      }
     }
   ],
   "githubArchiveVerified": true,

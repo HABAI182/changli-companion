@@ -7,6 +7,8 @@ import { model } from '../../model';
 import { Live2DAdapter } from './Live2DAdapter';
 import { loadCubismCore } from './CoreLoader';
 import { recordLive2DStatus } from './runtimeStatus';
+import { native } from '../../storage';
+import { invoke } from '@tauri-apps/api/core';
 
 export function Live2DRenderer(props: RendererProps) {
   const entry = model.renderer.live2d.entry;
@@ -17,6 +19,12 @@ export function Live2DRenderer(props: RendererProps) {
   latestSnapshot.current = props.snapshot;
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // React has committed the loaded canvas (or an explicit error fallback).
+  // Native cold start stays hidden until this point rather than flashing art.
+  useEffect(() => {
+    if (native && (ready || loadError)) void invoke('pet_renderer_ready').catch(console.error);
+  }, [ready, loadError]);
 
   useEffect(() => {
     if (!entry || !host.current || !canvas.current) return;
@@ -36,7 +44,10 @@ export function Live2DRenderer(props: RendererProps) {
       .then(() => import('./CubismBackend'))
       .then(async ({ CubismBackend }) => {
         if (!active) return;
-        instance = new Live2DAdapter(model.renderer.live2d, new CubismBackend(model.renderer.live2d.runtimeOffsets));
+        instance = new Live2DAdapter(
+          model.renderer.live2d,
+          new CubismBackend(model.renderer.live2d.runtimeOffsets),
+        );
         adapter.current = instance;
         const status = await instance.init(target);
         if (active) recordLive2DStatus(entry, status, instance.error);

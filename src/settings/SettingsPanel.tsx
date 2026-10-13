@@ -270,6 +270,7 @@ export function SettingsPanel(p: Props) {
   const range = (
     key:
       | 'headElasticity'
+      | 'settingsTextScale'
       | 'keyboardMotionScale'
       | 'keyboardHandSpeed'
       | 'mouseMotionScale'
@@ -310,6 +311,7 @@ export function SettingsPanel(p: Props) {
       data-theme={theme}
       data-accent={s.accentColor}
       data-density={s.settingsDensity}
+      style={{ '--settings-text-scale': s.settingsTextScale ?? 1 } as CSSProperties}
       aria-label="桌宠设置"
     >
       <div className="panel-content">
@@ -317,16 +319,15 @@ export function SettingsPanel(p: Props) {
           <div className="settings-avatar" aria-hidden="true">
             <img src="/assets/changli-icon-v0810.png" alt="" />
           </div>
-          <div>
-            <p className="settings-kicker">离火长明</p>
-            <h2>偏好设置</h2>
-            <p>你的桌面，长离相伴</p>
+          <div className="settings-heading-copy">
+            <h2>离火长明</h2>
+            <p>桌宠设置</p>
           </div>
+          <span className="settings-version">v0.7.14</span>
         </div>
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
           <strong>{p.live2dReady ? 'Live2D 已加载' : '备用角色显示中'}</strong>
-          <span className="model-stage">v0.7.14</span>
         </div>
         <nav className="settings-navigation" aria-label="设置分类">
           {(
@@ -355,6 +356,7 @@ export function SettingsPanel(p: Props) {
         >
           <h3 id="theme-title">界面外观</h3>
           <div className="settings-card">
+            {range('settingsTextScale', '设置文字大小', '只调整设置界面的文字', 85, 130)}
             <Row title="主题" description="设置界面的明暗风格">
               <select
                 aria-label="主题"

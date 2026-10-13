@@ -25,6 +25,8 @@ struct Settings {
     accent_color: String,
     #[serde(rename = "settingsDensity")]
     settings_density: String,
+    #[serde(rename = "settingsTextScale")]
+    settings_text_scale: f64,
     #[serde(rename = "cursorFollowEnabled")]
     cursor_follow_enabled: bool,
     #[serde(rename = "headElasticity")]
@@ -93,6 +95,7 @@ impl Default for Settings {
             settings_theme: "system".into(),
             accent_color: "coral".into(),
             settings_density: "comfortable".into(),
+            settings_text_scale: 1.0,
             cursor_follow_enabled: true,
             head_elasticity: 1.0,
             keyboard_motion_scale: 1.0,
@@ -101,7 +104,7 @@ impl Default for Settings {
             bubble_duration_seconds: 3.0,
             bubble_idle_interval_seconds: 90,
             drag_reactions_enabled: true,
-            fullscreen_hide_enabled: true,
+            fullscreen_hide_enabled: false,
             fullscreen_exceptions: Vec::new(),
             edge_snap_enabled: true,
             mouse_details_enabled: true,
@@ -447,6 +450,8 @@ fn preview_scale(app: tauri::AppHandle, scale: f64) -> Result<(), String> {
 #[tauri::command]
 fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Settings, String> {
     if !settings.scale.is_finite()
+        || !settings.settings_text_scale.is_finite()
+        || !(0.85..=1.3).contains(&settings.settings_text_scale)
         || settings.scale < 0.5
         || settings.scale > 2.0
         || ![30, 60].contains(&settings.fps)
@@ -545,7 +550,9 @@ fn native_status(app: tauri::AppHandle) -> String {
         .unwrap_or_default();
     format!(
         "{}。本地 SQLite 存储；托盘可恢复互动。{}{}{}",
-        if active {
+        if input::RAW_ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
+            "键鼠后台Raw Input已注册（游戏效果需实机验收）"
+        } else if active {
             "键鼠监听已注册（跨应用效果需实机验收）"
         } else {
             "键鼠监听未启动或注册失败"
@@ -556,6 +563,14 @@ fn native_status(app: tauri::AppHandle) -> String {
     )
 }
 fn main() {
+    #[cfg(windows)]
+    {
+        // Scope the background-rendering arguments to this process and all its
+        // WebViews. Preserve caller arguments (including a local debug port).
+        // Using one environment avoids mismatched args on the shared profile.
+        let existing = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").unwrap_or_default();
+        std::env::set_var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", format!("{existing} --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows"));
+    }
     if std::env::current_exe()
         .ok()
         .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
@@ -599,6 +614,7 @@ fn main() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
+            desktop::pet_renderer_ready,
             desktop::begin_pet_drag,
             desktop::finish_pet_drag,
             desktop::list_pet_positions,
@@ -783,9 +799,15 @@ fn main() {
                 }
             }
             windows::restore(app.handle())?;
-            if let Some(w) = app.get_webview_window("pet") {
-                w.show()?;
-            }
+            // The frontend reveals the pet after Cubism has painted its first
+            // frame. Keep the static loading fallback out of the cold start.
+            let loading_app = app.handle().clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(8));
+                if !loading_app.state::<desktop::DesktopState>().renderer_ready.load(std::sync::atomic::Ordering::Relaxed) {
+                    let _ = desktop::pet_renderer_ready(loading_app);
+                }
+            });
             input::start(app.handle().clone());
             gamepad::start(app.handle().clone());
             windows::watch(app.handle().clone());

@@ -719,12 +719,10 @@ export function App() {
           }
         >
           <ChangliEmblem />
-          <svg className="drag-grip" viewBox="0 0 6 12" aria-hidden="true">
-            {[2, 6, 10].flatMap((y) =>
-              [1, 5].map((x) => (
-                <circle key={`${x}-${y}`} cx={x} cy={y} r="0.8" fill="currentColor" />
-              )),
-            )}
+          <svg className="drag-grip" viewBox="0 0 12 4" aria-hidden="true">
+            {[2, 6, 10].map((x) => (
+              <circle key={x} cx={x} cy="2" r="0.65" fill="currentColor" />
+            ))}
           </svg>
         </button>
       )}
@@ -749,7 +747,7 @@ export function App() {
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.12</span>
+            <i /> 浏览器预览 <span>v0.7.14</span>
           </div>
         </header>
       )}

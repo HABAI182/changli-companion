@@ -326,9 +326,9 @@
         },
         "depthPixels": 18,
         "keyboardMesh": "ArtMesh56",
-        "keyboardAsset": "assets/keyboard-refined-v0810.svg",
+        "keyboardAsset": "assets/keyboard-changli-v0714.svg",
         "jawAsset": "assets/jaw-underpaint-v078.svg",
-        "mouseAsset": "assets/mouse-complete-v078.svg",
+        "mouseAsset": "assets/mouse-wireless-v0714.svg",
         "underpaintAsset": "assets/sleeves-underpaint-v078.svg",
         "jawBlend": true
       }

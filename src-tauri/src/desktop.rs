@@ -8,7 +8,23 @@ struct Visibility { manual_hidden: bool, auto_hidden: bool, override_fullscreen:
 #[derive(Default)]
 pub struct DesktopState {
     pub dragging: AtomicBool,
+    pub renderer_ready: AtomicBool,
     visibility: Mutex<Visibility>,
+}
+
+#[tauri::command]
+pub fn pet_renderer_ready(app: tauri::AppHandle) -> Result<(), String> {
+    let desktop = app.state::<DesktopState>();
+    if desktop.renderer_ready.swap(true, Ordering::Relaxed) { return Ok(()); }
+    let (enabled, exceptions) = app.state::<Runtime>().settings.lock()
+        .map(|s| (s.fullscreen_hide_enabled, s.fullscreen_exceptions.clone())).unwrap_or_default();
+    let fullscreen = enabled && external_fullscreen(&app, &exceptions);
+    let mut state = desktop.visibility.lock().map_err(|_| "桌面状态锁失败")?;
+    state.auto_hidden = !state.manual_hidden && desired_hidden(&state, enabled, fullscreen, false);
+    if !state.manual_hidden && !state.auto_hidden {
+        app.get_webview_window("pet").ok_or("桌宠窗口不存在")?.show().map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 pub fn manual_visible(app: &tauri::AppHandle, visible: bool) -> Result<(), String> {
@@ -157,6 +173,7 @@ pub fn watch(app: tauri::AppHandle) {
             .map(|s| (s.fullscreen_hide_enabled, s.fullscreen_exceptions.clone())).unwrap_or_default();
         let fullscreen = enabled && external_fullscreen(&app, &exceptions);
         let desktop = app.state::<DesktopState>();
+        if !desktop.renderer_ready.load(Ordering::Relaxed) { continue; }
         let Ok(mut state) = desktop.visibility.lock() else { continue; };
         if !fullscreen { state.override_fullscreen = false; }
         let dragging = desktop.dragging.load(Ordering::Relaxed);

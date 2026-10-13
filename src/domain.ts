@@ -161,6 +161,7 @@ export type Settings = {
   settingsTheme: 'system' | 'light' | 'dark';
   accentColor: 'coral' | 'blue' | 'violet' | 'sage';
   settingsDensity: 'comfortable' | 'compact';
+  settingsTextScale: number;
   cursorFollowEnabled: boolean;
   headElasticity: number;
   keyboardMotionScale: number;
@@ -219,6 +220,7 @@ export function initialData(): Data {
       settingsTheme: 'system',
       accentColor: 'coral',
       settingsDensity: 'comfortable',
+      settingsTextScale: 1,
       cursorFollowEnabled: true,
       headElasticity: 1,
       keyboardMotionScale: 1,
@@ -227,7 +229,7 @@ export function initialData(): Data {
       bubbleDurationSeconds: 3,
       bubbleIdleIntervalSeconds: 90,
       dragReactionsEnabled: true,
-      fullscreenHideEnabled: true,
+      fullscreenHideEnabled: false,
       fullscreenExceptions: [],
       edgeSnapEnabled: true,
       mouseDetailsEnabled: true,

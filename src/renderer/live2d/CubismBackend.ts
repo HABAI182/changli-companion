@@ -297,6 +297,10 @@ export class CubismBackend implements Live2DBackend {
     this.canvas.width = Math.max(1, Math.round(width * dpr));
     this.canvas.height = Math.max(1, Math.round(height * dpr));
     this.renderer?.setRenderTargetSize(this.canvas.width, this.canvas.height);
+    // Resizing clears the canvas. Paint synchronously before native reveal,
+    // while maintaining exactly one RAF loop even when the window is hidden.
+    cancelAnimationFrame(this.frame);
+    this.draw(performance.now());
   }
 
   private draw = (now: number): void => {

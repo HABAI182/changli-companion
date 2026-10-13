@@ -344,17 +344,6 @@ header {
   border-radius: max(3px, calc(var(--control-radius) - 0.85cqw));
   pointer-events: none;
 }
-.changli-control::after {
-  content: '';
-  position: absolute;
-  top: -0.12cqw;
-  left: 1.3cqw;
-  width: 4.3cqw;
-  height: 0.85cqw;
-  border-radius: 0 0 0.5cqw 0.5cqw;
-  background: #f27d72;
-  pointer-events: none;
-}
 .changli-emblem {
   display: block;
   color: var(--control-gold);
@@ -1150,32 +1139,39 @@ details:not(.dev-tools) {
   top: 75.5%;
   right: 1%;
   left: auto;
-  --control-radius: clamp(7px, 2.6cqw, 16px);
-  width: clamp(28px, 10cqw, 60px);
-  height: clamp(28px, 9.4cqw, 56px);
+  --control-radius: clamp(6px, 2.2cqw, 12px);
+  width: clamp(24px, 8cqw, 44px);
+  height: clamp(24px, 8cqw, 44px);
   padding: clamp(3px, 0.85cqw, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6cqw;
+  opacity: 0.86;
   cursor: grab;
   line-height: 1;
   transition:
     border-color 160ms ease,
-    box-shadow 160ms ease;
+    box-shadow 160ms ease,
+    opacity 160ms ease;
 }
 .drag-handle .changli-emblem {
-  width: clamp(14px, 5.5cqw, 32px);
-  height: clamp(14px, 5.5cqw, 32px);
+  width: clamp(12px, 4.2cqw, 22px);
+  height: clamp(12px, 4.2cqw, 22px);
+  margin-top: -1cqw;
   flex: none;
 }
 .drag-grip {
-  width: clamp(5px, 1.5cqw, 9px);
-  height: clamp(10px, 3cqw, 18px);
-  color: #eb9b88;
+  position: absolute;
+  bottom: 0.8cqw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(9px, 3cqw, 16px);
+  height: clamp(3px, 1cqw, 5px);
+  color: #cda986;
   pointer-events: none;
 }
 .drag-handle:hover {
+  opacity: 1;
   background: linear-gradient(145deg, #65444a, #322934 80%);
   border-color: #ffe2a8;
   box-shadow:

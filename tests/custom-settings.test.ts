@@ -9,6 +9,23 @@ it('keeps legacy preferences while filling new settings', () => {
   expect(data.settings.topmost).toBe(false);
   expect(data.settings.settingsTheme).toBe('system');
   expect(data.settings.keyboardMotionScale).toBe(1);
+  expect(data.settings.settingsTextScale).toBe(1);
+});
+
+it('persists the settings text size independently of the desktop-pet size', () => {
+  const data = initialData();
+  data.settings.settingsTextScale = 1.25;
+  data.settings.scale = 0.75;
+  const saved = parseData(JSON.stringify(data));
+  expect(saved.settings.settingsTextScale).toBe(1.25);
+  expect(saved.settings.scale).toBe(0.75);
+});
+
+it('keeps the pet visible in full-screen apps by default but preserves a chosen hide setting', () => {
+  expect(initialData().settings.fullscreenHideEnabled).toBe(false);
+  const optedIn = initialData();
+  optedIn.settings.fullscreenHideEnabled = true;
+  expect(parseData(JSON.stringify(optedIn)).settings.fullscreenHideEnabled).toBe(true);
 });
 
 it('changes reach distance without swapping hands and disables mouse following independently', () => {

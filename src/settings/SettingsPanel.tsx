@@ -323,7 +323,7 @@ export function SettingsPanel(p: Props) {
             <h2>离火长明</h2>
             <p>桌宠设置</p>
           </div>
-          <span className="settings-version">v0.7.14</span>
+          <span className="settings-version">v0.7.15</span>
         </div>
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
@@ -473,6 +473,12 @@ export function SettingsPanel(p: Props) {
                 '同时显示多个按键',
                 '最多显示最近 6 个按键，各自停留后淡出，不保存记录',
               )}
+            {s.keyOverlayEnabled &&
+              toggle(
+                'keyOverlayRepeatEnabled',
+                '长按重复浮现',
+                '关闭时一次长按只浮现一次，手部仍保持长按响应',
+              )}
             {toggle('cursorFollowEnabled', '鼠标视线跟随', '随鼠标转头与转眼，不影响鼠标手动作')}
             {range(
               'keyboardMotionScale',
@@ -542,6 +548,12 @@ export function SettingsPanel(p: Props) {
         >
           <h3 id="desktop-title">桌面陪伴</h3>
           <div className="settings-card">
+            {toggle(
+              'elevatedInputModeEnabled',
+              '高权限兼容启动',
+              '默认开启；下次启动请求 Windows 确认，兼容以管理员身份运行的游戏',
+              true,
+            )}
             {toggle('topmost', '窗口置顶', '显示在其他窗口上方', true)}
             {toggle(
               'fullscreenHideEnabled',

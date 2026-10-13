@@ -16,6 +16,7 @@ import { loadCubismCore } from './CoreLoader';
 import { RuntimeOffsets, type RuntimeOffsetRig } from './RuntimeOffsets';
 import { checkCubismResources, modelFileUrl } from './modelAssets';
 import { FaceEffects } from './FaceEffects';
+import { noteRenderedFrame } from '../../inputDiagnostics';
 
 const SHADER_URL = '/vendor/live2d/shaders/';
 const SHADER_TIMEOUT_MS = 10000;
@@ -363,6 +364,7 @@ export class CubismBackend implements Live2DBackend {
       now,
       (this.parameters.get('__gesture.flameStrength') || 0) > 0,
     );
+    noteRenderedFrame(now);
     this.frame = requestAnimationFrame(this.draw);
   };
 

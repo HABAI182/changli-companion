@@ -33,7 +33,9 @@ export function nextKeyBadges(
   now: number,
   current: KeyBadge[],
   multiple: boolean,
+  repeatEnabled = false,
 ): KeyBadge[] {
+  if (key?.repeat && !repeatEnabled) return current;
   const previous = current.at(-1);
   const badge = nextKeyBadge(key, now, previous);
   if (!badge || badge === previous) return current;

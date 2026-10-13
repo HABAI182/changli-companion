@@ -51,7 +51,9 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 // single-image fallback preview is never passed off as a Cubism model.
 export class CubismBackend implements Live2DBackend {
   private offsets: RuntimeOffsets;
-  constructor(private rig?: RuntimeOffsetRig) { this.offsets = new RuntimeOffsets(rig); }
+  constructor(private rig?: RuntimeOffsetRig) {
+    this.offsets = new RuntimeOffsets(rig);
+  }
   private canvas?: HTMLCanvasElement;
   private gl?: WebGLRenderingContext;
   private moc?: CubismMoc;
@@ -105,7 +107,15 @@ export class CubismBackend implements Live2DBackend {
     if (check.manifest.Layout) {
       this.modelMatrix.setupFromLayout(new Map(Object.entries(check.manifest.Layout)));
     }
-    this.renderer = new MouseRegionRenderer(canvas.width, canvas.height, this.rig?.mouseRegion, this.rig?.handOrder, this.rig?.contours, this.rig?.flameMesh, this.rig?.skinPatches);
+    this.renderer = new MouseRegionRenderer(
+      canvas.width,
+      canvas.height,
+      this.rig?.mouseRegion,
+      this.rig?.handOrder,
+      this.rig?.contours,
+      this.rig?.flameMesh,
+      this.rig?.skinPatches,
+    );
     this.renderer.initialize(this.model);
     this.renderer.startUp(gl);
     this.renderer.setIsPremultipliedAlpha(true);
@@ -125,25 +135,39 @@ export class CubismBackend implements Live2DBackend {
       this.textures.push(texture);
       this.renderer.bindTexture(index, texture);
     }
-    if(this.rig?.keyboardAsset && this.rig.keyboardMesh) {
-      const image=await loadImage('/models/changli/'+this.rig.keyboardAsset);
-      if(this.disposed)return;
-      const texture=gl.createTexture();if(!texture)throw new Error('键盘贴图创建失败');
-      gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,1);
-      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
-      const index=this.textures.length;this.textures.push(texture);this.renderer.bindTexture(index,texture);this.renderer.setKeyboard(this.rig.keyboardMesh,index);
+    if (this.rig?.keyboardAsset && this.rig.keyboardMesh) {
+      const image = await loadImage('/models/changli/' + this.rig.keyboardAsset);
+      if (this.disposed) return;
+      const texture = gl.createTexture();
+      if (!texture) throw new Error('键盘贴图创建失败');
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+      const index = this.textures.length;
+      this.textures.push(texture);
+      this.renderer.bindTexture(index, texture);
+      this.renderer.setKeyboard(this.rig.keyboardMesh, index);
     }
     if (this.rig?.jawAsset) {
       const image = await loadImage('/models/changli/' + this.rig.jawAsset);
       if (this.disposed) return;
-      const texture = gl.createTexture(); if (!texture) throw new Error('下颌补片贴图创建失败');
-      gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      const texture = gl.createTexture();
+      if (!texture) throw new Error('下颌补片贴图创建失败');
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      const index = this.textures.length; this.textures.push(texture); this.renderer.bindTexture(index, texture); this.renderer.setJawTexture(index, this.rig?.jawBlend);
+      const index = this.textures.length;
+      this.textures.push(texture);
+      this.renderer.bindTexture(index, texture);
+      this.renderer.setJawTexture(index, this.rig?.jawBlend);
     }
     for (const [asset, apply] of [
       [this.rig?.mouseAsset, (index: number) => this.renderer!.setMouseTexture(index)],
@@ -152,12 +176,19 @@ export class CubismBackend implements Live2DBackend {
       if (!asset) continue;
       const image = await loadImage('/models/changli/' + asset);
       if (this.disposed) return;
-      const texture = gl.createTexture(); if (!texture) throw new Error('底层补全贴图创建失败');
-      gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      const texture = gl.createTexture();
+      if (!texture) throw new Error('底层补全贴图创建失败');
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      const index = this.textures.length; this.textures.push(texture); this.renderer.bindTexture(index, texture); apply(index);
+      const index = this.textures.length;
+      this.textures.push(texture);
+      this.renderer.bindTexture(index, texture);
+      apply(index);
     }
     for (const [group, files] of Object.entries(refs.Motions || {})) {
       for (const [index, motion] of files.entries()) {
@@ -212,24 +243,41 @@ export class CubismBackend implements Live2DBackend {
     if (!this.model) return {};
     const core = this.model.getModel();
     const ppu = this.model.getPixelsPerUnit();
-    return Object.fromEntries([...core.drawables.ids].map((id, i) => [id, {
-      opacity: core.drawables.opacities[i],
-      positions: [...core.drawables.vertexPositions[i]].map(value => value * ppu),
-    }]));
+    return Object.fromEntries(
+      [...core.drawables.ids].map((id, i) => [
+        id,
+        {
+          opacity: core.drawables.opacities[i],
+          positions: [...core.drawables.vertexPositions[i]].map((value) => value * ppu),
+        },
+      ]),
+    );
   }
 
-  getMouseMotionSnapshot() { return this.renderer?.getMouseMotionSnapshot() || null; }
-  getDrawOrderSnapshot() { return this.renderer?.getDrawOrderSnapshot() || {}; }
-  getContourSnapshot() { return this.renderer?.getContourSnapshot() || {}; }
-  getFaceEffectsSnapshot() { return this.faceEffects?.snapshot() || {}; }
+  getMouseMotionSnapshot() {
+    return this.renderer?.getMouseMotionSnapshot() || null;
+  }
+  getDrawOrderSnapshot() {
+    return this.renderer?.getDrawOrderSnapshot() || {};
+  }
+  getContourSnapshot() {
+    return this.renderer?.getContourSnapshot() || {};
+  }
+  getFaceEffectsSnapshot() {
+    return this.faceEffects?.snapshot() || {};
+  }
 
   startMotion(name: string): void {
-    if (name === '__clear-input') { this.motionManager.stopAllMotions(); return; }
+    if (name === '__clear-input') {
+      this.motionManager.stopAllMotions();
+      return;
+    }
     const motion = this.motions.get(name) || this.motions.get(`${name}/0`);
     if (motion) {
       // Input presses replace the previous press immediately. SDK fade-out
       // blending can otherwise depress the mouse hand during the next key.
-      if (/^(LeftPress|RightPress|BothPress|RightClick|WheelRoll)(\/|$)/.test(name)) this.motionManager.stopAllMotions();
+      if (/^(LeftPress|RightPress|BothPress|RightClick|WheelRoll)(\/|$)/.test(name))
+        this.motionManager.stopAllMotions();
       this.motionManager.startMotionPriority(motion, false, 2);
     }
   }
@@ -237,7 +285,10 @@ export class CubismBackend implements Live2DBackend {
   setExpression(name: string): void {
     const expression = this.expressions.get(name);
     if (expression) this.expressionManager.startMotion(expression, false);
-    this.expressionName = name.replace(/Reaction$/, '').replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+    this.expressionName = name
+      .replace(/Reaction$/, '')
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .toLowerCase();
   }
 
   resize(width: number, height: number): void {
@@ -258,6 +309,15 @@ export class CubismBackend implements Live2DBackend {
       this.model.setParameterValueById(CubismFramework.getIdManager().getId(id), value);
     }
     this.motionManager.updateMotion(this.model, delta);
+    // Direct independent input wins over any authored hand curves. Without
+    // this post-motion override an interrupted action can press both hands.
+    if (this.parameters.get('__gesture.handInputOwned')) {
+      for (const id of ['ParamHandLeftPress', 'ParamHandRightPress'])
+        this.model.setParameterValueById(
+          CubismFramework.getIdManager().getId(id),
+          this.parameters.get(id) || 0,
+        );
+    }
     // Expressions and physics are per-frame effects. Keeping their output as
     // the next frame's base makes Add/Multiply expressions accumulate.
     this.model.saveParameters();
@@ -285,11 +345,20 @@ export class CubismBackend implements Live2DBackend {
     ]);
     const mouse = this.offsets.getMouseOffset();
     this.renderer.setMouseMotion(mouse.x, mouse.y);
-    this.renderer.setFlameMotion(this.parameters.get('__gesture.flamePhase') || 0, this.parameters.get('__gesture.flameStrength') || 0);
+    this.renderer.setFlameMotion(
+      this.parameters.get('__gesture.flamePhase') || 0,
+      this.parameters.get('__gesture.flameStrength') || 0,
+    );
     this.renderer.setMouthCoverage(this.faceEffects?.mouthCoverage() || 0);
     this.renderer.drawModel(SHADER_URL);
-    this.faceEffects?.draw(this.model, matrix, canvas, this.expressionName, now,
-      (this.parameters.get('__gesture.flameStrength') || 0) > 0);
+    this.faceEffects?.draw(
+      this.model,
+      matrix,
+      canvas,
+      this.expressionName,
+      now,
+      (this.parameters.get('__gesture.flameStrength') || 0) > 0,
+    );
     this.frame = requestAnimationFrame(this.draw);
   };
 

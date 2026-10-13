@@ -35,7 +35,7 @@
         "phoenix": "PhoenixInteract/0",
         "pet": "SecondaryImpulse/0",
         "body": "SecondaryImpulse/0",
-        "keyboard_left": "RightPress/0",
+        "keyboard_left": "LeftPress/0",
         "keyboard_right": "RightPress/0",
         "space": "RightPress/0",
         "enter": "RightPress/0",
@@ -75,6 +75,7 @@
           "ArtMesh9"
         ],
         "reachPixels": 120,
+        "mouseToKeyboardPixels": [250, 94],
         "mousePixels": 18,
         "mouth": [
           "ArtMesh28"

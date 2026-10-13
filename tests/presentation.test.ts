@@ -61,21 +61,21 @@ it('输入动作与持续表情可组合，完整动画结束恢复当前表情'
   expect(pet.snapshot(1830, settings).animation).toBeNull();
   expect(pet.snapshot(1830, settings).expression).toBe('smile');
 });
-it('四区切换同一只键盘手，前后方向独立平滑，气泡无末尾句号', () => {
+it('四区由两手分别覆盖并镜像，前后方向独立平滑，气泡无末尾句号', () => {
   const pet = new PresentationRuntime(0, () => 0.5);
   pet.input('keyboard_left', 100, 0, -1);
   let s = pet.snapshot(200, settings);
-  expect(s.idle.keyboardReach).toBeLessThan(-0.8);
-  expect(s.idle.keyboardDepth).toBeLessThan(-0.8);
+  expect(s.idle.keyboardReach).toBeGreaterThan(0.75);
+  expect(s.idle.keyboardDepth).toBeLessThan(-0.75);
   pet.input('keyboard_left', 220, 0, 1);
   s = pet.snapshot(320, settings);
-  expect(s.idle.keyboardReach).toBeLessThan(-0.9);
-  expect(s.idle.keyboardDepth).toBeGreaterThan(0.7);
+  expect(s.idle.keyboardReach).toBeGreaterThan(0.9);
+  expect(s.idle.keyboardDepth).toBeGreaterThan(0.6);
   pet.input('keyboard_right', 340, 0, -1);
   s = pet.snapshot(440, settings);
-  expect(s.idle.keyboardReach).toBeGreaterThan(0.7);
-  expect(s.idle.keyboardDepth).toBeLessThan(-0.7);
-  expect(handAction(s.action!.id, s.base)).toBe('keyboard_right');
+  expect(s.idle.rightKeyboardReach).toBeLessThan(-0.75);
+  expect(s.idle.rightKeyboardDepth).toBeLessThan(-0.75);
+  expect(handAction(s.action!.id, s.base)).toBe('keyboard_left');
   pet.snapshot(1800, settings);
   expect(Math.abs(pet.snapshot(2500, settings).idle.keyboardDepth!)).toBeLessThan(0.001);
   pet.setSpeech('又被你发现了。', 3000);
@@ -105,22 +105,22 @@ it('纯键盘屏蔽鼠标手，快速输入保留键区，不自动改成双手�
   pet.input('keyboard_left', 300501);
   expect(pet.snapshot(300502, sleep).base).toBe('keyboard_mouse');
 });
-it('两种模式的所有键盘区域共用键盘手，鼠标保持独立动作', () => {
+it('两种模式按实体键盘区域分配两手，画面左右为镜像', () => {
   expect(handAction('keyboard_left', 'keyboard_mouse')).toBe('keyboard_right');
-  expect(handAction('keyboard_right', 'keyboard_mouse')).toBe('keyboard_right');
+  expect(handAction('keyboard_right', 'keyboard_mouse')).toBe('keyboard_left');
   expect(handAction('space', 'keyboard_mouse')).toBe('keyboard_right');
   expect(handAction('mouse_left', 'keyboard_mouse')).toBe('mouse_left');
   expect(handAction('keyboard_left', 'keyboard_only')).toBe('keyboard_right');
-  expect(handAction('keyboard_right', 'keyboard_only')).toBe('keyboard_right');
+  expect(handAction('keyboard_right', 'keyboard_only')).toBe('keyboard_left');
 });
-it('同一键盘手左右移动与空格回中，鼠标独立归位，气泡关闭时不会空口说话', () => {
+it('左手空格回中，右手优先键盘后回鼠标，气泡关闭时不会空口说话', () => {
   const pet = new PresentationRuntime(0, () => 0.5);
   pet.input('keyboard_left', 100);
-  expect(pet.snapshot(200, settings).idle.keyboardReach).toBeLessThan(-0.8);
+  expect(pet.snapshot(200, settings).idle.keyboardReach).toBeGreaterThan(0.75);
   pet.input('keyboard_right', 220);
-  expect(pet.snapshot(320, settings).idle.keyboardReach).toBeGreaterThan(0.7);
+  expect(pet.snapshot(320, settings).idle.rightKeyboardReach).toBeLessThan(-0.75);
   pet.input('space', 400);
-  expect(Math.abs(pet.snapshot(600, settings).idle.keyboardReach!)).toBeLessThan(0.02);
+  expect(Math.abs(pet.snapshot(700, settings).idle.keyboardReach!)).toBeLessThan(0.02);
   pet.snapshot(1000, settings);
   expect(Math.abs(pet.snapshot(1800, settings).idle.keyboardReach!)).toBeLessThan(0.001);
   pet.input('move', 2000, 1, -1);

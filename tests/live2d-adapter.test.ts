@@ -136,7 +136,12 @@ it('屏幕下视和 XInput 上视在 Cubism 中保持正确纵向方向并能回
   expect(backend.setParameter).toHaveBeenCalledWith('ParamEyeBallY', 0.8);
   snapshot.idle.gazeY = 0;
   adapter.update(snapshot);
-  expect(vi.mocked(backend.setParameter).mock.calls.filter(([id]) => id === 'ParamAngleY').at(-1)).toEqual(['ParamAngleY', 0]);
+  expect(
+    vi
+      .mocked(backend.setParameter)
+      .mock.calls.filter(([id]) => id === 'ParamAngleY')
+      .at(-1),
+  ).toEqual(['ParamAngleY', 0]);
   adapter.dispose();
 });
 
@@ -168,7 +173,8 @@ it('连续同侧输入会重新按压，未绑定的动画不会吞掉输入动�
   });
   adapter.update(snapshot);
   adapter.update(snapshot);
-  expect(backend.startMotion).toHaveBeenCalledTimes(1);
+  expect(backend.startMotion).not.toHaveBeenCalled();
+  expect(backend.setParameter).toHaveBeenCalledWith('__gesture.handInputOwned', 1);
   pet.input('keyboard_left', 140);
   const next: RenderSnapshot = pet.snapshot(150, {
     motion: 'full',
@@ -183,33 +189,58 @@ it('连续同侧输入会重新按压，未绑定的动画不会吞掉输入动�
     status: 'awaiting-art',
   };
   adapter.update(next);
-  expect(backend.startMotion).toHaveBeenCalledTimes(2);
-  expect(backend.startMotion).toHaveBeenLastCalledWith('RightPress/0');
+  expect(backend.startMotion).not.toHaveBeenCalled();
+  expect(backend.setParameter).toHaveBeenCalledWith(
+    '__gesture.keyboardReach',
+    next.idle.keyboardReach,
+  );
   adapter.dispose();
 });
-it('鼠标后交替键区仍只触发同一键盘手，帧基值清掉旧手压力', async () => {
-  const backend: Live2DBackend = { load: vi.fn().mockResolvedValue(undefined), setParameter: vi.fn(),
-    startMotion: vi.fn(), setExpression: vi.fn(), resize: vi.fn(), dispose: vi.fn() };
-  const adapter = new Live2DAdapter({ entry: 'real.model3.json',
-    parameterMap: { 'hand.left.press': 'ParamHandLeftPress', 'hand.right.press': 'ParamHandRightPress' },
-    motionMap: { mouse_left: 'LeftPress/0', keyboard_left: 'LeftPress/0', keyboard_right: 'RightPress/0', space: 'BothPress/0' }, expressionMap: {} }, backend);
+it('两手独立输入直接覆盖压力，旧动作不再竞争或残留', async () => {
+  const backend: Live2DBackend = {
+    load: vi.fn().mockResolvedValue(undefined),
+    setParameter: vi.fn(),
+    startMotion: vi.fn(),
+    setExpression: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
+  };
+  const adapter = new Live2DAdapter(
+    {
+      entry: 'real.model3.json',
+      parameterMap: {
+        'hand.left.press': 'ParamHandLeftPress',
+        'hand.right.press': 'ParamHandRightPress',
+      },
+      motionMap: {
+        mouse_left: 'LeftPress/0',
+        keyboard_left: 'LeftPress/0',
+        keyboard_right: 'RightPress/0',
+        space: 'BothPress/0',
+      },
+      expressionMap: {},
+    },
+    backend,
+  );
   await adapter.init({} as HTMLCanvasElement);
   const pet = new PresentationRuntime(0, () => 0);
   const settings = { motion: 'full', inputMode: 'keyboard_mouse', autoSleepMinutes: 0 } as const;
-  pet.input('left', 100);adapter.update(pet.snapshot(101, settings));
-  expect(backend.startMotion).toHaveBeenLastCalledWith('LeftPress/0');
+  pet.input('left', 100);
+  adapter.update(pet.snapshot(101, settings));
+  expect(backend.startMotion).not.toHaveBeenCalled();
   for (let n = 0; n < 12; n++) {
-    pet.input(n % 2 ? 'keyboard_right' : 'keyboard_left', 140+n*30);
-    adapter.update(pet.snapshot(141+n*30, settings));
-    expect(backend.startMotion).toHaveBeenLastCalledWith('RightPress/0');
+    pet.input(n % 2 ? 'keyboard_right' : 'keyboard_left', 140 + n * 30);
+    adapter.update(pet.snapshot(141 + n * 30, settings));
+    expect(backend.startMotion).not.toHaveBeenCalled();
   }
-  pet.input('space', 700);adapter.update(pet.snapshot(701, settings));
-  expect(backend.startMotion).toHaveBeenLastCalledWith('RightPress/0');
+  pet.input('space', 700);
+  adapter.update(pet.snapshot(701, settings));
+  expect(backend.startMotion).not.toHaveBeenCalled();
   expect(backend.setParameter).toHaveBeenCalledWith('ParamHandLeftPress', 0);
   expect(backend.setParameter).toHaveBeenCalledWith('ParamHandRightPress', 0);
   pet.input('keyboard_left', 900, 0, 0, 'keyboard_only');
   adapter.update(pet.snapshot(901, { ...settings, inputMode: 'keyboard_only' }));
-  expect(backend.startMotion).toHaveBeenLastCalledWith('RightPress/0');
+  expect(backend.startMotion).not.toHaveBeenCalled();
 });
 it('缺失真正的模型资源或运行时会回退，不会宣称 ready', async () => {
   const missing = new Live2DAdapter({

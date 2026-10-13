@@ -1045,24 +1045,7 @@
         "login-autostart",
         "fullscreen-avoidance",
         "fullscreen-app-exceptions"
-      ],
-      "verification": {
-        "frontendTests": 100,
-        "nativeMacosTests": 18,
-        "guiRuntimeTested": false,
-        "windowsBuildTested": false
-      },
-      "userRuntimeValidation": {
-        "date": "2026-10-13",
-        "reportedBy": "user",
-        "scope": [
-          "global-keyboard"
-        ],
-        "result": "restored-after-input-monitoring-reauthorization",
-        "systemTapRegistrationVerified": true,
-        "fullscreenRuntimeTested": false,
-        "gameRuntimeTested": false
-      }
+      ]
     }
   ]
 }

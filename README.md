@@ -23,7 +23,7 @@
 | Windows x64 | [Windows 0.7.15](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15) | 便携 EXE / EXE 安装包 |
 | macOS Apple Silicon（M 系列） | [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3) | DMG / APP ZIP；最低 macOS 12 |
 
-已发布的 macOS 0.7.12-macos.3 由用户在 MacBook 实测通过，具体安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.12-macos.3.md)。Release 中带 `source` 的 ZIP 是开发者源码。
+已发布的 macOS 0.7.12-macos.3 安装包与源码入口见 [macOS 发布说明](docs/MACOS-0.7.12-macos.3.md)。Release 中带 `source` 的 ZIP 是开发者源码。
 
 右键角色打开互动菜单和设置；拖动键位于键盘右下角。历史版本分别留档，见文末版本索引。
 
@@ -66,7 +66,7 @@ npm run desktop
 
 编译完成后，按终端输出的路径打开 `离火长明.app`，或打开 `.dmg` 将应用拖入“应用程序”。构建产物保存在源码目录之外。当前支持 Apple Silicon Mac。
 
-首次使用全局键鼠互动，请在“系统设置 → 隐私与安全性 → 输入监控”中添加并允许“离火长明”，然后重新启动应用。可在桌宠设置中选择输入模式、开关鼠标视线跟随和按键浮显。更新应用后若键盘无反应，请移除旧的输入监控条目，重新添加当前应用并重启。
+首次使用全局键鼠互动，请在“系统设置 → 隐私与安全性 → 输入监控”中添加并允许“离火长明”，然后重新启动应用。可在桌宠设置中选择输入模式、开关鼠标视线跟随和按键浮显。更换或更新应用后，请检查输入监控授权，必要时移除旧条目，重新添加已安装的应用并重启。
 
 需要登录后自动启动时，先将应用安装到“应用程序”，再在桌宠“设置 → 高级”中打开“开机启动”。关闭该开关即可取消自启动。
 

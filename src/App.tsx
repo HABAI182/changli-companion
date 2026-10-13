@@ -31,6 +31,7 @@ import { model, type ShortcutSlot } from './model';
 import { SettingsPanel } from './settings/SettingsPanel';
 import { KEY_BADGE_MS, nextKeyBadges, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
 import { ChangliEmblem } from './overlay/ChangliEmblem';
+import { inputHealth } from './inputDiagnostics';
 
 const names: Record<string, string> = {
   keyboard_left: '左键区',
@@ -131,7 +132,13 @@ export function App() {
       );
       if (data.settings.keyOverlayEnabled && key)
         setKeyBadges((current) =>
-          nextKeyBadges(key, Date.now(), current, data.settings.multiKeyOverlayEnabled),
+          nextKeyBadges(
+            key,
+            Date.now(),
+            current,
+            data.settings.multiKeyOverlayEnabled,
+            data.settings.keyOverlayRepeatEnabled,
+          ),
         );
       redraw((n) => n + 1);
     },
@@ -139,6 +146,7 @@ export function App() {
       data.settings.inputMode,
       data.settings.keyOverlayEnabled,
       data.settings.multiKeyOverlayEnabled,
+      data.settings.keyOverlayRepeatEnabled,
     ],
   );
   useEffect(() => {
@@ -264,6 +272,13 @@ export function App() {
       clean?.();
     };
   }, [signal]);
+  useEffect(() => {
+    if (!native || panelWindow) return;
+    const timer = setInterval(() => {
+      void invoke('input_frontend_heartbeat', inputHealth()).catch(console.error);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [panelWindow]);
   useEffect(() => {
     if (!native || panelWindow || !data.settings.gamepadEnabled) return;
     let clean: (() => void) | undefined,
@@ -533,11 +548,19 @@ export function App() {
           </p>
           <p>备用分层素材：{renderInfo.layers}。</p>
           {native && (
-            <button
-              onClick={() => void invoke<string>('native_status').then(setNativeStatus).catch(fail)}
-            >
-              刷新监听状态
-            </button>
+            <>
+              <button
+                onClick={() =>
+                  void invoke<string>('native_status').then(setNativeStatus).catch(fail)
+                }
+              >
+                刷新监听状态
+              </button>
+              <button onClick={() => void invoke('restart_input_compatibility').catch(fail)}>
+                以管理员身份重启
+              </button>
+              <p>仅用于高权限游戏的输入兼容；Windows 会要求确认，取消后桌宠继续运行</p>
+            </>
           )}
         </div>
       </details>
@@ -747,7 +770,7 @@ export function App() {
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.14</span>
+            <i /> 浏览器预览 <span>v0.7.15</span>
           </div>
         </header>
       )}

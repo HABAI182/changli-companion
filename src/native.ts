@@ -7,6 +7,7 @@ import { native } from './storage';
 import type { Settings, Signal } from './domain';
 import { browserVirtualKey, keyRegion, keyDepth } from './model';
 import type { KeyDisplay } from './overlay/keyOverlay';
+import { noteNativeInput } from './inputDiagnostics';
 export type Panel = 'focus' | 'todos' | 'settings';
 export const openPanel = (panel: Panel) => invoke('open_panel', { panel });
 export async function openProjectLink(page: 'home' | 'updates') {
@@ -107,7 +108,10 @@ export async function subscribeInput(
   if (native)
     return listen<{ signal: Signal; x: number; y: number; key?: KeyDisplay }>(
       'semantic-input',
-      (e) => fn(e.payload.signal, e.payload.x, e.payload.y, e.payload.key),
+      (e) => {
+        noteNativeInput();
+        fn(e.payload.signal, e.payload.x, e.payload.y, e.payload.key);
+      },
     );
   const editable = (target: EventTarget | null) =>
     target instanceof HTMLElement &&
@@ -126,7 +130,7 @@ export async function subscribeInput(
         special || (keyRegion(browserVirtualKey(e.code)) as Signal),
         0,
         keyDepth(browserVirtualKey(e.code)),
-        { label: browserKeyLabel(e.code), phase: 'down' },
+        { label: browserKeyLabel(e.code), phase: 'down', repeat: e.repeat },
       );
     }
   };

@@ -2,6 +2,8 @@
 mod desktop;
 mod gamepad;
 mod input;
+#[cfg(windows)]
+mod input_merge;
 mod model;
 mod pet_menu;
 mod storage;
@@ -68,6 +70,10 @@ struct Settings {
     key_overlay_enabled: bool,
     #[serde(rename = "multiKeyOverlayEnabled")]
     multi_key_overlay_enabled: bool,
+    #[serde(rename = "keyOverlayRepeatEnabled")]
+    key_overlay_repeat_enabled: bool,
+    #[serde(rename = "elevatedInputModeEnabled")]
+    elevated_input_mode_enabled: bool,
     #[serde(rename = "autoSleepMinutes")]
     auto_sleep_minutes: u32,
     #[serde(rename = "hoverHideEnabled")]
@@ -120,6 +126,8 @@ impl Default for Settings {
             input_mode: "keyboard_mouse".into(),
             key_overlay_enabled: true,
             multi_key_overlay_enabled: false,
+            key_overlay_repeat_enabled: false,
+            elevated_input_mode_enabled: true,
             auto_sleep_minutes: 0,
             hover_hide_enabled: false,
             hover_hide_delay_ms: 500,
@@ -350,7 +358,7 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
         w.show().map_err(|e| e.to_string())?;
         return w.set_focus().map_err(|e| e.to_string());
     }
-    let settings_window = WebviewWindowBuilder::new(
+    let settings_builder = WebviewWindowBuilder::new(
         &app,
         label,
         WebviewUrl::App(format!("index.html?panel={panel}").into()),
@@ -360,9 +368,10 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
     .min_inner_size(420.0, 500.0)
     .center()
     .focused(true)
-    .always_on_top(true)
-    .build()
-    .map_err(|e| e.to_string())?;
+    .always_on_top(true);
+    #[cfg(windows)]
+    let settings_builder = settings_builder.additional_browser_args(webview_args());
+    let settings_window = settings_builder.build().map_err(|e| e.to_string())?;
     input::register_editor(&settings_window);
     Ok(())
 }
@@ -551,7 +560,7 @@ fn native_status(app: tauri::AppHandle) -> String {
     format!(
         "{}。本地 SQLite 存储；托盘可恢复互动。{}{}{}",
         if input::RAW_ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
-            "键鼠后台Raw Input已注册（游戏效果需实机验收）"
+            "键鼠后台双通道监听已启动（游戏效果需实机验收）"
         } else if active {
             "键鼠监听已注册（跨应用效果需实机验收）"
         } else {
@@ -562,15 +571,16 @@ fn native_status(app: tauri::AppHandle) -> String {
         gamepad::summary()
     )
 }
-fn main() {
-    #[cfg(windows)]
-    {
-        // Scope the background-rendering arguments to this process and all its
-        // WebViews. Preserve caller arguments (including a local debug port).
-        // Using one environment avoids mismatched args on the shared profile.
+#[cfg(windows)]
+pub(crate) fn webview_args() -> &'static str {
+    static ARGS: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    ARGS.get_or_init(|| {
         let existing = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").unwrap_or_default();
-        std::env::set_var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", format!("{existing} --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows"));
-    }
+        let debug = if std::env::args().any(|arg| arg == "--local-input-diagnostics") {" --remote-debugging-port=9225"} else {""};
+        format!("{existing}{debug} --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows")
+    })
+}
+fn main() {
     if std::env::current_exe()
         .ok()
         .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
@@ -579,6 +589,16 @@ fn main() {
     {
         desktop::run_fullscreen_fixture();
         return;
+    }
+    // Elevated WebView2 ignores environment-only browser arguments. Pass one
+    // identical set in code to pet, settings and menu so their profile matches.
+    let mut context = tauri::generate_context!();
+    if input::elevate_at_startup(&context.config().identifier) {
+        return;
+    }
+    #[cfg(windows)]
+    for window in &mut context.config_mut().app.windows {
+        window.additional_browser_args = Some(webview_args().into());
     }
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::Builder::new().build())
@@ -633,6 +653,9 @@ fn main() {
             pet_menu::menu_action,
             preview_scale,
             native_status,
+            input::input_diagnostics,
+            input::input_frontend_heartbeat,
+            input::restart_input_compatibility,
             list_shortcuts,
             update_shortcuts,
             storage::load_data,
@@ -804,7 +827,11 @@ fn main() {
             let loading_app = app.handle().clone();
             std::thread::spawn(move || {
                 std::thread::sleep(std::time::Duration::from_secs(8));
-                if !loading_app.state::<desktop::DesktopState>().renderer_ready.load(std::sync::atomic::Ordering::Relaxed) {
+                if !loading_app
+                    .state::<desktop::DesktopState>()
+                    .renderer_ready
+                    .load(std::sync::atomic::Ordering::Relaxed)
+                {
                     let _ = desktop::pet_renderer_ready(loading_app);
                 }
             });
@@ -814,6 +841,6 @@ fn main() {
             desktop::watch(app.handle().clone());
             Ok(())
         })
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("离火长明启动失败，请检查 WebView2 和本地数据目录权限");
 }

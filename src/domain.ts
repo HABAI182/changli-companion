@@ -186,6 +186,8 @@ export type Settings = {
   inputMode: 'keyboard_mouse' | 'keyboard_only';
   keyOverlayEnabled: boolean;
   multiKeyOverlayEnabled: boolean;
+  keyOverlayRepeatEnabled: boolean;
+  elevatedInputModeEnabled: boolean;
   autoSleepMinutes: 0 | 5 | 10 | 15;
   hoverHideEnabled: boolean;
   hoverHideDelayMs: 250 | 500 | 1000;
@@ -245,6 +247,8 @@ export function initialData(): Data {
       inputMode: 'keyboard_mouse',
       keyOverlayEnabled: true,
       multiKeyOverlayEnabled: false,
+      keyOverlayRepeatEnabled: false,
+      elevatedInputModeEnabled: true,
       autoSleepMinutes: 0,
       hoverHideEnabled: false,
       hoverHideDelayMs: 500,

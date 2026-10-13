@@ -4,6 +4,19 @@ import { PresentationRuntime } from '../src/pet/presentation';
 import { initialData } from '../src/domain';
 import { nextKeyBadges, KEY_BADGE_MS } from '../src/overlay/keyOverlay';
 
+it('长按默认只浮现一次，开启重复浮现后恢复；松开再按可重新浮现', () => {
+  const first = nextKeyBadges({ label: 'W', phase: 'down' }, 100, [], true);
+  const held = nextKeyBadges({ label: 'W', phase: 'down', repeat: true }, 200, first, true);
+  expect(held).toBe(first);
+  expect(held[0].expiresAt).toBe(100 + KEY_BADGE_MS);
+  expect(
+    nextKeyBadges({ label: 'W', phase: 'down', repeat: true }, 200, first, true, true),
+  ).toHaveLength(2);
+  expect(
+    nextKeyBadges({ label: 'W', phase: 'down', repeat: false }, 300, first, true),
+  ).toHaveLength(2);
+});
+
 it('两手同时响应各自键区，实体左区在画面右侧、右区在左侧', () => {
   const hands = new KeyboardHands(0);
   hands.input('keyboard_left', 100, -1);

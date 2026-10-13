@@ -1,12 +1,12 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.14**，macOS 独立公测版 **0.7.12-macos.3**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.15**，macOS 独立公测版 **0.7.12-macos.3**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
 [B站主页](https://space.bilibili.com/1605091088) · [桌宠演示视频](https://www.bilibili.com/video/BV1Pipf6AEQF/)
 
-0.7.14 更新长离发饰控件、立体键盘与无线鼠标；拖动键缩小，握持点移至中下方。设置文字大小可调并保存，标题简化；全屏避让默认关闭，新增Windows后台键鼠接收与模型准备后显示窗口。鸣潮实际输入效果仍需实测。保留0.7.13的双手镜像键盘分区、手部速度和多按键浮显。
+0.7.15 修复高权限游戏中的键鼠兼容问题，管理员候选版已由用户在鸣潮实际角色操作中核验通过。默认开启高权限兼容启动，可在桌面设置关闭；启动仍需 Windows 确认。长按默认只浮现一次按键，可在互动设置开启重复浮现。保留可调字体、立体键盘、无线鼠标、双手镜像分区和多按键浮显。
 
 ## 公测说明
 
@@ -20,7 +20,7 @@
 
 | 系统 | 下载 | 文件类型 |
 | --- | --- | --- |
-| Windows x64 | [Windows 0.7.14](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.14) | 便携 EXE / EXE 安装包 |
+| Windows x64 | [Windows 0.7.15](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15) | 便携 EXE / EXE 安装包 |
 | macOS Apple Silicon（M 系列） | [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3) | DMG / APP ZIP；最低 macOS 12 |
 
 macOS 版已由用户在 MacBook 实测通过，具体安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.12-macos.3.md)。Release 中带 `source` 的 ZIP 是开发者源码。
@@ -58,7 +58,7 @@ npm run desktop
 
 0.7.5通过81个前端测试、12个原生测试、39个Live2D引用检查。实际App WebGL检查9种按键、开心/困倦/生气冒火、移除动作、气泡50%/100%/200%比例；Windows便携EXE实测全局Q/A/U/H四区、透明模型、开心/困倦、气泡、新图标和设置。EXE及NSIS安装包构建成功；本版安装包没有重复安装/卸载验收。多屏/DPI尚未全面验证。
 
-程序和当前运行资源可用。新增表情由原生Cubism参数与运行时矢量美术组合；动态和轮廓修整部分在运行时实现，未写回CMO3，未产生新的MOC3导出。独立精细原生表情、完整抬臂挥手与袖口/发束最终美术验收仍未全部完成，不能称完整美术正式版，也未宣称达到参考作者同等完成度。详见[交付记录](DELIVERY-0.7.14.md)。
+程序和当前运行资源可用。新增表情由原生Cubism参数与运行时矢量美术组合；动态和轮廓修整部分在运行时实现，未写回CMO3，未产生新的MOC3导出。独立精细原生表情、完整抬臂挥手与袖口/发束最终美术验收仍未全部完成，不能称完整美术正式版，也未宣称达到参考作者同等完成度。详见[交付记录](DELIVERY-0.7.15.md)。
 
 已验证Cubism源位于[authoring](authoring/README.md)，当前模型位于`public/models/changli/live-reference-repair-v71-candidate/`。历代模型、编译缓存、本机日志和旧交付留在本机，不进入仓库。历史制作脚本可能依赖这些本机资源。
 

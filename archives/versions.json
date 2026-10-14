@@ -798,12 +798,205 @@
       "windowsScope": "portable startup and menu creation only",
       "nativeDragVerified": false,
       "nativeDragPendingReason": "user stopped Computer Use with physical Escape"
+    },
+    {
+      "version": "0.7.13",
+      "tag": "v0.7.13",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.13",
+      "localDelivery": "deliveries/20261013-desktop-0.7.13",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61047296,
+          "sha256": "8E319FD5374A99BA57817B63838014CFA1E3F6BA85D77B2EF5AD5BF7AB03C4C8",
+          "localPath": "deliveries/20261013-desktop-0.7.13/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.13-x64-setup.exe",
+          "bytes": 51572934,
+          "sha256": "B141514225A230C584CC57CD6ABE1C485C5993E20C0EF8133D11320F10A85880",
+          "localPath": "deliveries/20261013-desktop-0.7.13/changli-companion-0.7.13-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261013-desktop-0.7.13/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261013-desktop-0.7.13/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "sourceCommit": "f7e1543d4313a3a68db7e327b3ecc2d975cdf41f",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "mirrored independent hands, four zones, Space, multi-key fade, speed persistence, browser menu drag/outside click",
+      "windowsDesktopVerified": true,
+      "windowsScope": "new EXE startup, WebGL readiness and actual native menu creation/close commands",
+      "nativeDragVerified": false,
+      "nativeOutsideClickVerified": false,
+      "completeWindowsAcceptance": false
+    },
+    {
+      "version": "0.7.14",
+      "tag": "v0.7.14",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.14",
+      "localDelivery": "deliveries/20261013-desktop-0.7.14",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61072384,
+          "sha256": "84CDA06DD498E38BEAD42F8109CC3F4F38D1297E6C0BE22074E51A9D28A54BCE",
+          "localPath": "deliveries/20261013-desktop-0.7.14/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.14-x64-setup.exe",
+          "bytes": 51584123,
+          "sha256": "CCED9A393A247BFA6343066B6F81FC35A5E0B9BAAC044CF98939C5B056B11160",
+          "localPath": "deliveries/20261013-desktop-0.7.14/changli-companion-0.7.14-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261013-desktop-0.7.14/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261013-desktop-0.7.14/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "sourceCommit": "833da63ff39e21af42fd19f04e32522e00f619a8",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "hairpin controls, three-dot smaller drag button, keyboard/wireless mouse, 50/100/200% sizes and settings font scaling/persistence",
+      "windowsDesktopVerified": true,
+      "windowsScope": "new EXE/WebGL controls, hidden loading until ready, background Raw Input registration and native font-size persistence",
+      "nativeDragVerified": false,
+      "nativeOutsideClickVerified": false,
+      "wutheringWavesVerified": false,
+      "completeWindowsAcceptance": false
+    },
+    {
+      "version": "0.7.15",
+      "tag": "v0.7.15",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15",
+      "localDelivery": "deliveries/20261013-desktop-0.7.15",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61183488,
+          "sha256": "F15AF6434B3A32962288E37CFF80AD8EA059270952B33C2B4FB179DAFBBEE0DB",
+          "localPath": "deliveries/20261013-desktop-0.7.15/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.15-x64-setup.exe",
+          "bytes": 51610375,
+          "sha256": "971C41DC589B3466D9B1FDDDA27CC7C2D9BB7E18FCBD3CBA6CF6A15BEDAA2E89",
+          "localPath": "deliveries/20261013-desktop-0.7.15/changli-companion-0.7.15-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261013-desktop-0.7.15/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261013-desktop-0.7.15/THIRD-PARTY-LICENSES.txt"
+        }
+      ],
+      "sourceCommit": "82e7791ff1f17d4be82f7026b1419745b2ae2764",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "actual final EXE Cubism held/release parameters; synthetic repeats do not retrigger poses or badges; max1/6 settings persisted",
+      "windowsDesktopVerified": true,
+      "windowsScope": "default elevated startup, common child WebView2 arguments, native settings persistence and final built EXE rendered model",
+      "wutheringWavesVerified": true,
+      "wutheringWavesTestedBuild": "0.7.15-local.2 elevated candidate",
+      "wutheringWavesScope": "user physically controlled character using keyboard and mouse in borderless mode; not only login/settings",
+      "physicalLongHoldUserReport": "按下弹一下，之后不动；测试后仅改变显示上限默认值为1",
+      "defaultKeyOverlayMaxKeys": 1,
+      "nativeDragVerified": false,
+      "nativeOutsideClickVerified": false,
+      "completeWindowsAcceptance": false,
+      "prepublicationArchive": {
+        "path": "deliveries/20261013-desktop-0.7.15-prepublication-01",
+        "sourceCommit": "a16e650c60f3952a6ae6af1bae855cfb70e30acc",
+        "published": false
+      }
     }
   ],
   "githubArchiveVerified": true,
   "visibility": "public",
   "visibilityChangedAt": "2026-10-12",
   "macosBuilds": [
+    {
+      "build": "0.7.12-macos.3",
+      "platform": "macOS",
+      "architecture": "arm64",
+      "minimumSystemVersion": "12.0",
+      "tag": "macos-0.7.12-preview.3",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3",
+      "sourceCommit": "0bd8af98b4c6ab055447c792d01036d91d9fac95",
+      "sourceBranch": "macos-port",
+      "sourceStatus": "recovered-exact-git-source-from-user-archive",
+      "sourceBranchPushed": true,
+      "localDelivery": "deliveries/20261012-desktop-0.7.12-macos.3",
+      "status": "published-prerelease",
+      "published": true,
+      "remoteAssetsVerified": true,
+      "runtimeValidation": {
+        "reportedBy": "user",
+        "device": "MacBook",
+        "result": "passed",
+        "date": "2026-10-12",
+        "exactOsAndChipNotProvided": true
+      },
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.12-macos.3-arm64.app.zip",
+          "bytes": 54615171,
+          "sha256": "AF265E677D9E730C6F0A2F6164C08555CA9EAD0BAA87EC206149CD522FB5CE06"
+        },
+        {
+          "file": "changli-companion-0.7.12-macos.3-arm64.dmg",
+          "bytes": 57162344,
+          "sha256": "A069357FDE65115DACE7B3EAFCA90C637DD5834C8C7F6E7E66EC2BFB61F4A513"
+        },
+        {
+          "file": "changli-companion-0.7.12-macos.3-source.zip",
+          "bytes": 121300972,
+          "sha256": "030AFFAFF9C2224779A21D44FA995BC89E5D04D26AA603325ED12BA8BE358A1B"
+        }
+      ],
+      "publishedAt": "2026-10-12T10:33:44Z"
+    },
     {
       "build": "0.7.12-macos.1",
       "upstreamVersion": "0.7.12",
@@ -836,20 +1029,40 @@
       }
     },
     {
-      "build": "0.7.12-macos.3",
-      "upstreamVersion": "0.7.12",
-      "upstreamCommit": "37fce2ef573d52b60ebeb7b4d9d000f943581cbb",
+      "build": "0.7.15-macos.1",
+      "upstreamVersion": "0.7.15",
+      "upstreamCommit": "f326d1ec4bb939d4609666673d87b6693923563e",
       "platform": "macOS",
       "architecture": "arm64",
-      "status": "local-preview",
+      "minimumSystemVersion": "12.0",
+      "status": "published-prerelease",
+      "published": true,
+      "artifactsStoredInSource": false,
       "features": [
-        "global-keyboard",
+        "global-keyboard-down-up-repeat",
         "global-mouse-buttons-and-scroll",
         "cursor-gaze",
-        "login-autostart"
+        "login-autostart",
+        "fullscreen-avoidance",
+        "fullscreen-app-exceptions"
       ],
-      "artifactsStoredInSource": false,
-      "published": false
+      "tag": "macos-0.7.15-preview.1",
+      "releaseUrl": "https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1",
+      "releaseRepository": "Kyusakino/changli-companion-macos",
+      "sourceBranch": "macos-0.7.15",
+      "binaryBuildCommit": "9cb269dfe1f1f12977249fd73483b2e95c72481a",
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.15-macos.1-arm64.app.zip",
+          "bytes": 54658859,
+          "sha256": "9aaa01b957e120985291955ca6af8ac3fdd38ca5e836747b4faa138bed9f60b1"
+        },
+        {
+          "file": "changli-companion-0.7.15-macos.1-arm64.dmg",
+          "bytes": 57244637,
+          "sha256": "97810ea73842ba9d4cd71e482b88d62f4cbba2cca09aebea8eba82863059b900"
+        }
+      ]
     }
   ]
 }

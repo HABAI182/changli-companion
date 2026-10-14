@@ -2,6 +2,8 @@ import type { Signal, Settings } from '../domain';
 import { model } from '../model';
 import { ResponseDeck, type ResponseTopic } from './responses';
 import { ElasticSpring } from './ElasticSpring';
+import { KeyboardHands } from './KeyboardHands';
+import type { KeyDisplay } from '../overlay/keyOverlay';
 
 export type ActionId =
   | 'keyboard_left'
@@ -42,6 +44,12 @@ export interface IdleParameters {
   keyboardReach?: number;
   keyboardDepth?: number;
   keyboardLanding?: number;
+  rightKeyboardReach?: number;
+  rightKeyboardDepth?: number;
+  rightKeyboardMix?: number;
+  leftKeyboardPress?: number;
+  rightKeyboardPress?: number;
+  mousePress?: number;
   mouseHandX?: number;
   mouseHandY?: number;
   dragSway?: number;
@@ -103,11 +111,10 @@ const actions: Partial<Record<Signal, ActionId>> = {
 };
 const mouseSignals: Signal[] = ['left', 'right', 'wheel', 'move'];
 
-// Rig names refer to image sides: RightPress is Changli's anatomical left
-// hand over the keyboard. Every keyboard region uses it; mouse uses LeftPress.
+// Rig motion names refer to image sides, opposite anatomical hands.
 export function handAction(id: string, _base: RenderSnapshot['base']): string {
-  if (['keyboard_left', 'keyboard_right', 'space', 'enter', 'backspace', 'rapid'].includes(id))
-    return 'keyboard_right';
+  if (['keyboard_left', 'space'].includes(id)) return 'keyboard_right';
+  if (['keyboard_right', 'enter', 'backspace', 'rapid'].includes(id)) return 'keyboard_left';
   return id;
 }
 
@@ -156,14 +163,9 @@ export class PresentationRuntime {
   private poseUpdatedAt: number;
   private nextAmbientAt: number;
   private responses: ResponseDeck;
-  private keyboardReach = 0;
-  private keyboardDepth = 0;
-  private keyboardLanding = 0;
-  private landingTarget = 0;
-  private depthTarget = 0;
+  private hands: KeyboardHands;
+  private mousePressedAt = -Infinity;
   private handUpdatedAt: number;
-  private keyboardTarget = 0;
-  private reachUntil = 0;
   private mouseUntil = 0;
   private mouseHand = { x: 0, y: 0 };
   private keyBurst = { count: 0, startedAt: 0 };
@@ -174,6 +176,7 @@ export class PresentationRuntime {
     private random: () => number = Math.random,
   ) {
     this.lastInput = now;
+    this.hands = new KeyboardHands(now);
     this.springUpdatedAt = now;
     this.gazeUpdatedAt = now;
     this.poseUpdatedAt = now;
@@ -186,10 +189,25 @@ export class PresentationRuntime {
   get activeAnimationId() {
     return this.animation?.id;
   }
-  input(signal: Signal, now: number, x = 0, y = 0, mode: Settings['inputMode'] = 'keyboard_mouse') {
+  input(
+    signal: Signal,
+    now: number,
+    x = 0,
+    y = 0,
+    mode: Settings['inputMode'] = 'keyboard_mouse',
+    key?: KeyDisplay,
+  ) {
     this.tick(now);
     if (this.dragActive) return;
     if (mode === 'keyboard_only' && mouseSignals.includes(signal)) return;
+    this.hands.input(signal, now, y, key);
+    // OS autorepeat does not mean another physical press. Keep the held pose,
+    // without restarting authored motions, spring impulses or typing bursts.
+    if (key?.phase === 'up') return;
+    if (key?.repeat) {
+      this.lastInput = now;
+      return;
+    }
     if (signal === 'complete') {
       this.touchSmileUntil = now + 900;
       return;
@@ -219,10 +237,6 @@ export class PresentationRuntime {
     if (
       ['keyboard_left', 'keyboard_right', 'key', 'space', 'enter', 'backspace'].includes(signal)
     ) {
-      this.keyboardTarget = signal === 'space' ? 0 : signal === 'keyboard_left' ? -1 : 1;
-      this.depthTarget = signal === 'space' ? 1 : Math.max(-1, Math.min(1, y));
-      this.landingTarget = signal === 'space' ? 0 : 1;
-      this.reachUntil = now + 310;
       if (now - this.keyBurst.startedAt > 6000) this.keyBurst = { count: 0, startedAt: now };
       if (++this.keyBurst.count >= 12 && now - this.lastAutomaticSpeechAt >= 25000) {
         if (this.react('typing', now)) this.lastAutomaticSpeechAt = now;
@@ -230,6 +244,7 @@ export class PresentationRuntime {
       }
     } else if (['left', 'right', 'wheel'].includes(signal)) {
       this.mouseUntil = now + 320;
+      this.mousePressedAt = now;
     }
     if (this.action?.id === id && now < this.action.until && id !== 'move') {
       this.action = {
@@ -249,7 +264,8 @@ export class PresentationRuntime {
     if (active) {
       this.action = null;
       this.animation = null;
-      this.reachUntil = this.mouseUntil = 0;
+      this.mouseUntil = 0;
+      this.hands.reset(now);
       this.headY.kick(-10);
       this.headShape.kick(-12);
       this.dragMovedAt = now;
@@ -371,17 +387,13 @@ export class PresentationRuntime {
                 ? 'happy'
                 : 'normal';
     const factor = settings.motion === 'off' ? 0 : settings.motion === 'low' ? 0.35 : 1;
+    const hands = this.hands.advance(now, settings.keyboardHandSpeed ?? 1);
     const elapsed = Math.max(0, now - this.handUpdatedAt);
     const handBlend = 1 - Math.exp(-elapsed / 45);
     if (!this.dragActive || now - this.dragMovedAt > 100) this.dragSway *= Math.exp(-elapsed / 140);
     this.handUpdatedAt = Math.max(now, this.handUpdatedAt);
-    const keyboardTarget = now < this.reachUntil ? this.keyboardTarget : 0;
-    this.keyboardReach += (keyboardTarget - this.keyboardReach) * handBlend;
-    this.keyboardDepth +=
-      ((now < this.reachUntil ? this.depthTarget : 0) - this.keyboardDepth) * handBlend;
-    this.keyboardLanding +=
-      ((now < this.reachUntil ? this.landingTarget : 0) - this.keyboardLanding) * handBlend;
-    const mouseActive = base === 'keyboard_mouse' && now < this.mouseUntil;
+    const mouseActive =
+      base === 'keyboard_mouse' && now < this.mouseUntil && !hands.rightKeyboardActive;
     for (const axis of ['x', 'y'] as const) {
       const target = mouseActive ? this.gaze[axis] : 0;
       this.mouseHand[axis] += (target - this.mouseHand[axis]) * handBlend;
@@ -502,9 +514,19 @@ export class PresentationRuntime {
           : 0,
         headTilt: factor ? this.ambientPose.tilt * factor : 0,
         headTurn: factor ? this.ambientPose.turn * factor : 0,
-        keyboardReach: this.keyboardReach * factor * (settings.keyboardMotionScale ?? 1),
-        keyboardDepth: this.keyboardDepth * factor * (settings.keyboardMotionScale ?? 1),
-        keyboardLanding: this.keyboardLanding * factor,
+        keyboardReach: hands.keyboardReach * factor * (settings.keyboardMotionScale ?? 1),
+        keyboardDepth: hands.keyboardDepth * factor * (settings.keyboardMotionScale ?? 1),
+        keyboardLanding: hands.keyboardLanding * factor,
+        rightKeyboardReach: hands.rightKeyboardReach * factor * (settings.keyboardMotionScale ?? 1),
+        rightKeyboardDepth: hands.rightKeyboardDepth * factor * (settings.keyboardMotionScale ?? 1),
+        rightKeyboardMix: hands.rightKeyboardMix * factor,
+        leftKeyboardPress: hands.leftKeyboardPress * factor,
+        rightKeyboardPress: hands.rightKeyboardPress * factor,
+        mousePress:
+          base === 'keyboard_mouse' && !hands.rightKeyboardActive
+            ? Math.max(0, Math.sin(Math.PI * Math.min(1, (now - this.mousePressedAt) / 190))) *
+              factor
+            : 0,
         mouseHandX:
           base === 'keyboard_mouse'
             ? this.mouseHand.x * factor * (settings.mouseMotionScale ?? 1)

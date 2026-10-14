@@ -5,6 +5,10 @@ if [[ "$(uname -s)" != Darwin ]]; then
   echo "This command requires macOS and Xcode Command Line Tools." >&2
   exit 1
 fi
+if [[ "$(uname -m)" != arm64 ]]; then
+  echo "This macOS build supports Apple Silicon only." >&2
+  exit 1
+fi
 mode="${1:-build}"
 shift || true
 if [[ "$mode" != build && "$mode" != test ]]; then
@@ -46,21 +50,23 @@ export npm_config_cache="$build_root/cache/npm"
 # npm ci honors the lockfile on every invocation; its cache stays outside source.
 npm ci --no-audit --no-fund
 if [[ "$mode" == test ]]; then
-  npm run tauri -- build --config macos/tauri.conf.json --features tauri/macos-private-api --no-bundle --ci
-  TAURI_CONFIG="$(cat macos/tauri.conf.json)" cargo test --manifest-path src-tauri/Cargo.toml --release --locked --features tauri/macos-private-api,tauri/custom-protocol "$@"
+  npm run typecheck
+  npm test
+  npm run tauri -- build --config macos/tauri.conf.json --features tauri/macos-private-api --target aarch64-apple-darwin --no-bundle --ci
+  TAURI_CONFIG="$(cat macos/tauri.conf.json)" cargo test --target aarch64-apple-darwin --manifest-path src-tauri/Cargo.toml --release --locked --features tauri/macos-private-api,tauri/custom-protocol "$@"
 else
-  if ! npm run tauri -- build --config macos/tauri.conf.json --features tauri/macos-private-api --ci "$@" 2>&1 | tee "$build_root/build.log"; then
+  if ! npm run tauri -- build --config macos/tauri.conf.json --features tauri/macos-private-api --target aarch64-apple-darwin --ci "$@" 2>&1 | tee "$build_root/build.log"; then
     # Synced Documents folders may attach Finder metadata to a new app bundle.
     # Only retry this specific signing failure, after cleaning generated apps.
     if [[ "$(cat "$build_root/build.log")" != *"resource fork, Finder information"* ]]; then
       exit 1
     fi
-    for app_bundle in "$CARGO_TARGET_DIR/release/bundle/macos/"*.app; do
+    for app_bundle in "$CARGO_TARGET_DIR/aarch64-apple-darwin/release/bundle/macos/"*.app; do
       if [[ -d "$app_bundle" ]]; then
         xattr -cr "$app_bundle"
       fi
     done
-    npm run tauri -- build --config macos/tauri.conf.json --features tauri/macos-private-api --ci "$@"
+    npm run tauri -- build --config macos/tauri.conf.json --features tauri/macos-private-api --target aarch64-apple-darwin --ci "$@"
   fi
-  echo "macOS bundles: $CARGO_TARGET_DIR/release/bundle/"
+  echo "macOS bundles: $CARGO_TARGET_DIR/aarch64-apple-darwin/release/bundle/"
 fi

@@ -8,6 +8,7 @@ export interface RuntimeOffsetRig {
   rightHand: string[];
   reachPixels: number;
   depthPixels?: number;
+  mouseToKeyboardPixels?: [number, number];
   keyboardMesh?: string;
   keyboardAsset?: string;
   jawAsset?: string;
@@ -55,8 +56,21 @@ export class RuntimeOffsets {
     const mouseX = value('__gesture.mouseX', 1.5) * this.rig.mousePixels;
     const mouseY = value('__gesture.mouseY', 1.5) * this.rig.mousePixels * 0.7;
     this.mouseOffset = { x: mouseX, y: mouseY };
+    const mix = value('__gesture.rightKeyboardMix');
+    const [travelX, travelY] = this.rig.mouseToKeyboardPixels || [250, 94];
     const groups = [
-      { ids: this.rig.leftHand, x: mouseX, y: mouseY },
+      {
+        ids: this.rig.leftHand,
+        x:
+          mouseX * (1 - mix) +
+          travelX * mix +
+          value('__gesture.rightKeyboardReach', 1.25) * this.rig.reachPixels,
+        y:
+          mouseY * (1 - mix) +
+          travelY * mix -
+          value('__gesture.rightKeyboardDepth', 1.25) * (this.rig.depthPixels || 0) -
+          Math.sin(Math.PI * mix) * 24,
+      },
       {
         ids: this.rig.rightHand,
         x: value('__gesture.keyboardReach', 1.25) * this.rig.reachPixels,

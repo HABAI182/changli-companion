@@ -161,9 +161,11 @@ export type Settings = {
   settingsTheme: 'system' | 'light' | 'dark';
   accentColor: 'coral' | 'blue' | 'violet' | 'sage';
   settingsDensity: 'comfortable' | 'compact';
+  settingsTextScale: number;
   cursorFollowEnabled: boolean;
   headElasticity: number;
   keyboardMotionScale: number;
+  keyboardHandSpeed: number;
   mouseMotionScale: number;
   bubbleDurationSeconds: number;
   bubbleIdleIntervalSeconds: 0 | 60 | 90 | 180;
@@ -183,6 +185,10 @@ export type Settings = {
   shortcut: string;
   inputMode: 'keyboard_mouse' | 'keyboard_only';
   keyOverlayEnabled: boolean;
+  multiKeyOverlayEnabled: boolean;
+  keyOverlayMaxKeys: number;
+  keyOverlayRepeatEnabled: boolean;
+  elevatedInputModeEnabled: boolean;
   autoSleepMinutes: 0 | 5 | 10 | 15;
   hoverHideEnabled: boolean;
   hoverHideDelayMs: 250 | 500 | 1000;
@@ -217,14 +223,16 @@ export function initialData(): Data {
       settingsTheme: 'system',
       accentColor: 'coral',
       settingsDensity: 'comfortable',
+      settingsTextScale: 1,
       cursorFollowEnabled: true,
       headElasticity: 1,
       keyboardMotionScale: 1,
+      keyboardHandSpeed: 1,
       mouseMotionScale: 1,
       bubbleDurationSeconds: 3,
       bubbleIdleIntervalSeconds: 90,
       dragReactionsEnabled: true,
-      fullscreenHideEnabled: true,
+      fullscreenHideEnabled: false,
       fullscreenExceptions: [],
       edgeSnapEnabled: true,
       mouseDetailsEnabled: true,
@@ -239,6 +247,10 @@ export function initialData(): Data {
       shortcut: 'Ctrl+Shift+F10',
       inputMode: 'keyboard_mouse',
       keyOverlayEnabled: true,
+      multiKeyOverlayEnabled: false,
+      keyOverlayMaxKeys: 1,
+      keyOverlayRepeatEnabled: false,
+      elevatedInputModeEnabled: true,
       autoSleepMinutes: 0,
       hoverHideEnabled: false,
       hoverHideDelayMs: 500,

@@ -2,12 +2,15 @@
 
 仓库已于2026-10-12由用户授权公开。每个版本独立保留，旧版本不覆盖。Release中的程序、安装包和SHA256清单对应各自版本。
 
-已核对全部23个独立Release的程序、安装包及远端SHA256摘要。
+26个Windows版本独立留档。最新0.7.15的远端附件SHA256已核对；先前25版沿用原有归档验证，没有重复运行旧程序。
 
 历史源码标签从当时保存的源码检查点恢复，恢复日期不是原开发提交日期，也没有重新构建或重新验收旧版本。0.6.3只有二进制存档；其archive标签只含归档说明，不提供伪造的旧源码。0.6.8使用本版源码检查点，运行模型从使用同一已验证v71原生源的0.6.9恢复包提取，来源单独记录。
 
 | 版本 | 独立Release | 源码情况 | 本地程序目录 |
 | --- | --- | --- | --- |
+| 0.7.15 | [v0.7.15](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15) | 原Git标签；鸣潮管理员候选实测通过，最终EXE长按姿势/设置核验；按键上限1～6，默认1 | `deliveries/20261013-desktop-0.7.15` |
+| 0.7.14 | [v0.7.14](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.14) | 原Git标签；控件/设置/首帧显示与后台注册通过；鸣潮及原生拖动待实测 | `deliveries/20261013-desktop-0.7.14` |
+| 0.7.13 | [v0.7.13](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.13) | 原Git标签；双手镜像与UI/WebGL通过；跨窗口点击及原生拖动人工待验收 | `deliveries/20261013-desktop-0.7.13` |
 | 0.7.12 | [v0.7.12](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.12) | 原Git标签；启动已核对，原生拖动验收被用户Esc中断 | `deliveries/20261012-desktop-0.7.12` |
 | 0.7.11 | [v0.7.11](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.11) | 原Git标签；原生拖动消失问题已标注，推荐更新版 | `deliveries/20261012-desktop-0.7.11` |
 | 0.7.10 | [v0.7.10](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.10) | 原Git标签；冷启动/邻接菜单范围验收 | `deliveries/20261012-desktop-0.7.10` |
@@ -36,11 +39,15 @@
 
 以后发布必须使用新版本号和独立目录；旧tag不移动、Release附件不覆盖、不删除旧版本。源码与美术的未完成状态以各版交付记录为准。
 
-## macOS 构建
+## macOS 独立发布（2026-10-12）
 
-- `0.7.12-macos.1`：基于上游 0.7.12 的 ARM64 构建。
-- `0.7.12-macos.2`：增加独立 macOS 全局键鼠监听和鼠标视线跟随；Windows 监听模块保持原样。15 项原生测试与 86 项前端测试通过，用户已于 2026-10-12 确认可正常运行。
+- `0.7.12-macos.3`：Apple Silicon ARM64，用户已在 MacBook 实测通过。
+- DMG 与 APP ZIP 为安装使用附件；`ChangliCompanion.zip` 是带 Git 的移植工程，已从真实提交 `0bd8af98b4c6ab055447c792d01036d91d9fac95` 导出独立、无 Git 工作区元数据的源码 ZIP。
+- 本地归档：`deliveries/20261012-desktop-0.7.12-macos.3/`，包含校验清单、发布说明和可续传脚本。
+- **已发布并核对全部 5 个附件的远端 SHA256 与体积：** [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3)。源码保留在独立 [macos-port 分支](https://github.com/HABAI182/changli-companion/tree/macos-port)，版本标签指向真实 macOS 提交。Windows 使用单独 Release。
 
-- `0.7.12-macos.3`：开机启动说明改为“登录系统后自动显示桌宠”；macOS 明确使用 LaunchAgent，并在自启动开启时刷新应用路径。Windows 自启动行为保持原样。
+## macOS 0.7.15 适配版
 
-编译与使用方式见 [README](README.md#macos-编译与使用)。安装包和本机交付记录保存在源码之外，尚未发布远端 Release。
+- `0.7.15-macos.1`：基于 `main` 的 0.7.15，共享双手键盘动作、长按与重复键、浮显数量、新素材、设置缩放和首帧显示。
+- Apple Silicon ARM64；保留全局键鼠、视线跟随与 LaunchAgent 登录自启动，新增同屏前台全屏窗口避让及应用例外。macOS 不提供手柄与 Windows 管理员兼容模式。
+- 独立预发布：[0.7.15-macos.1](https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1)，提供 ARM64 DMG、APP ZIP 和 SHA256 清单。源码由 `macos-0.7.15-preview.1` 标签保留；构建产物保存在源码之外。编译与使用见 [README](README.md#macos-编译与使用)。

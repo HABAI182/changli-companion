@@ -2,6 +2,10 @@
 mod desktop;
 mod gamepad;
 mod input;
+#[cfg(windows)]
+mod input_merge;
+#[cfg(target_os = "macos")]
+mod macos;
 mod model;
 mod pet_menu;
 mod storage;
@@ -25,12 +29,16 @@ struct Settings {
     accent_color: String,
     #[serde(rename = "settingsDensity")]
     settings_density: String,
+    #[serde(rename = "settingsTextScale")]
+    settings_text_scale: f64,
     #[serde(rename = "cursorFollowEnabled")]
     cursor_follow_enabled: bool,
     #[serde(rename = "headElasticity")]
     head_elasticity: f64,
     #[serde(rename = "keyboardMotionScale")]
     keyboard_motion_scale: f64,
+    #[serde(rename = "keyboardHandSpeed")]
+    keyboard_hand_speed: f64,
     #[serde(rename = "mouseMotionScale")]
     mouse_motion_scale: f64,
     #[serde(rename = "bubbleDurationSeconds")]
@@ -62,6 +70,14 @@ struct Settings {
     input_mode: String,
     #[serde(rename = "keyOverlayEnabled")]
     key_overlay_enabled: bool,
+    #[serde(rename = "multiKeyOverlayEnabled")]
+    multi_key_overlay_enabled: bool,
+    #[serde(rename = "keyOverlayMaxKeys")]
+    key_overlay_max_keys: u32,
+    #[serde(rename = "keyOverlayRepeatEnabled")]
+    key_overlay_repeat_enabled: bool,
+    #[serde(rename = "elevatedInputModeEnabled")]
+    elevated_input_mode_enabled: bool,
     #[serde(rename = "autoSleepMinutes")]
     auto_sleep_minutes: u32,
     #[serde(rename = "hoverHideEnabled")]
@@ -89,14 +105,16 @@ impl Default for Settings {
             settings_theme: "system".into(),
             accent_color: "coral".into(),
             settings_density: "comfortable".into(),
+            settings_text_scale: 1.0,
             cursor_follow_enabled: true,
             head_elasticity: 1.0,
             keyboard_motion_scale: 1.0,
+            keyboard_hand_speed: 1.0,
             mouse_motion_scale: 1.0,
             bubble_duration_seconds: 3.0,
             bubble_idle_interval_seconds: 90,
             drag_reactions_enabled: true,
-            fullscreen_hide_enabled: true,
+            fullscreen_hide_enabled: false,
             fullscreen_exceptions: Vec::new(),
             edge_snap_enabled: true,
             mouse_details_enabled: true,
@@ -111,6 +129,10 @@ impl Default for Settings {
             shortcut: "Ctrl+Shift+F10".into(),
             input_mode: "keyboard_mouse".into(),
             key_overlay_enabled: true,
+            multi_key_overlay_enabled: false,
+            key_overlay_max_keys: 1,
+            key_overlay_repeat_enabled: false,
+            elevated_input_mode_enabled: true,
             auto_sleep_minutes: 0,
             hover_hide_enabled: false,
             hover_hide_delay_ms: 500,
@@ -341,7 +363,7 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
         w.show().map_err(|e| e.to_string())?;
         return w.set_focus().map_err(|e| e.to_string());
     }
-    let settings_window = WebviewWindowBuilder::new(
+    let settings_builder = WebviewWindowBuilder::new(
         &app,
         label,
         WebviewUrl::App(format!("index.html?panel={panel}").into()),
@@ -351,9 +373,10 @@ async fn open_panel(app: tauri::AppHandle, panel: String) -> Result<(), String> 
     .min_inner_size(420.0, 500.0)
     .center()
     .focused(true)
-    .always_on_top(true)
-    .build()
-    .map_err(|e| e.to_string())?;
+    .always_on_top(true);
+    #[cfg(windows)]
+    let settings_builder = settings_builder.additional_browser_args(webview_args());
+    let settings_window = settings_builder.build().map_err(|e| e.to_string())?;
     input::register_editor(&settings_window);
     Ok(())
 }
@@ -441,11 +464,31 @@ fn preview_scale(app: tauri::AppHandle, scale: f64) -> Result<(), String> {
     windows::fit(&app, None, false)
 }
 #[tauri::command]
+fn desktop_platform() -> &'static str {
+    if cfg!(target_os = "macos") { "macos" } else if cfg!(windows) { "windows" } else { "other" }
+}
+
+fn valid_fullscreen_exception(name: &str) -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        let name = name.trim();
+        !name.is_empty() && name.chars().count() <= 120 &&
+            (name.to_ascii_lowercase().ends_with(".app") || name.split('.').count() >= 2 &&
+                name.split('.').all(|part| !part.is_empty() && part.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')))
+    }
+    #[cfg(not(target_os = "macos"))]
+    { name.to_ascii_lowercase().ends_with(".exe") }
+}
+
+#[tauri::command]
 fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Settings, String> {
     if !settings.scale.is_finite()
+        || !settings.settings_text_scale.is_finite()
+        || !(0.85..=1.3).contains(&settings.settings_text_scale)
         || settings.scale < 0.5
         || settings.scale > 2.0
         || ![30, 60].contains(&settings.fps)
+        || !(1..=6).contains(&settings.key_overlay_max_keys)
         || !["keyboard_mouse", "keyboard_only"].contains(&settings.input_mode.as_str())
         || !["full", "low", "off"].contains(&settings.motion.as_str())
         || !["system", "light", "dark"].contains(&settings.settings_theme.as_str())
@@ -455,6 +498,8 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !(0.0..=1.5).contains(&settings.head_elasticity)
         || !settings.keyboard_motion_scale.is_finite()
         || !(0.5..=1.25).contains(&settings.keyboard_motion_scale)
+        || !settings.keyboard_hand_speed.is_finite()
+        || !(0.5..=2.0).contains(&settings.keyboard_hand_speed)
         || !settings.mouse_motion_scale.is_finite()
         || !(0.0..=1.5).contains(&settings.mouse_motion_scale)
         || !settings.bubble_duration_seconds.is_finite()
@@ -470,8 +515,8 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !(0.0..=1.0).contains(&settings.voice_volume)
         || settings.fullscreen_exceptions.len() > 32
         || settings.fullscreen_exceptions.iter().any(|e| {
-            e.len() > 128
-                || !e.to_ascii_lowercase().ends_with(".exe")
+            (if cfg!(target_os = "macos") { e.chars().count() > 120 } else { e.len() > 128 })
+                || !valid_fullscreen_exception(e)
                 || e.contains(['\\', '/', ':', '*', '?', '"', '<', '>', '|'])
         })
     {
@@ -539,7 +584,9 @@ fn native_status(app: tauri::AppHandle) -> String {
         .unwrap_or_default();
     format!(
         "{}。本地 SQLite 存储；托盘可恢复互动。{}{}{}",
-        if active {
+        if input::RAW_ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
+            "键鼠后台双通道监听已启动（游戏效果需实机验收）"
+        } else if active {
             "键鼠监听已注册（跨应用效果需实机验收）"
         } else {
             "键鼠监听未启动或注册失败"
@@ -548,6 +595,15 @@ fn native_status(app: tauri::AppHandle) -> String {
         input::summary(),
         gamepad::summary()
     )
+}
+#[cfg(windows)]
+pub(crate) fn webview_args() -> &'static str {
+    static ARGS: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    ARGS.get_or_init(|| {
+        let existing = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").unwrap_or_default();
+        let debug = if std::env::args().any(|arg| arg == "--local-input-diagnostics") {" --remote-debugging-port=9225"} else {""};
+        format!("{existing}{debug} --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows")
+    })
 }
 fn main() {
     if std::env::current_exe()
@@ -558,6 +614,18 @@ fn main() {
     {
         desktop::run_fullscreen_fixture();
         return;
+    }
+    // Elevated WebView2 ignores environment-only browser arguments. Pass one
+    // identical set in code to pet, settings and menu so their profile matches.
+    let context = tauri::generate_context!();
+    #[cfg(windows)]
+    let mut context = context;
+    if input::elevate_at_startup(&context.config().identifier) {
+        return;
+    }
+    #[cfg(windows)]
+    for window in &mut context.config_mut().app.windows {
+        window.additional_browser_args = Some(webview_args().into());
     }
     tauri::Builder::default()
         .plugin({
@@ -598,6 +666,8 @@ fn main() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
+            desktop_platform,
+            desktop::pet_renderer_ready,
             desktop::begin_pet_drag,
             desktop::finish_pet_drag,
             desktop::list_pet_positions,
@@ -616,6 +686,9 @@ fn main() {
             pet_menu::menu_action,
             preview_scale,
             native_status,
+            input::input_diagnostics,
+            input::input_frontend_heartbeat,
+            input::restart_input_compatibility,
             list_shortcuts,
             update_shortcuts,
             storage::load_data,
@@ -782,15 +855,25 @@ fn main() {
                 }
             }
             windows::restore(app.handle())?;
-            if let Some(w) = app.get_webview_window("pet") {
-                w.show()?;
-            }
+            // The frontend reveals the pet after Cubism has painted its first
+            // frame. Keep the static loading fallback out of the cold start.
+            let loading_app = app.handle().clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(8));
+                if !loading_app
+                    .state::<desktop::DesktopState>()
+                    .renderer_ready
+                    .load(std::sync::atomic::Ordering::Relaxed)
+                {
+                    let _ = desktop::pet_renderer_ready(loading_app);
+                }
+            });
             input::start(app.handle().clone());
             gamepad::start(app.handle().clone());
             windows::watch(app.handle().clone());
             desktop::watch(app.handle().clone());
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("离火长明启动失败，请检查 WebView2 和本地数据目录权限");
+        .run(context)
+        .expect("离火长明启动失败，请检查桌面运行环境和本地数据目录权限");
 }

@@ -43,10 +43,22 @@ export function layerTransform(id: string, state: RenderSnapshot): string {
   } else if (id === 'left_arm_hand' || id === 'right_arm_hand') {
     const side = id === 'left_arm_hand' ? -1 : 1;
     const action = state.action && handAction(state.action.id, state.base);
-    const active = action?.includes(side < 0 ? 'left' : 'right') ? 1 : 0;
+    const active =
+      state.idle.leftKeyboardPress !== undefined
+        ? side < 0
+          ? Math.max(state.idle.rightKeyboardPress || 0, state.idle.mousePress || 0)
+          : state.idle.leftKeyboardPress
+        : action?.includes(side < 0 ? 'left' : 'right')
+          ? 1
+          : 0;
     y = active * 2 + breath * 0.4 + (side > 0 ? -(state.idle.keyboardDepth || 0) * 4 : 0);
     x = side < 0 ? (state.idle.mouseHandX || 0) * 4 : (state.idle.keyboardReach || 0) * 13.3;
     if (side < 0) y += (state.idle.mouseHandY || 0) * 2.8;
+    if (side < 0) {
+      const mix = state.idle.rightKeyboardMix || 0;
+      x = x * (1 - mix) + mix * 20 + (state.idle.rightKeyboardReach || 0) * 9.6;
+      y += mix * 7.5 - (state.idle.rightKeyboardDepth || 0) * 1.4 - Math.sin(Math.PI * mix) * 1.9;
+    }
     angle = side * (active * 1.5 + drag * 1.2);
   }
   return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${angle.toFixed(2)}deg) scale(${scaleX.toFixed(3)}, ${scaleY.toFixed(3)})`;

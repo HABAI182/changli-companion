@@ -996,6 +996,65 @@
         }
       ],
       "publishedAt": "2026-10-12T10:33:44Z"
+    },
+    {
+      "build": "0.7.15-macos.1",
+      "platform": "macOS",
+      "architecture": "arm64",
+      "minimumSystemVersion": "12.0",
+      "tag": "macos-0.7.15-preview.1",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.15-preview.1",
+      "sourceCommit": "eaa0185229654f81ba0e51621a17685d4c658c6a",
+      "sourceBranch": "macos-port",
+      "sourceBranchMergeCommit": "9b0bbc8e2fccbfa8848a60a1fdd497ca5cd2237d",
+      "sourceStatus": "upstream-exact-source-already-merged-via-pr-1",
+      "sourceBranchPushed": true,
+      "alreadyMergedPullRequest": "https://github.com/HABAI182/changli-companion/pull/1",
+      "upstreamRepository": "https://github.com/Kyusakino/changli-companion-macos",
+      "upstreamRelease": "https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1",
+      "localDelivery": "deliveries/20261014-desktop-0.7.15-macos.1",
+      "status": "published-prerelease",
+      "published": true,
+      "publishedAt": "2026-10-14T01:55:13Z",
+      "originalAssetsUnchanged": true,
+      "remoteAssetsVerified": true,
+      "protectedPreviousReleasesUnchanged": true,
+      "runtimeValidation": {
+        "reportedBy": "not-tested-in-this-import",
+        "result": "not-repeated",
+        "hostPlatform": "Windows",
+        "macRuntimeVerified": false
+      },
+      "fileValidation": {
+        "zipCrcVerified": true,
+        "arm64MachOVerified": true,
+        "plistVersionVerified": true,
+        "minimumSystemVersionVerified": true,
+        "dmgTrailerVerified": true,
+        "signatureCryptographicallyVerified": false
+      },
+      "artifacts": [
+        {
+          "file": "changli-companion-0.7.15-macos.1-arm64.app.zip",
+          "bytes": 54658859,
+          "sha256": "9AAA01B957E120985291955CA6AF8AC3FDD38CA5E836747B4FAA138BED9F60B1"
+        },
+        {
+          "file": "changli-companion-0.7.15-macos.1-arm64.dmg",
+          "bytes": 57244637,
+          "sha256": "97810EA73842BA9D4CD71E482B88D62F4CBBA2CCA09AEBEA8EBA82863059B900"
+        },
+        {
+          "file": "SHA256.json",
+          "bytes": 467,
+          "sha256": "E6C81EFADF71551B790AECD5E1FC1910E4BCEA707891B1909210C323B5D95194"
+        },
+        {
+          "file": "SHA256SUMS.txt",
+          "bytes": 222,
+          "sha256": "1CCA27DC54C2A8569031D739EB832DA96859C62DE3EC75C9C147459F4B2042D8"
+        }
+      ]
     }
   ]
 }

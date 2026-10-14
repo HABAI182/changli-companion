@@ -45,3 +45,12 @@
 - DMG 与 APP ZIP 为安装使用附件；`ChangliCompanion.zip` 是带 Git 的移植工程，已从真实提交 `0bd8af98b4c6ab055447c792d01036d91d9fac95` 导出独立、无 Git 工作区元数据的源码 ZIP。
 - 本地归档：`deliveries/20261012-desktop-0.7.12-macos.3/`，包含校验清单、发布说明和可续传脚本。
 - **已发布并核对全部 5 个附件的远端 SHA256 与体积：** [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3)。源码保留在独立 [macos-port 分支](https://github.com/HABAI182/changli-companion/tree/macos-port)，版本标签指向真实 macOS 提交。Windows 使用单独 Release。
+
+## macOS 0.7.15 独立发布（2026-10-14）
+
+- 当前版本：[`0.7.15-macos.1`](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.15-preview.1)，Apple Silicon ARM64，最低 macOS 12
+- 收录来源：[Kyusakino 的 macOS 0.7.15 发布](https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1)，四个原始附件逐字节保留，已核对上游与本仓库远端 SHA256 和体积
+- 真实发布源码 `eaa0185229654f81ba0e51621a17685d4c658c6a`；此前已经通过 PR #1 合入 `macos-port`，本次未重复合并或覆盖分支
+- 本地独立留档：`deliveries/20261014-desktop-0.7.15-macos.1/`；发布说明见 [docs/MACOS-0.7.15-macos.1.md](docs/MACOS-0.7.15-macos.1.md)
+- 已检查 APP ZIP 完整性、ARM64 Mach-O、应用版本、最低系统版本与 DMG 文件尾；当前在 Windows 归档，未新增 Mac 实机运行或 Apple 签名/公证验收
+- Windows 0.7.15 与旧 Mac 0.7.12-macos.3 的发布及附件均保留，远端记录已对照核验未变化

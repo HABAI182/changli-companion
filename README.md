@@ -1,6 +1,6 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.15**，macOS 独立公测版 **0.7.12-macos.3**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.15**，macOS 独立公测版 **0.7.15-macos.1**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
@@ -21,9 +21,9 @@
 | 系统 | 下载 | 文件类型 |
 | --- | --- | --- |
 | Windows x64 | [Windows 0.7.15](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15) | 便携 EXE / EXE 安装包 |
-| macOS Apple Silicon（M 系列） | [macOS 0.7.12-macos.3](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.12-preview.3) | DMG / APP ZIP；最低 macOS 12 |
+| macOS Apple Silicon（M 系列） | [macOS 0.7.15-macos.1](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.15-preview.1) | DMG / APP ZIP；最低 macOS 12 |
 
-macOS 版已由用户在 MacBook 实测通过，具体安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.12-macos.3.md)。Release 中带 `source` 的 ZIP 是开发者源码。
+macOS 0.7.15-macos.1 收录自 [Kyusakino 的适配版本](https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1)，安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.15-macos.1.md)。Source code ZIP 为开发者源码；旧版继续在 Releases 独立留档。
 
 右键角色打开互动菜单和设置；拖动键位于键盘右下角。历史版本分别留档，见文末版本索引。
 

@@ -10,10 +10,12 @@
 - 透明轮廓与下方留白自动点击穿透，角色和拖动键仍可操作，拖动捕获和手动完全穿透保持优先
 - 所有设置页版本标签从package版本读取，显示0.7.16
 
-验证：39项相关前端测试、1项原生掩码边界测试、TS/Vite与Windows EXE/NSIS构建。真实WebGL与新EXE菜单收缩/展开、持久化设置、视线回正和本地音频播放已检查。原生控制测试在透明顶角及下方将OS点击交给了自建底层窗口；头部和拖动键保留命中。测试开关结束后恢复，按键浮显仍开、上限1。
+验证：57项相关前端测试、1项原生掩码边界测试、TS/Vite与Windows EXE/NSIS构建。真实WebGL与新EXE菜单收缩/展开、持久化设置、视线回正和本地音频播放已检查。原生控制测试在透明顶角及下方将OS点击交给了自建底层窗口；头部和拖动键保留命中。测试开关结束后恢复，按键浮显仍开、上限1。
 
 实际键鼠游戏兼容实现沿用0.7.15；本轮没有重新在鸣潮或其他游戏验收，不扩展旧结论。Windows当前主机验证不代表Mac、多屏或全部DPI验收。模型为v71原生导出+现有运行修整，不是新CMO3导出。
 
 项目：https://github.com/HABAI182/changli-companion
 B站主页：https://space.bilibili.com/1605091088
 演示：https://www.bilibili.com/video/BV1Pipf6AEQF/
+
+源码提交：c3d976266c8a7c84fec7530154e50438a48f9247；[GitHub发行](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.16)。6个远端附件已核对大小/SHA256，旧28份发行及全部旧附件ID/哈希保持不变。

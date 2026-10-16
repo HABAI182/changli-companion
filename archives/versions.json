@@ -950,6 +950,77 @@
         "sourceCommit": "a16e650c60f3952a6ae6af1bae855cfb70e30acc",
         "published": false
       }
+    },
+    {
+      "version": "0.7.16",
+      "tag": "v0.7.16",
+      "releaseUrl": "https://github.com/HABAI182/changli-companion/releases/tag/v0.7.16",
+      "localDelivery": "deliveries/20261017-desktop-0.7.16",
+      "artifacts": [
+        {
+          "file": "changli-companion.exe",
+          "bytes": 61218816,
+          "sha256": "78C0AF69E9276ABE0FFD384EAF4E059359E25F3048CE8FFB93AA565A5B2C9889",
+          "localPath": "deliveries/20261017-desktop-0.7.16/changli-companion.exe"
+        },
+        {
+          "file": "changli-companion-0.7.16-x64-setup.exe",
+          "bytes": 51630286,
+          "sha256": "29A2C534E15BC9B0D3F96A50FD4F2C457D6C3B25DC0B30D585842C8ECF2CD9BD",
+          "localPath": "deliveries/20261017-desktop-0.7.16/changli-companion-0.7.16-x64-setup.exe"
+        },
+        {
+          "file": "LICENSE-RUNTIME.txt",
+          "bytes": 2325,
+          "sha256": "F5E8E0A81539C8EF26339BD27EEEF9AC28394BB26D6360218707DD93A0FC288A",
+          "localPath": "deliveries/20261017-desktop-0.7.16/LICENSE-RUNTIME.txt"
+        },
+        {
+          "file": "THIRD-PARTY-LICENSES.txt",
+          "bytes": 3940335,
+          "sha256": "3A198DCEA4CFD8D4767C5531AEF98C1C5FF287FC1DE4B3282A85FCE0843EB9A6",
+          "localPath": "deliveries/20261017-desktop-0.7.16/THIRD-PARTY-LICENSES.txt"
+        },
+        {
+          "file": "README-users-0.7.16.txt",
+          "bytes": 1970,
+          "sha256": "5BDC028F52F7032CACA9881D1875B83F6270C69AB16345F2415BF6292DB24839",
+          "localPath": "deliveries/20261017-desktop-0.7.16/README-users-0.7.16.txt"
+        }
+      ],
+      "sourceCommit": "c3d976266c8a7c84fec7530154e50438a48f9247",
+      "source": {
+        "status": "original-git-tag",
+        "modelEntry": "live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json"
+      },
+      "remoteAssetsVerified": true,
+      "historicalValidationRepeated": false,
+      "formalArtComplete": false,
+      "webglRendered": true,
+      "webglScope": "Q/A/U/H/Space held poses, clean underlay, perspective keycaps, recenter and key feedback",
+      "windowsDesktopVerified": true,
+      "windowsScope": "final packaged EXE in standard mode; native menu sizing, settings persistence, gaze, sound and OS clicks to a controlled underlying fixture",
+      "transparentHitTestVerified": true,
+      "transparentHitTestSamples": [
+        "top-left",
+        "below keyboard",
+        "head",
+        "drag handle"
+      ],
+      "inputFeedbackVerified": true,
+      "gazeRecenterVerified": true,
+      "nativeMenuContentSizeVerified": true,
+      "wutheringWavesVerified": false,
+      "gameInputImplementationFrom": "0.7.15",
+      "newMacRuntimeTest": false,
+      "completeWindowsAcceptance": false,
+      "defaultGazeIdleSeconds": 3,
+      "defaultKeyOverlayMaxKeys": 1,
+      "sourceArchive": "deliveries/20261017-desktop-0.7.16/source-v0.7.16.zip",
+      "prepublicationArchive": {
+        "path": "deliveries/20261017-desktop-0.7.16-prepublication-01",
+        "published": false
+      }
     }
   ],
   "githubArchiveVerified": true,

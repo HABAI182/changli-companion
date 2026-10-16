@@ -163,6 +163,8 @@ export type Settings = {
   settingsDensity: 'comfortable' | 'compact';
   settingsTextScale: number;
   cursorFollowEnabled: boolean;
+  gazeRecenterEnabled: boolean;
+  gazeIdleSeconds: number;
   headElasticity: number;
   keyboardMotionScale: number;
   keyboardHandSpeed: number;
@@ -225,6 +227,8 @@ export function initialData(): Data {
       settingsDensity: 'comfortable',
       settingsTextScale: 1,
       cursorFollowEnabled: true,
+      gazeRecenterEnabled: true,
+      gazeIdleSeconds: 3,
       headElasticity: 1,
       keyboardMotionScale: 1,
       keyboardHandSpeed: 1,

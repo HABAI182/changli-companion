@@ -3,6 +3,7 @@ import type { Settings } from '../domain';
 import { ScalePreviewQueue } from './scalePreview';
 import { PositionPresets } from './PositionPresets';
 import { openProjectLink } from '../native';
+import { APP_VERSION } from '../version';
 import './settings.css';
 import runtimeLicense from '../../LICENSE-RUNTIME.txt?raw';
 
@@ -323,7 +324,7 @@ export function SettingsPanel(p: Props) {
             <h2>离火长明</h2>
             <p>桌宠设置</p>
           </div>
-          <span className="settings-version">v0.7.15</span>
+          <span className="settings-version">v{APP_VERSION}</span>
         </div>
         <div className="character-status" role="status" aria-label="角色状态">
           <span className={`status-dot ${p.live2dReady ? 'ready' : ''}`} />
@@ -493,6 +494,25 @@ export function SettingsPanel(p: Props) {
                 '关闭时一次长按只浮现一次，手部仍保持长按响应',
               )}
             {toggle('cursorFollowEnabled', '鼠标视线跟随', '随鼠标转头与转眼，不影响鼠标手动作')}
+            {s.cursorFollowEnabled &&
+              toggle(
+                'gazeRecenterEnabled',
+                '空闲时视线回正',
+                '鼠标停下后，视线柔和回到正前方；键盘操作不延后回正',
+              )}
+            {s.cursorFollowEnabled && s.gazeRecenterEnabled && (
+              <PreferenceRange
+                title="视线回正等待"
+                description="鼠标停止移动多久后回正"
+                value={s.gazeIdleSeconds}
+                min={1}
+                max={15}
+                step={1}
+                unit=" 秒"
+                busy={p.busy}
+                update={(value) => p.update({ gazeIdleSeconds: value })}
+              />
+            )}
             {range(
               'keyboardMotionScale',
               '键盘手移动幅度',
@@ -693,7 +713,7 @@ export function SettingsPanel(p: Props) {
             <details className="settings-extra">
               <summary>手柄与音效</summary>
               {toggle('gamepadEnabled', '手柄互动', '可与键鼠同时使用', true)}
-              {toggle('sfxEnabled', '互动音效', '原创占位音，默认关闭')}
+              {toggle('sfxEnabled', '按键反馈音', '键盘敲击与鼠标点击时播放轻音，文字气泡不配音')}
               <Row title={`音效音量 ${Math.round(s.sfxVolume * 100)}%`}>
                 <input
                   aria-label="音效音量"
@@ -707,16 +727,16 @@ export function SettingsPanel(p: Props) {
                 />
               </Row>
               <button className="wide" disabled={!s.sfxEnabled} onClick={p.playSound}>
-                试听互动音效
+                试听按键音
               </button>
-              <p className="setting-hint">键盘音与语音素材尚未接入，相关功能保持关闭。</p>
+              <p className="setting-hint">仅在实际按下时发声，长按不连响；默认关闭</p>
             </details>
             {p.children}
           </div>
           <div className="project-links">
             <span>
               <strong>离火长明</strong>
-              <small>版本 0.7.12 · Windows 桌宠</small>
+              <small>版本 {APP_VERSION} · Windows 桌宠</small>
             </span>
             <div>
               <button type="button" onClick={() => void openProjectLink('updates').catch(p.fail)}>

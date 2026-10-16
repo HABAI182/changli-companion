@@ -75,7 +75,10 @@
           "ArtMesh9"
         ],
         "reachPixels": 120,
-        "mouseToKeyboardPixels": [250, 94],
+        "mouseToKeyboardPixels": [
+          250,
+          94
+        ],
         "mousePixels": 18,
         "mouth": [
           "ArtMesh28"
@@ -326,11 +329,17 @@
         },
         "depthPixels": 18,
         "keyboardMesh": "ArtMesh56",
-        "keyboardAsset": "assets/keyboard-changli-v0714.svg",
+        "keyboardAsset": "assets/keyboard-changli-v0716.svg",
         "jawAsset": "assets/jaw-underpaint-v078.svg",
         "mouseAsset": "assets/mouse-wireless-v0714.svg",
         "underpaintAsset": "assets/sleeves-underpaint-v078.svg",
-        "jawBlend": true
+        "jawBlend": true,
+        "keyboardUnderlayBounds": [
+          260,
+          915,
+          1254,
+          1105
+        ]
       }
     }
   },
@@ -956,11 +965,17 @@
     "right_stick": "move"
   },
   "sounds": {
-    "focus_complete": {
-      "asset": "assets/audio/placeholder-chime.wav",
+    "key_press": {
+      "asset": "assets/audio/key-press-v0716.wav",
       "kind": "sfx",
-      "cooldownMs": 1000,
-      "status": "original-placeholder"
+      "cooldownMs": 28,
+      "status": "original-feedback"
+    },
+    "mouse_press": {
+      "asset": "assets/audio/mouse-press-v0716.wav",
+      "kind": "sfx",
+      "cooldownMs": 35,
+      "status": "original-feedback"
     }
   },
   "actions": {

@@ -43,3 +43,15 @@ export function partitionMouseMesh(source: Float32Array, uv: Float32Array,
     uvs:new Float32Array(uvs), indices:new Uint16Array(triangles), moving};
 }
 
+// Remove a duplicated baked object only after its complete independent layer
+// exists. Outside triangles retain source UVs; do not cut the replacement.
+export function subtractSourceRect(source: Float32Array, uv: Float32Array, indices: Uint16Array,
+  bounds: [number, number, number, number], ppu: number, origin: [number, number]) {
+  const [l,t,r,b]=bounds;
+  const g=partitionMouseMesh(source,uv,indices,[[l,t],[r,t],[r,b],[l,b]],ppu,origin);
+  const kept:number[]=[];
+  for(let n=0;n<g.indices.length;n+=3)
+    if(!g.moving[g.indices[n]])kept.push(g.indices[n],g.indices[n+1],g.indices[n+2]);
+  return {positions:g.positions,uvs:g.uvs,indices:new Uint16Array(kept)};
+}
+

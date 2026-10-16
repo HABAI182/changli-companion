@@ -5,7 +5,7 @@ export interface MouseRegion {
   mesh: string;
   outline: [number, number][];
 }
-import { partitionMouseMesh } from './MouseMesh';
+import { partitionMouseMesh, subtractSourceRect } from './MouseMesh';
 import { handDrawOrder, type HandDrawOrder } from './HandDrawOrder';
 import { jawRepairMesh, jawSkinLayers } from './JawRepair';
 import { underpaintMesh } from './UnderpaintMesh';
@@ -23,7 +23,7 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   private lastDrawOrder: Record<string, number> = {};
   private flame = {phase: 0, strength: 0};
   private mouthCoverage = 0;
-  private keyboard?: {mesh: string; texture: number};
+  private keyboard?: {mesh: string; texture: number; underlayBounds?: [number,number,number,number]};
   private jawTexture?: number;
   private jawBlend = false;
   private underpaintTexture?: number;
@@ -33,7 +33,7 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
   setUnderpaintTexture(texture: number) { this.underpaintTexture = texture; }
   setMouseTexture(texture: number) { this.mouseTexture = texture; }
   setJawTexture(texture: number, blend = false) { this.jawTexture = texture; this.jawBlend = blend; }
-  setKeyboard(mesh: string, texture: number) { this.keyboard={mesh,texture}; }
+  setKeyboard(mesh: string, texture: number, underlayBounds?: [number,number,number,number]) { this.keyboard={mesh,texture,underlayBounds}; }
   setMouthCoverage(value: number) { this.mouthCoverage = value; }
   private contourInfo: Record<string, {nativeVertices: number; renderedVertices: number}> = {};
   constructor(width: number,height: number,private region?: MouseRegion, private handOrder?: HandDrawOrder,
@@ -96,12 +96,9 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
           const rear=underpaintMesh(model.getDrawableVertexPositions(face),model.getDrawableVertexUvs(face),model.getDrawableVertexIndices(face));
           this.drawGeometry(model,index,rear,this.underpaintTexture);
         }
-        // Retain the whole authored sleeve behind the head. Only the clean
-        // palm/cuff foreground is drawn again at the higher hand priority.
-        for (const hand of this.handOrder?.ids || []) {
-          const i=model.getModel().drawables.ids.indexOf(hand);
-          if(i >= 0) this.drawGeometry(model,i,{positions:model.getDrawableVertexPositions(i),uvs:model.getDrawableVertexUvs(i),indices:model.getDrawableVertexIndices(i)});
-        }
+        // Complete body/sleeves come from the head-attached underpaint above.
+        // Drawing the raw hand here again carries a second uncropped sleeve
+        // into the keyboard when the mouse hand changes ownership.
       }
       if (id === 'ArtMesh29' && this.jawTexture !== undefined) {
         super.drawMeshWebGL(model, index);
@@ -175,7 +172,10 @@ export class MouseRegionRenderer extends CubismRenderer_WebGL {
           target.push(g.indices[n],g.indices[n+1],g.indices[n+2]);
         }
         this.completeMouse={positions:g.positions,uvs:fullUvs,indices:new Uint16Array(moving)};
-        this.fixedForeground={positions:g.positions,uvs:g.uvs,indices:new Uint16Array(fixed)};
+        this.fixedForeground=this.keyboard?.underlayBounds
+          ? subtractSourceRect(g.base,g.uvs,new Uint16Array(fixed),this.keyboard.underlayBounds,
+              ppu,[info.CanvasOriginX,info.CanvasOriginY])
+          : {positions:g.positions,uvs:g.uvs,indices:new Uint16Array(fixed)};
       }
       const getters: Record<string,(index:number)=>unknown>={
         getDrawableVertexPositions:()=>this.geometry!.positions,

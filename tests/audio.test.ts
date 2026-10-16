@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { AudioManager } from '../src/audio/AudioManager';
+import { AudioManager, feedbackSound } from '../src/audio/AudioManager';
 import { initialData } from '../src/domain';
 
 it('本地音效默认关闭；开启后限音量并执行冷却', async () => {
@@ -15,16 +15,16 @@ it('本地音效默认关闭；开启后限音量并执行冷却', async () => {
     () => now,
   );
   const settings = initialData().settings;
-  expect(await audio.play('focus_complete', settings)).toBe('disabled');
+  expect(await audio.play('key_press', settings)).toBe('disabled');
   settings.sfxEnabled = true;
   settings.sfxVolume = 0.4;
-  expect(await audio.play('focus_complete', settings)).toBe('played');
+  expect(await audio.play('key_press', settings)).toBe('played');
   expect(played).toEqual([
-    { url: '/models/changli/assets/audio/placeholder-chime.wav', volume: 0.4 },
+    { url: '/models/changli/assets/audio/key-press-v0716.wav', volume: 0.4 },
   ]);
-  expect(await audio.play('focus_complete', settings)).toBe('cooldown');
+  expect(await audio.play('key_press', settings)).toBe('cooldown');
   now += 1000;
-  expect(await audio.play('focus_complete', settings)).toBe('played');
+  expect(await audio.play('key_press', settings)).toBe('played');
   expect(await audio.play('unknown', settings)).toBe('missing');
 });
 
@@ -38,6 +38,23 @@ it('播放失败时可重试，且不会把远程地址送给播放器', async (
   }));
   const settings = initialData().settings;
   settings.sfxEnabled = true;
-  expect(await audio.play('focus_complete', settings)).toBe('failed');
-  expect(await audio.play('focus_complete', settings)).toBe('played');
+  expect(await audio.play('key_press', settings)).toBe('failed');
+  expect(await audio.play('key_press', settings)).toBe('played');
+});
+
+it('按键和点击有反馈；长按、释放、文字互动和移动保持静音', () => {
+  expect(
+    feedbackSound('keyboard_left', { code: 65, label: 'A', phase: 'down', repeat: false }),
+  ).toBe('key_press');
+  expect(feedbackSound('space')).toBe('key_press');
+  expect(feedbackSound('left')).toBe('mouse_press');
+  expect(feedbackSound('right')).toBe('mouse_press');
+  expect(
+    feedbackSound('keyboard_left', { code: 65, label: 'A', phase: 'down', repeat: true }),
+  ).toBeNull();
+  expect(
+    feedbackSound('keyboard_left', { code: 65, label: 'A', phase: 'up', repeat: false }),
+  ).toBeNull();
+  for (const signal of ['move', 'pet', 'body', 'complete', 'wheel'] as const)
+    expect(feedbackSound(signal)).toBeNull();
 });

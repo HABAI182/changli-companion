@@ -1,12 +1,14 @@
 # 离火长明 · Q版长离 Live2D 桌宠
 
-支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.15**，macOS 独立公测版 **0.7.15-macos.1**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
+支持 Windows x64 与 macOS Apple Silicon 的桌面伴侣。Windows 当前免费公测版 **0.7.16**，macOS 独立公测版 **0.7.15-macos.1**，共用原生模型 v71。采用 Tauri、React、TypeScript 与 Live2D Cubism SDK。
 
 <img src="public/models/changli/preview.jpg" alt="长离桌宠预览" width="320" />
 
 [B站主页](https://space.bilibili.com/1605091088) · [桌宠演示视频](https://www.bilibili.com/video/BV1Pipf6AEQF/)
 
-0.7.15 修复高权限游戏中的键鼠兼容问题，管理员候选版已由用户在鸣潮实际角色操作中核验通过。默认开启高权限兼容启动，可在桌面设置关闭；启动仍需 Windows 确认。长按时按下弹动一次，随后保持落键，松开后回位。长按默认只浮现一次按键，可在互动设置开启重复浮现；同时浮现上限可调 1～6 个，默认 1 个。
+0.7.16 让右键菜单随内容收缩，展开更多表情时自动增高；透明边缘和键盘下方可点击穿透。新增鼠标空闲后视线柔和回正，默认等待3秒，可关闭或调为1～15秒；键盘改为近大远小的立体键帽与完整侧面。可选按键反馈轻音，实际敲键/点击才发声，长按不连响，文字气泡不配音。
+
+沿用0.7.15的高权限兼容启动（默认开，可在桌面设置关闭，启动仍需Windows确认）。长按时只弹动一次，随后保持落键，松开回位；重复浮现独立可选，上限可调1～6个，默认1个。鸣潮实测结论来自0.7.15管理员候选版；0.7.16未新增游戏实测。
 
 ## 公测说明
 
@@ -20,7 +22,7 @@
 
 | 系统 | 下载 | 文件类型 |
 | --- | --- | --- |
-| Windows x64 | [Windows 0.7.15](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.15) | 便携 EXE / EXE 安装包 |
+| Windows x64 | [Windows 0.7.16](https://github.com/HABAI182/changli-companion/releases/tag/v0.7.16) | 便携 EXE / EXE 安装包 |
 | macOS Apple Silicon（M 系列） | [macOS 0.7.15-macos.1](https://github.com/HABAI182/changli-companion/releases/tag/macos-0.7.15-preview.1) | DMG / APP ZIP；最低 macOS 12 |
 
 macOS 0.7.15-macos.1 收录自 [Kyusakino 的适配版本](https://github.com/Kyusakino/changli-companion-macos/releases/tag/macos-0.7.15-preview.1)，安装、输入监控授权与源码入口见 [macOS 发布说明](docs/MACOS-0.7.15-macos.1.md)。Source code ZIP 为开发者源码；旧版继续在 Releases 独立留档。
@@ -32,6 +34,8 @@ macOS 0.7.15-macos.1 收录自 [Kyusakino 的适配版本](https://github.com/Ky
 - 大头弹性回摆，发饰随动，凤凰翅膀、尾羽和火苗持续动态；可选完整、轻柔或关闭动态。
 - 17个可用表情、3段小动作、36条互动气泡、50%—200%连续大小调节。
 - Windows透明置顶、托盘、鼠标穿透与恢复快捷键、全屏避让、边缘磁吸、3个常用位置。
+- Windows透明空白自动穿透，保留角色与拖动键；手动完全穿透仍优先，可从托盘/恢复快捷键退出。
+- 互动设置可调整视线回正开关和等待秒数；高级 → 手柄与音效可开启按键反馈音并调节音量，默认关闭。
 
 0.7.9使用用户上传的完整原图作为图标，设置改为外观/互动/桌面/高级四分页；新增系统/深浅主题、强调色、布局密度、视线跟随、弹性与键鼠幅度、气泡时长及空闲频率。设置窗口置顶并聚焦，保存后保持在桌宠前面；高级页的GitHub更新按钮打开GitHub版本下载页，项目主页按钮打开仓库，未加入自动下载安装。0.7.8将鼠标重建为完整底层，手掌和袖口分前后绘制；袖口底层随大头变形，键盘手上方下颌沿用原脸纹理并柔化接缝，图标采用参照桌宠原图生成的长离头像。0.7.7修复鼠标手左侧前景残留，并补全键盘手移开后露出的下颌缺角；补片随原生脸部变形。0.7.6将生气火苗移到头部外缘、放大并加轮廓，改善小尺寸识别。0.7.5将开心改为睁眼微笑，困倦使用闭眼、大小递减的zzz和少量口水。移除打招呼、入睡两项动作与过期快捷键目标；保留凤凰互动、生气冒火和害羞。生气新增随脸运动的火苗。气泡随桌宠等比缩放、去掉末尾句号，边框加粗。靠近淡化默认关闭。应用和托盘共用珊瑚粉发色、白发尾、金色发饰的简约长离头像图标。
 

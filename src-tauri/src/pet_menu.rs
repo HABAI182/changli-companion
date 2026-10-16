@@ -46,7 +46,7 @@ pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
     let area = monitor.work_area();
     let f = monitor.scale_factor();
     let width = (260.0 * f).round() as i32;
-    let height = ((468.0 * f).round() as i32).min(area.size.height as i32 - 16);
+    let height = ((380.0 * f).round() as i32).min(area.size.height as i32 - 16);
     let left = area.position.x;
     let top = area.position.y;
     let right = left + area.size.width as i32;
@@ -75,7 +75,7 @@ pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
             WebviewUrl::App("index.html?menu=1".into()),
         )
         .title("长离 · 互动")
-        .inner_size(260.0, 468.0)
+        .inner_size(260.0, 380.0)
         .decorations(false)
         .transparent(true)
         .shadow(false)
@@ -98,6 +98,35 @@ pub async fn open_pet_menu(app: tauri::AppHandle) -> Result<(), String> {
     menu.show().map_err(|e| e.to_string())?;
     MENU_OPEN.store(true, Ordering::Relaxed);
     menu.set_focus().map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub fn resize_pet_menu(app: tauri::AppHandle, height: f64) -> Result<(), String> {
+    if !height.is_finite() || !(100.0..=2000.0).contains(&height) {
+        return Err("菜单尺寸无效".into());
+    }
+    let menu = app.get_webview_window("pet-menu").ok_or("互动窗口不存在")?;
+    let monitor = menu
+        .current_monitor()
+        .map_err(|e| e.to_string())?
+        .ok_or("显示器不存在")?;
+    let scale = monitor.scale_factor();
+    let area = monitor.work_area();
+    let target = height
+        .min((area.size.height as f64 - 16.0) / scale)
+        .max(100.0);
+    menu.set_size(LogicalSize::new(260.0, target))
+        .map_err(|e| e.to_string())?;
+    let position = menu.outer_position().map_err(|e| e.to_string())?;
+    let bottom = area.position.y + area.size.height as i32 - 8;
+    let y = position
+        .y
+        .min(bottom - (target * scale).ceil() as i32)
+        .max(area.position.y + 8);
+    if y != position.y {
+        menu.set_position(PhysicalPosition::new(position.x, y))
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 #[tauri::command]
 pub fn drag_pet_menu(app: tauri::AppHandle) -> Result<(), String> {

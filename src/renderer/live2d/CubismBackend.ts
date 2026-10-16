@@ -4,6 +4,7 @@ import type { CubismModel } from '../../../vendor/live2d/src/model/cubismmodel';
 import { CubismModelMatrix } from '../../../vendor/live2d/src/math/cubismmodelmatrix';
 import { CubismMatrix44 } from '../../../vendor/live2d/src/math/cubismmatrix44';
 import { MouseRegionRenderer } from './MouseRegionRenderer';
+import { publishPetHitMask } from '../../pet/hitMask';
 import { CubismShaderManager_WebGL } from '../../../vendor/live2d/src/rendering/cubismshader_webgl';
 import { CubismMotion } from '../../../vendor/live2d/src/motion/cubismmotion';
 import { CubismMotionManager } from '../../../vendor/live2d/src/motion/cubismmotionmanager';
@@ -151,7 +152,7 @@ export class CubismBackend implements Live2DBackend {
       const index = this.textures.length;
       this.textures.push(texture);
       this.renderer.bindTexture(index, texture);
-      this.renderer.setKeyboard(this.rig.keyboardMesh, index);
+      this.renderer.setKeyboard(this.rig.keyboardMesh, index, this.rig.keyboardUnderlayBounds);
     }
     if (this.rig?.jawAsset) {
       const image = await loadImage('/models/changli/' + this.rig.jawAsset);
@@ -365,6 +366,7 @@ export class CubismBackend implements Live2DBackend {
       (this.parameters.get('__gesture.flameStrength') || 0) > 0,
     );
     noteRenderedFrame(now);
+    publishPetHitMask([canvas]);
     this.frame = requestAnimationFrame(this.draw);
   };
 

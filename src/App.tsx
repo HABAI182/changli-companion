@@ -26,12 +26,14 @@ import { LayeredRenderer } from './Renderer';
 import { RendererHost, rendererDiagnostics } from './renderer/RendererHost';
 import { PresentationRuntime } from './pet/presentation';
 import { mapGamepadInput } from './pet/gamepad';
-import { AudioManager } from './audio/AudioManager';
+import { AudioManager, feedbackSound } from './audio/AudioManager';
 import { model, type ShortcutSlot } from './model';
 import { SettingsPanel } from './settings/SettingsPanel';
 import { KEY_BADGE_MS, nextKeyBadges, type KeyBadge, type KeyDisplay } from './overlay/keyOverlay';
 import { ChangliEmblem } from './overlay/ChangliEmblem';
 import { inputHealth } from './inputDiagnostics';
+import { APP_VERSION } from './version';
+import { publishPetHitMask } from './pet/hitMask';
 
 const names: Record<string, string> = {
   keyboard_left: '左键区',
@@ -74,6 +76,9 @@ const query = new URLSearchParams(location.search),
   menuWindow = native && query.has('menu'),
   panelWindow = native && (query.has('panel') || menuWindow);
 const preview = !native;
+const resizeNativeMenu = (height: number) => {
+  void invoke('resize_pet_menu', { height }).catch(console.error);
+};
 export function App() {
   const [data, setData] = useState<Data>(initialData),
     [ready, setReady] = useState(false),
@@ -131,6 +136,8 @@ export function App() {
         source === 'gamepad' ? 'keyboard_mouse' : data.settings.inputMode,
         key,
       );
+      const cue = source === 'input' ? feedbackSound(s, key) : null;
+      if (cue) void audio.current.play(cue, data.settings);
       if (data.settings.keyOverlayEnabled && key?.phase === 'down')
         setKeyBadges((current) =>
           nextKeyBadges(
@@ -150,8 +157,13 @@ export function App() {
       data.settings.multiKeyOverlayEnabled,
       data.settings.keyOverlayMaxKeys,
       data.settings.keyOverlayRepeatEnabled,
+      data.settings.sfxEnabled,
+      data.settings.sfxVolume,
     ],
   );
+  useEffect(() => {
+    if (data.settings.sfxEnabled && !panelWindow) audio.current.prime();
+  }, [data.settings.sfxEnabled]);
   useEffect(() => {
     if (!keyBadges.length) return;
     const timer = window.setTimeout(
@@ -173,6 +185,21 @@ export function App() {
     setHoverDim(false);
   }, [data.settings.hoverHideEnabled, data.settings.passthrough, menu]);
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
+  useEffect(() => {
+    if (!native || panelWindow) return;
+    const timer = window.setInterval(() => {
+      if (!document.querySelector('.native-pet .live2d-canvas')) {
+        const images = [
+          ...document.querySelectorAll<HTMLImageElement>(
+            '.native-pet .character-art, .native-pet .model-layer',
+          ),
+        ];
+        if (images.length && images.every((image) => image.complete && image.naturalWidth))
+          publishPetHitMask(images);
+      }
+    }, 180);
+    return () => window.clearInterval(timer);
+  }, []);
   const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0, maxHeight: 468 });
   const [technical, setTechnical] = useState(false);
   useEffect(() => {
@@ -423,9 +450,9 @@ export function App() {
         setNotice('角色渲染已重新初始化');
       }}
       playSound={() =>
-        void audio.current.play('focus_complete', data.settings).then((result) => {
+        void audio.current.play('key_press', data.settings).then((result) => {
           if (result === 'failed') setError('本地音效播放失败');
-          else if (result === 'played') setNotice('已试听本地占位音效');
+          else if (result === 'played') setNotice('已试听按键反馈音');
         })
       }
     >
@@ -592,6 +619,7 @@ export function App() {
   const menuView = (
     <InteractionMenu
       native={native}
+      onHeight={menuWindow ? resizeNativeMenu : undefined}
       drag={(e) => {
         if (e.button !== 0 || (e.target instanceof Element && e.target.closest('button'))) return;
         e.preventDefault();
@@ -777,7 +805,7 @@ export function App() {
             </div>
           </div>
           <div className="mode-badge">
-            <i /> 浏览器预览 <span>v0.7.15</span>
+            <i /> 浏览器预览 <span>v{APP_VERSION}</span>
           </div>
         </header>
       )}

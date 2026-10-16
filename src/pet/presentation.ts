@@ -140,6 +140,8 @@ export class PresentationRuntime {
   private gaze = { x: 0, y: 0 };
   private gazeTarget = { x: 0, y: 0 };
   private gazeUpdatedAt: number;
+  private lastMouseMoveAt = -Infinity;
+  private gazeIdleDelayMs: number | null = 3000;
   private dragActive = false;
   private dragReleaseUntil = 0;
   private headX = new ElasticSpring(13, 0.5);
@@ -230,6 +232,7 @@ export class PresentationRuntime {
       this.mouseUntil = now + 320;
       this.advanceGaze(now);
       this.gazeTarget = { x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) };
+      this.lastMouseMoveAt = now;
       if (this.action && this.action.id !== 'move') return;
     }
     const id = actions[signal];
@@ -359,6 +362,10 @@ export class PresentationRuntime {
       this.nextIdleSpeechAt = now + idleInterval;
     }
     this.tick(now);
+    this.gazeIdleDelayMs =
+      settings.gazeRecenterEnabled === false
+        ? null
+        : Math.max(1, Math.min(15, settings.gazeIdleSeconds ?? 3)) * 1000;
     this.advanceGaze(now);
     const base =
       settings.autoSleepMinutes > 0 && now - this.lastInput >= settings.autoSleepMinutes * 60000
@@ -576,9 +583,19 @@ export class PresentationRuntime {
   }
   private advanceGaze(now: number) {
     const elapsed = Math.max(0, now - this.gazeUpdatedAt);
+    const following =
+      this.gazeIdleDelayMs === null
+        ? elapsed
+        : Math.max(
+            0,
+            Math.min(elapsed, this.lastMouseMoveAt + this.gazeIdleDelayMs - this.gazeUpdatedAt),
+          );
     this.gazeUpdatedAt = Math.max(now, this.gazeUpdatedAt);
-    const blend = 1 - Math.exp(-elapsed / 85);
-    this.gaze.x += (this.gazeTarget.x - this.gaze.x) * blend;
-    this.gaze.y += (this.gazeTarget.y - this.gaze.y) * blend;
+    const blend = 1 - Math.exp(-following / 85);
+    const returnBlend = Math.exp(-(elapsed - following) / 320);
+    for (const axis of ['x', 'y'] as const) {
+      this.gaze[axis] =
+        (this.gaze[axis] + (this.gazeTarget[axis] - this.gaze[axis]) * blend) * returnBlend;
+    }
   }
 }

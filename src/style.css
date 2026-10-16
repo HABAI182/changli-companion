@@ -1624,7 +1624,7 @@ details:not(.dev-tools) {
   padding: 6px;
 }
 .native-menu .context-menu {
-  height: calc(100vh - 12px);
+  height: auto;
 }
 .detached-menu {
   font-family: 'Segoe UI Variable', 'Microsoft YaHei', sans-serif;
@@ -1655,8 +1655,9 @@ details:not(.dev-tools) {
   margin-top: 12px;
 }
 .browser-menu-container {
-  height: 468px;
+  height: auto;
 }
 .browser-menu-container .context-menu {
-  height: 100%;
+  height: auto;
+  max-height: calc(100vh - 28px);
 }

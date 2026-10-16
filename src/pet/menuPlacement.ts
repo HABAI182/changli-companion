@@ -2,7 +2,7 @@ export function menuPlacement(
   pet: { left: number; top: number; right: number; bottom: number },
   screen: { width: number; height: number },
   width = 260,
-  height = 468,
+  height = 380,
 ) {
   const gap = 12,
     margin = 8;

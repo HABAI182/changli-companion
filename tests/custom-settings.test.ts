@@ -69,3 +69,32 @@ it('uses configured bubble duration and can stop only automatic idle speech', ()
   expect(pet.snapshot(128900, settings).bubble).not.toBeNull();
   expect(pet.snapshot(129001, settings).bubble).toBeNull();
 });
+
+it('returns gaze smoothly after mouse inactivity even while keyboard input continues', () => {
+  const settings = { ...initialData().settings, gazeIdleSeconds: 1, headElasticity: 0 };
+  const pet = new PresentationRuntime(0, () => 0.5);
+  pet.input('move', 100, 1, -0.8);
+  expect(pet.snapshot(1099, settings).idle.gazeX).toBeGreaterThan(0.99);
+  pet.input('keyboard_left', 1150);
+  const during = pet.snapshot(1420, settings).idle;
+  expect(during.gazeX).toBeCloseTo(Math.exp(-1), 3);
+  expect(during.gazeY).toBeCloseTo(-0.8 * Math.exp(-1), 3);
+  expect(pet.snapshot(2700, settings).idle.gazeX).toBeLessThan(0.01);
+  pet.input('move', 2800, -1, 0);
+  const resumed = pet.snapshot(2885, settings).idle.gazeX;
+  expect(resumed).toBeLessThan(-0.6);
+  expect(resumed).toBeGreaterThan(-0.7);
+});
+
+it('can keep watching indefinitely and persists the recenter delay without resetting older choices', () => {
+  const data = initialData();
+  data.settings.gazeRecenterEnabled = false;
+  data.settings.gazeIdleSeconds = 7;
+  const saved = parseData(JSON.stringify(data));
+  expect(saved.settings.gazeRecenterEnabled).toBe(false);
+  expect(saved.settings.gazeIdleSeconds).toBe(7);
+  const pet = new PresentationRuntime(0, () => 0.5);
+  pet.snapshot(0, saved.settings);
+  pet.input('move', 100, 0.8, 0.2);
+  expect(pet.snapshot(8000, saved.settings).idle.gazeX).toBeCloseTo(0.8);
+});

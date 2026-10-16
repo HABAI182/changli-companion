@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod desktop;
 mod gamepad;
+mod hit_test;
 mod input;
 #[cfg(windows)]
 mod input_merge;
@@ -31,6 +32,10 @@ struct Settings {
     settings_text_scale: f64,
     #[serde(rename = "cursorFollowEnabled")]
     cursor_follow_enabled: bool,
+    #[serde(rename = "gazeRecenterEnabled")]
+    gaze_recenter_enabled: bool,
+    #[serde(rename = "gazeIdleSeconds")]
+    gaze_idle_seconds: f64,
     #[serde(rename = "headElasticity")]
     head_elasticity: f64,
     #[serde(rename = "keyboardMotionScale")]
@@ -105,6 +110,8 @@ impl Default for Settings {
             settings_density: "comfortable".into(),
             settings_text_scale: 1.0,
             cursor_follow_enabled: true,
+            gaze_recenter_enabled: true,
+            gaze_idle_seconds: 3.0,
             head_elasticity: 1.0,
             keyboard_motion_scale: 1.0,
             keyboard_hand_speed: 1.0,
@@ -474,6 +481,8 @@ fn apply_settings(app: tauri::AppHandle, mut settings: Settings) -> Result<Setti
         || !["coral", "blue", "violet", "sage"].contains(&settings.accent_color.as_str())
         || !["comfortable", "compact"].contains(&settings.settings_density.as_str())
         || !settings.head_elasticity.is_finite()
+        || !settings.gaze_idle_seconds.is_finite()
+        || !(1.0..=15.0).contains(&settings.gaze_idle_seconds)
         || !(0.0..=1.5).contains(&settings.head_elasticity)
         || !settings.keyboard_motion_scale.is_finite()
         || !(0.5..=1.25).contains(&settings.keyboard_motion_scale)
@@ -639,6 +648,7 @@ fn main() {
         )
         .invoke_handler(tauri::generate_handler![
             desktop::pet_renderer_ready,
+            hit_test::set_pet_hit_mask,
             desktop::begin_pet_drag,
             desktop::finish_pet_drag,
             desktop::list_pet_positions,
@@ -654,6 +664,7 @@ fn main() {
             pet_menu::open_pet_menu,
             pet_menu::drag_pet_menu,
             pet_menu::close_pet_menu,
+            pet_menu::resize_pet_menu,
             pet_menu::menu_action,
             preview_scale,
             native_status,
@@ -681,6 +692,7 @@ fn main() {
                 bindings: Mutex::new(Vec::new()),
                 slots: Mutex::new(model.shortcuts.clone()),
             });
+            app.manage(hit_test::HitTestState::default());
             let show = MenuItem::with_id(app, "show", "显示 / 隐藏", true, None::<&str>)?;
             let settings = MenuItem::with_id(app, "settings", "设置", true, None::<&str>)?;
             let restore = MenuItem::with_id(app, "recover", "关闭穿透并显示", true, None::<&str>)?;
@@ -842,6 +854,7 @@ fn main() {
             input::start(app.handle().clone());
             gamepad::start(app.handle().clone());
             windows::watch(app.handle().clone());
+            hit_test::watch(app.handle().clone());
             desktop::watch(app.handle().clone());
             Ok(())
         })

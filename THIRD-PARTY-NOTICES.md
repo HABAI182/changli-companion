@@ -29,11 +29,9 @@
 
 SQLite 随 rusqlite bundled 构建；WebView2 是 Windows 运行时前提，没有把它的二进制捆绑到当前源码交付中。项目现已在用户授权下引入官方 **Live2D Cubism SDK for Web R5** 的 Framework 源码、WebGL shaders 和 Core `live2dcubismcore.min.js`。Framework 使用 [Live2D Open Software License](https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html)，Core 使用 [Live2D Proprietary Software License](https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html)。本地许可副本见 `vendor/live2d/FRAMEWORK-LICENSE.md`、`vendor/live2d/CORE-LICENSE.md`，Core 可再分发文件范围见 `vendor/live2d/CORE-REDISTRIBUTABLE-FILES.txt`。官方示例模型受单独的 Free Material License 和各模型条款约束，本工程没有包含它们。0.7.10随发行附件提供LICENSE-RUNTIME.txt和THIRD-PARTY-LICENSES.txt；后者收集本机依赖源包中的许可文件与元数据，并明确列出没有独立许可文件的包。Core许可和版权未被本项目MIT许可替换。当前为免费公测，后续重新分发仍须遵守SDK协议。
 
-候选模型的离线生成脚本内置了 [enoughdrama/live2d-autorig-claude](https://github.com/enoughdrama/live2d-autorig-claude) 的部分实验性源码，按 MIT 许可使用；许可副本位于 `tools/live2d-authoring/vendor/LICENSE`。该脚本仅在制作阶段运行，未作为桌宠运行时代码加载。
+早期候选模型制作使用过 [enoughdrama/live2d-autorig-claude](https://github.com/enoughdrama/live2d-autorig-claude) 的 MIT 实验代码；该制作工具及其许可证随完整历史保存于维护者私有镜像，不参与当前运行或构建。历史技术调研仅作实现参考，未复制参考项目角色资产。
 
 ## 实施参考
-
-2026-10-06 制作工具：`HKUDS/CLI-Anything` 的 Live2D CLI 0.3.0（MIT），固定提交 `34f519533bc175d2fe287ab8316b0dd99bb9cc43`，只在独立制作环境运行，不加载到桌宠。源码与许可见 `tools/live2d-authoring/references/tool-research-20261006/`。NyaDeskPet 与 CubismExternalEditMCP 源码在同目录仅作技术参考，各自许可副本一并保留；没有复制其角色资产或应用模块进桌宠运行时。
 
 - [Tauri 环境要求](https://v2.tauri.app/start/prerequisites/)
 - [Tauri 系统托盘](https://v2.tauri.app/learn/system-tray/)
@@ -42,4 +40,4 @@ SQLite 随 rusqlite bundled 构建；WebView2 是 Windows 运行时前提，没�
 - [Win32 LowLevelKeyboardProc](https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc)
 - [Vite](https://vite.dev/guide/) / [Vitest](https://vitest.dev/guide/) / [React](https://react.dev/learn/setup)
 
-艺术参考来源及生成提示词见 ASSETS.md。官方参考与用户图不会被描述为已经授予软件发布授权。
+当前艺术素材来源见 ASSETS.md。官方参考与用户图不会被描述为已经授予软件发布授权。

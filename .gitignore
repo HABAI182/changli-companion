@@ -16,7 +16,8 @@ src-tauri/target/
 *.cmo3
 *.moc3
 !public/models/changli/live-reference-repair-v71-candidate/*.moc3
-!/authoring/*.cmo3
+!/authoring/ChangliReferenceRepair-v71-verified.cmo3
+# This exact grandfathered source is audited; new authoring sources stay local/private.
 __pycache__/
 *.pyc
 .venv/

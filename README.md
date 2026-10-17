@@ -64,7 +64,7 @@ Windows 0.7.16 与 macOS 0.7.15-macos.1 分开交付与验收；0.7.16 未新增
 
 程序和当前运行资源可用。新增表情由原生Cubism参数与运行时矢量美术组合；动态和轮廓修整部分在运行时实现，未写回CMO3，未产生新的MOC3导出。独立精细原生表情、完整抬臂挥手与袖口/发束最终美术验收仍未全部完成，不能称完整美术正式版，也未宣称达到参考作者同等完成度。详见[交付记录](DELIVERY-0.7.15.md)。
 
-已验证Cubism源位于[authoring](authoring/README.md)，当前模型位于`public/models/changli/live-reference-repair-v71-candidate/`。历代模型、编译缓存、本机日志和旧交付留在本机，不进入仓库。历史制作脚本可能依赖这些本机资源。
+已验证 Cubism 源的私有保管与恢复说明见 [authoring](authoring/README.md)，当前模型位于`public/models/changli/live-reference-repair-v71-candidate/`。历代模型、编译缓存、本机日志和旧交付留在本机，不进入仓库。历史制作脚本可能依赖这些本机资源。
 
 角色与参考素材的权利和SDK许可见[第三方说明](THIRD-PARTY-NOTICES.md)。仓库可见性不改变素材许可。
 

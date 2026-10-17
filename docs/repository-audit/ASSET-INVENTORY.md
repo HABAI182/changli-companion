@@ -12,3 +12,7 @@ Baseline `e9fc7bcfb10ac83ea2ea77dda83807314eedc82a`; `757` tracked files, `169` 
 | Authoring helpers | `tools/live2d-authoring/` | Some require old local candidates; not a reproducible full authoring pipeline |
 
 Character/model/cropped artwork rights remain permission-pending where no verifiable grant is present. Source possession, Git visibility and a code license are not rights evidence. No new character material was added by this audit. See [dependency map](DEPENDENCY-MAP.md), [risk decisions](RISK-DECISIONS.md), [license scope](../../LICENSE-SCOPE.md).
+
+## Current HEAD after source-only migration
+
+The table and `assets.json` above are the immutable pre-migration baseline. Only `authoring/ChangliReferenceRepair-v71-verified.cmo3` was removed from current HEAD after both independent backups were read back with the recorded SHA256. All 168 other baseline assets retain their original bytes; no runtime resource was removed. See [source-migration.json](source-migration.json) and [private preservation/recovery notes](../../authoring/README.md). Public history/old Releases remain intact.

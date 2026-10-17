@@ -1,0 +1,850 @@
+{
+  "baseline": "e9fc7bcfb10ac83ea2ea77dda83807314eedc82a",
+  "files": [
+    {
+      "path": "authoring/ChangliReferenceRepair-v71-verified.cmo3",
+      "bytes": 55314208,
+      "sha256": "849400cb201df17964af540a8dbe6cb0d00b9ec36ea077c6f7dfb3d39c793366"
+    },
+    {
+      "path": "docs/sponsor/alipay.jpg",
+      "bytes": 175584,
+      "sha256": "6713ac2d870315ada9f59d964eeccc2887cc337785c9fa769b5c80eb3bc85622"
+    },
+    {
+      "path": "docs/sponsor/wechat.jpg",
+      "bytes": 151087,
+      "sha256": "574fd2576ae58f6b9b61a11ad75c33d707cccd3b6c4d7441f0cb2f45b3937c51"
+    },
+    {
+      "path": "public/assets/changli-icon-v078.png",
+      "bytes": 1761126,
+      "sha256": "09e6c8c6720d93c23e1f29853a67e533039228ed66449fb32bf6c28512cde4fb"
+    },
+    {
+      "path": "public/assets/changli-icon-v079.jpg",
+      "bytes": 144114,
+      "sha256": "7e886c070dde1e6b61bd41391b4eb5a746a981c5c0c250ac5036d74bc25b429c"
+    },
+    {
+      "path": "public/assets/changli-icon-v0810.png",
+      "bytes": 1975342,
+      "sha256": "b1e161b85229855ed4e2a01ff92681756468c9ece3a2b20b2d97bfb3a7293cb2"
+    },
+    {
+      "path": "public/assets/icon.svg",
+      "bytes": 2215,
+      "sha256": "45c1233970a68b40e0e988606ce653810fce0fb9877b5f527626a2c17b5d24df"
+    },
+    {
+      "path": "public/models/changli/assets/changli-cutout.png",
+      "bytes": 1446403,
+      "sha256": "5d1eda0cf7879608c544904f4b74e2b40b0aa8d38c75293174fbcc84c3dc378e"
+    },
+    {
+      "path": "public/models/changli/assets/jaw-underpaint-v077.svg",
+      "bytes": 491,
+      "sha256": "fd6ae94948b16df41b8b7066649c141c1569bc0c6dfc757129276672c6fd9dbc"
+    },
+    {
+      "path": "public/models/changli/assets/jaw-underpaint-v078.svg",
+      "bytes": 584,
+      "sha256": "254f22c6ee548799641b22f36a3ed904647d95b2b9cbe87a4c42463b4e8451d7"
+    },
+    {
+      "path": "public/models/changli/assets/keyboard-changli-v0714.svg",
+      "bytes": 22719,
+      "sha256": "e9ff338bf012fd144dc9ba93de63096b9988bd7d8ca6dd69ae2470a4e17001c9"
+    },
+    {
+      "path": "public/models/changli/assets/keyboard-changli-v0716.svg",
+      "bytes": 37909,
+      "sha256": "4bf7067f77bb2dfd95319a9f2bbcbf29ded48b531e6598e2ec77d270a8e2dfc6"
+    },
+    {
+      "path": "public/models/changli/assets/keyboard-four-zones.svg",
+      "bytes": 9064,
+      "sha256": "532f4baa00ee0d739cbb38612f7720a0f36e6aa531183036f8a2fcac7aabc9b6"
+    },
+    {
+      "path": "public/models/changli/assets/keyboard-refined-v0810.svg",
+      "bytes": 16215,
+      "sha256": "81a4f8effce36feae191244920378d7c4e8f023f57bf449e1e89a78fc23069ff"
+    },
+    {
+      "path": "public/models/changli/assets/mouse-complete-v078.svg",
+      "bytes": 1652,
+      "sha256": "81d750cef6cbcbc38271cfd6065835e0313b86c1f876111a5bd95dc14dc39bba"
+    },
+    {
+      "path": "public/models/changli/assets/mouse-wireless-v0714.svg",
+      "bytes": 1493,
+      "sha256": "a7bfde82fb922d9cf04448c1531ddc96f24a94960e1059302e989e31a6cb38f3"
+    },
+    {
+      "path": "public/models/changli/assets/sleeves-underpaint-v078.svg",
+      "bytes": 1217,
+      "sha256": "ffad3469a2fee14c8be3f2e7e4c4ae4f498ad6fdb171c7382fb6c8cc781ca188"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop-v075.model3.json",
+      "bytes": 3953,
+      "sha256": "1ecf610b4e8fc1a9e0cb784c7748fa82aefe3d8abac17585f69a2ec4ae836491"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71-desktop.model3.json",
+      "bytes": 3011,
+      "sha256": "9fc43b9d846501b03ab5a4ab4ef5466ba543420f0d57f0004f392a13a4758208"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71-elastic.model3.json",
+      "bytes": 2667,
+      "sha256": "315750281f6960b2afa6e630609705f7ec1bc88d702a38f9203962eca61c8c41"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71-expressive.model3.json",
+      "bytes": 4263,
+      "sha256": "f95e4d2aaaa35b67fd5ec25813259aaeb2644726479b51703d41f3a2600e32aa"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71-interactions.model3.json",
+      "bytes": 2667,
+      "sha256": "315750281f6960b2afa6e630609705f7ec1bc88d702a38f9203962eca61c8c41"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71-physics.model3.json",
+      "bytes": 1861,
+      "sha256": "641829d4cfa1c77b4d0fac270cf7d7ac33b32ec4714f3d014dbb6efd77827882"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_00.png",
+      "bytes": 1698481,
+      "sha256": "3971ad3923603ba3d1c1891eb3c31241a302d963be11ca797055103f36ad623b"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_01.png",
+      "bytes": 2397785,
+      "sha256": "13c3c287a1c571b68ec1fa4e7a9cd3999222a289ada898d578eb797321ac1557"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_02.png",
+      "bytes": 4119899,
+      "sha256": "2fbbcdc0c8597a079f23a227592853ae4234fd2b85ab3f4cf27216f7d816efc6"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_03.png",
+      "bytes": 2508461,
+      "sha256": "a8de30bbf9c78f443fd9e634f70d0d84a53bd61730bebda9012634efe3693b6a"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_04.png",
+      "bytes": 2024113,
+      "sha256": "90d78938821955b583b70cbc3817b920d853c6cbb45d9a87fc7d5ebe2492e9c4"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_05.png",
+      "bytes": 2632295,
+      "sha256": "f290e7e02e4aeb03d61cea1e19dae2a9b831f845c73965ab67e892c73aacd625"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_06.png",
+      "bytes": 2691590,
+      "sha256": "8ddee9ca0c9560b5d674aeb6705af1a57538086b084bc577fe193aadb535e8ff"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.2048/texture_07.png",
+      "bytes": 1046177,
+      "sha256": "8aeb4be469a0f2b6530e99565e1611c8ca9cadb0ea2b79be8ee21bde985f758f"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.moc3",
+      "bytes": 80256,
+      "sha256": "7449806d6c452bd7a3e46459f9c0ce1fbd17d8020ef039ee74d21314880ddd53"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/ChangliReferenceRepairV71.model3.json",
+      "bytes": 1089,
+      "sha256": "fa1014c2cc8f863f56a7ec3480bfc0dc18d2fc275db56857157cfe8342ede533"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/action-angry_fire.motion3.json",
+      "bytes": 1060,
+      "sha256": "8fa383da2df1861e8e4651dc5867bb719742b2e7cedb3b153aa50d4ead9af37b"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/action-phoenix.motion3.json",
+      "bytes": 1442,
+      "sha256": "70b6ffb90f8d5a5eb34151e0c30770016358ede3e8b3c229599437f7abbe1cbf"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/action-shy.motion3.json",
+      "bytes": 853,
+      "sha256": "6aacdfa0d33077b00947f9dea62d0c3a827c0d5ca6ecf7105bd6abd6f4dfdc32"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/action-sleep.motion3.json",
+      "bytes": 891,
+      "sha256": "1a5b8cbae80a740dfeccc32cb5ab85b604ba40449a54cd75d6d37375cfdf9689"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/action-wave.motion3.json",
+      "bytes": 679,
+      "sha256": "be72d01f41dc9bc9447abe15b14797ab61e8e1ef443e664c3ef3bb21c02209e6"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/bothpress.motion3.json",
+      "bytes": 856,
+      "sha256": "60fbf378d3743c2448618ef3325ac959ddd2b79c2167928b9c5a58b47c4f3013"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/desktop-right-click.motion3.json",
+      "bytes": 606,
+      "sha256": "aa9bcfe765883f80a060bde8e62418c5f472595dcd9d0704e24c073274bf5867"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/desktop-wheel-roll.motion3.json",
+      "bytes": 686,
+      "sha256": "cd7980ea7e37d75418311b1cfe130afdbd239027f5a5337f6624228a47dbf139"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/leftpress.motion3.json",
+      "bytes": 605,
+      "sha256": "51ed6579ccb2571034aefd747e7759d44d2e2b5f298f5a768f75ef1e09ce0b88"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/neutral.exp3.json",
+      "bytes": 454,
+      "sha256": "5a64256436614baf894318cea9d15d33d7187b8e1e129089497dca9bb6e1c16c"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/phoenix-interaction.motion3.json",
+      "bytes": 1666,
+      "sha256": "f76ae435b6f3da093c0831c1758437cea904ea36f190819f2f41a97da4ee31d5"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-angry.exp3.json",
+      "bytes": 954,
+      "sha256": "a8e143bea1f8b6bef23fea0a9ec6d862f9cdc8549532d4b38f4c5029b3d613e9"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-blush.exp3.json",
+      "bytes": 964,
+      "sha256": "40d3c10dc4096b4971a71055dfa53355e20add29e97db4d7555643cd28070a70"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-confused.exp3.json",
+      "bytes": 764,
+      "sha256": "3221a95948ad4e6f2ae6cd7b884563d0ec0cb3aa82ff6ca61b07a963e4aaa53a"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-default.exp3.json",
+      "bytes": 885,
+      "sha256": "57f2379023d8295f4d5e4a48ba9bf5c98b55a587551d9923147efa42578a97d9"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-flame_eyes.exp3.json",
+      "bytes": 948,
+      "sha256": "6ea53ec19c0f75a0618e6e8ac8b904dd69158b43ec1981b4684e2faa3e53cb93"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-laugh.exp3.json",
+      "bytes": 941,
+      "sha256": "b78fb15be3ef0af591a3b0b78ce625795a9cfcebdc1a10a7a76495f920892040"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-phoenix_eyes.exp3.json",
+      "bytes": 944,
+      "sha256": "416b8cbd2e5a9ac50f4243914a4593353c7eaa12ca3a007ef07b201ed92b5cd6"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-pout.exp3.json",
+      "bytes": 954,
+      "sha256": "80feedbda2e1cd397720eb07503b068876b8aa0464fc75de2a6f90b08c2634f8"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-proud.exp3.json",
+      "bytes": 959,
+      "sha256": "69dc945cfc55bce5b7ff1351737d4dd7236846ef36abc66a0ec75d226aac2350"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-resigned.exp3.json",
+      "bytes": 763,
+      "sha256": "c2b0d0d78faadffb71d4b7330a3a252765c849ef35d30865b1debdcde57dfbde"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-serious.exp3.json",
+      "bytes": 949,
+      "sha256": "dfba956e69ad9e77af009f9be44c794526a7ec474f25b63b69ca8c674a4288a5"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-shy.exp3.json",
+      "bytes": 964,
+      "sha256": "5141e5b0023f2ea6667d1343fcc30a6104ffea9946ce8a5f422117189c9537ed"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-sleepy-v075.exp3.json",
+      "bytes": 848,
+      "sha256": "c9b53e0186e897fe5b8b3a0c7fc4be0d82d6be7a88b404ad5850021aa754ea44"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-sleepy.exp3.json",
+      "bytes": 865,
+      "sha256": "384a8dafd33db7677a21692d44b6069f26b2f72d99e4081e7b7f97437121c512"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-smile-v075.exp3.json",
+      "bytes": 668,
+      "sha256": "99cbff7b310fa7bc3abfd74343fad04490641fe78c65547cb7a1f205bf481709"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-smile.exp3.json",
+      "bytes": 665,
+      "sha256": "370d174b9f6019376bfb3eb69c4d6657c455a008aa0418f525dc0f6b3f3fbe96"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-surprised.exp3.json",
+      "bytes": 756,
+      "sha256": "cfba910ca7a4fb4390c327d4edb8e08bb44183f7340b34fbcdd644fa8c94645e"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-think.exp3.json",
+      "bytes": 952,
+      "sha256": "bf4e68e315f77417a85faad648a52f4cf0e43a7b76df683bbced4f4a49240c71"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/reaction-wronged.exp3.json",
+      "bytes": 958,
+      "sha256": "428b4e4c4ad3d015fa895e076771856060a98d9ca78d6e444c64980700a8e722"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/rightpress.motion3.json",
+      "bytes": 606,
+      "sha256": "94fb818935e4ce4d8c57b6ac5f73246b7b03f021b9cbf77e56e8826280925a20"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/secondary-impulse.motion3.json",
+      "bytes": 638,
+      "sha256": "64c3c308a857510715332b1ca57196744e1ee3ebcd209747e0dc2baba4651568"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/sleepy.exp3.json",
+      "bytes": 467,
+      "sha256": "97107b1d8e6c21b43fc7c08268ab0b150ef1c1a4d0d2a2a6735a5776b8819e09"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/smile.exp3.json",
+      "bytes": 467,
+      "sha256": "c9204b09d313ac6019249d2b14a5b7afdf1b6f0dbf6df2685f806c7e60a80403"
+    },
+    {
+      "path": "public/models/changli/live-reference-repair-v71-candidate/surprised.exp3.json",
+      "bytes": 469,
+      "sha256": "fdbf052a47f43f85051fb7591db7ae165cf07cf7798bc5b17afd2f7a2e02b6f2"
+    },
+    {
+      "path": "public/models/changli/preview.jpg",
+      "bytes": 184141,
+      "sha256": "fc87ea0cac9a3c283529585ec52a3909c9149e74c3ba1502d006ac817e132c11"
+    },
+    {
+      "path": "src-tauri/icons/128x128.png",
+      "bytes": 35294,
+      "sha256": "9f10c41660432d18de0243a7ed6512aaebb447f5fafed0a754d973fe2124dc2e"
+    },
+    {
+      "path": "src-tauri/icons/128x128@2x.png",
+      "bytes": 117952,
+      "sha256": "03b6f7527643db8ff3e195444fea22e4048e53f52b0a1caaea4c2525e1aede19"
+    },
+    {
+      "path": "src-tauri/icons/32x32.png",
+      "bytes": 3080,
+      "sha256": "960ea0251f6629760b1f9b59b54de0608183f652a6d9ef705106de6c0c4dadc3"
+    },
+    {
+      "path": "src-tauri/icons/64x64.png",
+      "bytes": 10504,
+      "sha256": "68d8a68429a8e552c7fb6e0a29ca2c7f5cc154d662c05ae081ce4cf48b2b8437"
+    },
+    {
+      "path": "src-tauri/icons/Square107x107Logo.png",
+      "bytes": 25880,
+      "sha256": "8f25c9742c8e4fa65367cc728585c0f234617692198fabfc77b1a091129ecfe9"
+    },
+    {
+      "path": "src-tauri/icons/Square142x142Logo.png",
+      "bytes": 42200,
+      "sha256": "be893d22ca72ac4d8a863fa84d091ec8f2113460686da7d21e8a77ef43bc39db"
+    },
+    {
+      "path": "src-tauri/icons/Square150x150Logo.png",
+      "bytes": 46741,
+      "sha256": "4290a079cd1f23cefee6797344c62fff9257beef25d5e5c5c1363b909d712af2"
+    },
+    {
+      "path": "src-tauri/icons/Square284x284Logo.png",
+      "bytes": 141605,
+      "sha256": "0c65b5cd3f4d541b3ee32e895d81c927b2b49a7ebebda45ea53e83ba59e424c4"
+    },
+    {
+      "path": "src-tauri/icons/Square30x30Logo.png",
+      "bytes": 2751,
+      "sha256": "87994dbdfb28c53979ccf81fbe7298ec04f1caf29ce085fc09b9b37aef9d1af1"
+    },
+    {
+      "path": "src-tauri/icons/Square310x310Logo.png",
+      "bytes": 165315,
+      "sha256": "35b86adc1a1fbaaa9ecf2f222eabfdba38f6d965882584b1e70e27ba01f90adc"
+    },
+    {
+      "path": "src-tauri/icons/Square44x44Logo.png",
+      "bytes": 5296,
+      "sha256": "e4d68745bd9a920ed4043d7d209a271bb5af35d7c3aa3055efce2d4aaa02f5cd"
+    },
+    {
+      "path": "src-tauri/icons/Square71x71Logo.png",
+      "bytes": 12616,
+      "sha256": "ee83f284969d3eee51f5d86ffaa7e653292dc0dd441256b37faed51da22aece2"
+    },
+    {
+      "path": "src-tauri/icons/Square89x89Logo.png",
+      "bytes": 18649,
+      "sha256": "f48f54f07a8c8b40005088c57cc392518327b7cc21f7d8bfa33221d96b14af5a"
+    },
+    {
+      "path": "src-tauri/icons/StoreLogo.png",
+      "bytes": 6652,
+      "sha256": "0249cf8ea120d63deab317dd90dee0521f11b0092c387adc3ee64e8637f497ea"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-hdpi/ic_launcher.png",
+      "bytes": 5067,
+      "sha256": "0249a7d1b57564c77fbebb47a937c54e5c62084fc459fa14fadc24fa0797ad52"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-hdpi/ic_launcher_foreground.png",
+      "bytes": 53458,
+      "sha256": "b829ab6289fead3f9c578049370faa6d9a03a912bad79e02e7417d4fd357305c"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-hdpi/ic_launcher_round.png",
+      "bytes": 5076,
+      "sha256": "ade13fc2e7e5bef9f273e44d5c55ba9511937868f90b525e1cc5248a47bc6939"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-mdpi/ic_launcher.png",
+      "bytes": 4892,
+      "sha256": "c113d57cbe41e9d84198b3cbd9f23d7b95577cb074c84f70da6428155d996540"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-mdpi/ic_launcher_foreground.png",
+      "bytes": 26216,
+      "sha256": "17fa0c617ff2ff61b2483336d4214cc64d8934081a48e3f50a07a75705ca5030"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-mdpi/ic_launcher_round.png",
+      "bytes": 4812,
+      "sha256": "fa786f6cfdde2da48ab535eb87e0428ddb9b18bc9fd160d22120625d686586ae"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xhdpi/ic_launcher.png",
+      "bytes": 16470,
+      "sha256": "ce17bb71ff0985f0fded15964b942b00f6ff9116f7e66cdfbb9b5e405b255bea"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xhdpi/ic_launcher_foreground.png",
+      "bytes": 87825,
+      "sha256": "08179250cb79b1f944a95fd61984b6e49fda630fff6777917b791d93eedad421"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xhdpi/ic_launcher_round.png",
+      "bytes": 16630,
+      "sha256": "ad39840ffc259451db0c17388789a6fb283196e13de3357f55a07b7237abdd2d"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xxhdpi/ic_launcher.png",
+      "bytes": 33438,
+      "sha256": "a22093a4ecccdcd77de87b7c35bc1a68c7f3c1042273f7a8e3aeac27aa908f8a"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_foreground.png",
+      "bytes": 177990,
+      "sha256": "586f24fc37b07afd6bb45fd32398f8820e1ec925cfd356bd0940df21a1e5adcc"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_round.png",
+      "bytes": 34499,
+      "sha256": "352bba423b5974755615e5c3eefdbc4470a33b671377e05420d4accc3877b8b7"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher.png",
+      "bytes": 55340,
+      "sha256": "2ce1bda6b648634fb8559ae0c67550dbb1cac8cb3e0cbfc57836af82f712bdb6"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "bytes": 294546,
+      "sha256": "109e0c2736aa451831c3142585d001448ecd49d7222f49440b944313573d0b4b"
+    },
+    {
+      "path": "src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_round.png",
+      "bytes": 57360,
+      "sha256": "0ae319177161644490fbd3293b90067285cee39dacd393a3e9a975aa0171eb62"
+    },
+    {
+      "path": "src-tauri/icons/icon-source.png",
+      "bytes": 1975342,
+      "sha256": "b1e161b85229855ed4e2a01ff92681756468c9ece3a2b20b2d97bfb3a7293cb2"
+    },
+    {
+      "path": "src-tauri/icons/icon.png",
+      "bytes": 397160,
+      "sha256": "d6ef7690c111ae695f9183fcdd6284a18fd309f74dd5c01ed51bbbcf28deab1d"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-20x20@1x.png",
+      "bytes": 1305,
+      "sha256": "6e905b1cc7305bf16d7c4437bbb7d3326addf3b856da27b4daae56aa9e968fa6"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-20x20@2x-1.png",
+      "bytes": 4325,
+      "sha256": "b5f2fc553e43329d0a92a676e67261a2240ef6c6402848e6dca917d0a2cc7043"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-20x20@2x.png",
+      "bytes": 4325,
+      "sha256": "b5f2fc553e43329d0a92a676e67261a2240ef6c6402848e6dca917d0a2cc7043"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-20x20@3x.png",
+      "bytes": 8888,
+      "sha256": "1ba30a4a1073f654e8c14d63d3f17a21355a31c6ecc354531a4ad2e35eb6efaa"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-29x29@1x.png",
+      "bytes": 2465,
+      "sha256": "a938fb1e7bcd592abe7ee74062c43f712c42a6dd1a15b4e09af8fe9e8b916b5f"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-29x29@2x-1.png",
+      "bytes": 8336,
+      "sha256": "7eb30ae29204185ba1fbc16a9db07d5b3a0df0908fe56ae5a1d0eb04444d2d2f"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-29x29@2x.png",
+      "bytes": 8336,
+      "sha256": "7eb30ae29204185ba1fbc16a9db07d5b3a0df0908fe56ae5a1d0eb04444d2d2f"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-29x29@3x.png",
+      "bytes": 17217,
+      "sha256": "87004ce6d675e918bf589057ecce96a0f3792bd30e46950e7183fb09012c89ca"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-40x40@1x.png",
+      "bytes": 4325,
+      "sha256": "b5f2fc553e43329d0a92a676e67261a2240ef6c6402848e6dca917d0a2cc7043"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-40x40@2x-1.png",
+      "bytes": 14730,
+      "sha256": "2cb6ebc9d681e3a7b85d83abe93353d1192d8b04fc38b34a9f7d4dfff95c76eb"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-40x40@2x.png",
+      "bytes": 14730,
+      "sha256": "2cb6ebc9d681e3a7b85d83abe93353d1192d8b04fc38b34a9f7d4dfff95c76eb"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-40x40@3x.png",
+      "bytes": 30235,
+      "sha256": "1dc229adc8bbaf704bb3007567cb8e77508bbdbb3becc1eb790380d154b48fe5"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-512@2x.png",
+      "bytes": 1297716,
+      "sha256": "029442bc24438812bb20f4f5439d69436ae7d0c3c1fb7ed7eaa81d03772d559d"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-60x60@2x.png",
+      "bytes": 30235,
+      "sha256": "1dc229adc8bbaf704bb3007567cb8e77508bbdbb3becc1eb790380d154b48fe5"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-60x60@3x.png",
+      "bytes": 61878,
+      "sha256": "a6001dbbada2087623e5969aadb82309f241bbf414352a347ae97d4fc2e12bd6"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-76x76@1x.png",
+      "bytes": 13520,
+      "sha256": "42d242486c59f65b84b2f8feb2caa16d7faac8df5f8a0652816e8724ed564771"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-76x76@2x.png",
+      "bytes": 46111,
+      "sha256": "d171ae71b0561b7ae968f941e399ce3212f663405a48d3edfd5c518c2d5ca0ec"
+    },
+    {
+      "path": "src-tauri/icons/ios/AppIcon-83.5x83.5@2x.png",
+      "bytes": 54325,
+      "sha256": "31bedb6a234684dab65019bc264b566850fb1138968dbb13ed3c984b2ab0cfef"
+    },
+    {
+      "path": "tools/live2d-authoring/ChangliHairTailAuthoring.2048/texture_00.png",
+      "bytes": 2672606,
+      "sha256": "907a8fc4e04e99cad8460985cfa92a3de3a22dae94058952e8a7842693d5c390"
+    },
+    {
+      "path": "tools/live2d-authoring/ChangliHairTailAuthoring.2048/texture_01.png",
+      "bytes": 2200018,
+      "sha256": "4853daac4ddce387b08bbd3f278e5d1ba4ff3c8e80f067ef93159be14e60b3e0"
+    },
+    {
+      "path": "tools/live2d-authoring/ChangliHairTailAuthoring.2048/texture_02.png",
+      "bytes": 2397785,
+      "sha256": "13c3c287a1c571b68ec1fa4e7a9cd3999222a289ada898d578eb797321ac1557"
+    },
+    {
+      "path": "tools/live2d-authoring/ChangliHairTailAuthoring.model3.json",
+      "bytes": 322,
+      "sha256": "58dd95a38fcf95af721b153c6f81aa622ffc74b4ae7c0cdb644a0a9e5c4779fe"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/ahoge-v1.png",
+      "bytes": 64901,
+      "sha256": "e77c4461c90b16a1be5924371067399ead0970862b422644db67e45488722ca4"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/bang-center-v1-rejected.png",
+      "bytes": 406937,
+      "sha256": "c170ef5519988926891f238ae0fb2355cf28a4e2a46d26792ed594e0c02b0072"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/bang-center-v2-candidate.png",
+      "bytes": 304621,
+      "sha256": "77ab95642822c2fece56be248b3e62447a574b214a35f0b5956ef6cfffd4f4c8"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/bang-center-v3-rejected.png",
+      "bytes": 320952,
+      "sha256": "86bc904cc80053fdfb270c06e0d36de537e421cc8bd123cccedfcba614829597"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/bang-center-v4-candidate.png",
+      "bytes": 241970,
+      "sha256": "c7e896ff4ca918582302f4e981434c30a984b1fd6df36c03a8bdc122f9914b31"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/bang-underpaint-no-left-v2-candidate.png",
+      "bytes": 1155805,
+      "sha256": "9050de8409dbe87b2e453a11063d690550ca64283110a53481cfae1ae97b4c15"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/bang-underpaint-v1-candidate.png",
+      "bytes": 1192957,
+      "sha256": "d9d6e154b796758b5ef5dd943a630675740ac244e7173341dd57bfbbcdcd32fb"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/changli-closed-eyes-v3-candidate.png",
+      "bytes": 1706195,
+      "sha256": "f58e17c4427204477a982907b5bcf93fe9170c7c2cd640b77db614c596f9a121"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/changli-face-underpaint-v2-candidate.png",
+      "bytes": 1693680,
+      "sha256": "619f20c3eed5bf413d5eb35556bb2b9a819f58a50863c43edc478685ed76d637"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/changli-original-clean-alpha-v1.png",
+      "bytes": 1475119,
+      "sha256": "7af2cf46d902e336aa3f047c5a28694f92232425ac25c9df356d9e05c96a454b"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/closed-eyes-candidate.png",
+      "bytes": 1450359,
+      "sha256": "7f7b271d88783e82ccde80d68276479db58fdc6720d0564d1ba8e869165d1fb7"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/eye-irises-v1-candidate.png",
+      "bytes": 311350,
+      "sha256": "8434a9d8377271420c8f59e42b066e9ff620a0bbda38574f807e7d57cf22f796"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/eye-sclera-rim-v2-candidate.png",
+      "bytes": 140764,
+      "sha256": "33f3307d137dda7236385827a776ddc27bd6d62a8352749bdb93500afca760f1"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/eye-sclera-v1-candidate.png",
+      "bytes": 135107,
+      "sha256": "afaaffff7b8f8e4db5ab4e7231eaf4f64ef511ed42efbab31ef4b2f0ea9d6d29"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/eye-skin-patches-v1-candidate.png",
+      "bytes": 140364,
+      "sha256": "f9425e4c2aa1ff3ce0969af20f15c7be35b66f36b67db7587cd17c7539c9273c"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/eye-skin-underpaint-v1-candidate.png",
+      "bytes": 1139158,
+      "sha256": "08ac3c1d51f4b57132ec0fc13a487f969b59ba7be769016b45d3c4e7a877dad4"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/eye-upper-lashes-v1-candidate.png",
+      "bytes": 136229,
+      "sha256": "c9bada1545c56e93952e850f094c3c3565aba6e52787f0415a55e0d47ace753c"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hair-front-v1.png",
+      "bytes": 576663,
+      "sha256": "f47d5b48a34425a51b7295c7f3f4d420fbcfe2da551d356d3dfbb9f77c03cf7e"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hair-left-v1.png",
+      "bytes": 679037,
+      "sha256": "66b55f56d9b565dae689620a4e1a01c8b138fd7e0493ad7dd98d55a679f4b657"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hair-left-v2-candidate.png",
+      "bytes": 316104,
+      "sha256": "bccf341de2c68e483226d346a3b1fd449ba55dad681e4f0333d772c22c47d45c"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hair-right-v1.png",
+      "bytes": 617620,
+      "sha256": "2f2be4708d371603335972413468e3d816f0f3e07ba49a90bcfa78d4f225801e"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hair-underpaint-v1.png",
+      "bytes": 1198885,
+      "sha256": "b82c553e36e2951c0ac57c839dc94088e86cbf81b7ad52f29d1b2ae600905c9b"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hand-left-v1.png",
+      "bytes": 85840,
+      "sha256": "ceab9329f9a94578755e75e5e78f37faac4527428eb4af8fd77273cd16dda251"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hand-left-v2.png",
+      "bytes": 102624,
+      "sha256": "61908551df936bb6f00855cba91f5f402a893f767a9949d24dae43554eece73c"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hand-right-v1.png",
+      "bytes": 97697,
+      "sha256": "8c13b98e93b3ef3adf97a424d1062d52563ce56c6b0bb0851447d33fccc5b89e"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hand-right-v2.png",
+      "bytes": 92810,
+      "sha256": "60ba23724a0e9428b1fa9fb164fa96ff33ef1854ff59e095fb7f9d57db7243af"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/hand-right-v3.png",
+      "bytes": 118037,
+      "sha256": "9a5d6885e96a0da97e0bf2ba3b33dbe0a1e9356116075e43fb73af9f2def75c5"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/keyboard-facing-character-v1.png",
+      "bytes": 908957,
+      "sha256": "b3260a708084ac2887e51abed89cc4438cd064084f5d9d75c7431b12ce0f4c17"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/left-ornament-patch-v1-rejected.png",
+      "bytes": 722044,
+      "sha256": "7ea1e9a3d2ea55f0d00e829a6afd4e89de4ff9455b5ced348dadc196e686cac9"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/left-ornament-patch-v2-rejected.png",
+      "bytes": 219018,
+      "sha256": "ae7a1f3eada040d20b8a5af1fea4a3177bc2bee5321375128373ff549bbdd8cb"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/no-hands-underpaint-v1.png",
+      "bytes": 1474001,
+      "sha256": "338cfe9aac78223e6831a60415e6c472ed329a389e8a957b6c4f5f9921cd5b72"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/ornament-left-v1-candidate.png",
+      "bytes": 259822,
+      "sha256": "bc632b52ee15f0679ad2cffe0f0af33d06ad0757f72342f1301b4d0e1c09f907"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/ornament-right-v1.png",
+      "bytes": 107598,
+      "sha256": "e346656844807ae6bf714962447842454fda10517dac8c9d500ebd1230ef20a0"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-body-no-wing-v1-candidate.png",
+      "bytes": 205883,
+      "sha256": "5d50bafd9da3f77c278c5e08b062168a371e09d77f1a4a4f27e932cff9c03878"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-body-v1.png",
+      "bytes": 212537,
+      "sha256": "aac91ccf80bd0ce2c54ccf699c937d7a334610b4fd296e734df1dcbf8fd488e7"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-original-body-v1.png",
+      "bytes": 92108,
+      "sha256": "2a88fcdaf2c93235e62a11d9c14237563c5028c402c553f9da06957f1653922e"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-original-extracted-v1.png",
+      "bytes": 118609,
+      "sha256": "9614c973aa515dfae1ff84bb54748a0551ba439ad86f20624c0d05c253bb1c6c"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-original-tail-v1.png",
+      "bytes": 90870,
+      "sha256": "bc1c65c573703e4038548f314ef0646dfe03a91e1fcfff7aa12d2f47191767ed"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-original-wing-v1.png",
+      "bytes": 52169,
+      "sha256": "1f79871f16b2281e46a96167c536f80a502769afd56ce4c33b83a4e2875cdc24"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-tail-v1.png",
+      "bytes": 261430,
+      "sha256": "bac034b39895fadb90e311bb9f70b9ee9d26627bc9247b8635a54d59d65c3b1d"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-tail-v2.png",
+      "bytes": 256304,
+      "sha256": "c1b5f0991af40770ff6e2ee743194a83c68562cf4ed28930bd703e1754fc3340"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-v1.png",
+      "bytes": 258517,
+      "sha256": "45629fa6ca6ac1b54344fc9d21c051f78fdb6bb66aa711a4c278e12e89147e07"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-wing-v1-candidate.png",
+      "bytes": 129522,
+      "sha256": "b00e7879049b5e669aaa9ea1b43e6bb2015da9f045fa9770d6dc17ab44ba7ba0"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/phoenix-wing-v2-candidate.png",
+      "bytes": 73082,
+      "sha256": "1162db8355d05a17ba5e480ccbd7c4aebb8547955d3ed6c0cc88f38c88ee9ad6"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/secondary-underpaint-v1.png",
+      "bytes": 1429260,
+      "sha256": "221f50ee6c899cd2dcbb91725d96b161e53d4fd94d5462586059fa5ef224e99b"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/secondary-underpaint-v2.png",
+      "bytes": 1429751,
+      "sha256": "1f67f1f816981bdb39caaf5a3e863a3afb7b719a2c8bf81f6579d8cf41664342"
+    },
+    {
+      "path": "tools/live2d-authoring/assets/underpaint-no-left-ornament-v1-candidate.png",
+      "bytes": 1397627,
+      "sha256": "1a29d801962348e912866a3a255ca805556d62111a4f185374e48d329fcdb8cb"
+    }
+  ]
+}

@@ -13,7 +13,9 @@
     "desktop": "tauri dev",
     "package:windows": "tauri build --bundles nsis",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "check:repository": "node scripts/check-repository.mjs",
+    "test:repository": "node --test scripts/repository-guard-checks.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "2.11.1",

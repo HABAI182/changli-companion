@@ -60,7 +60,7 @@ npm run desktop
 
 ## 当前完成度
 
-0.7.5通过81个前端测试、12个原生测试、39个Live2D引用检查。实际App WebGL检查9种按键、开心/困倦/生气冒火、移除动作、气泡50%/100%/200%比例；Windows便携EXE实测全局Q/A/U/H四区、透明模型、开心/困倦、气泡、新图标和设置。EXE及NSIS安装包构建成功；本版安装包没有重复安装/卸载验收。多屏/DPI尚未全面验证。
+Windows 0.7.16 与 macOS 0.7.15-macos.1 分开交付与验收；0.7.16 未新增游戏实测。2026-10-17 对当前源码执行：102 个前端测试、19 个 Windows Rust 单元测试、TypeScript 检查和前端生产构建通过，源码与 dist 的 51 项运行引用完整。本轮未重新运行安装器、物理输入、游戏或 macOS；CI 以 Actions 实际结果为准。旧 0.7.5 的检查移至[历史验证](docs/repository-audit/HISTORICAL-VALIDATION.md)，不能替代新版验收。
 
 程序和当前运行资源可用。新增表情由原生Cubism参数与运行时矢量美术组合；动态和轮廓修整部分在运行时实现，未写回CMO3，未产生新的MOC3导出。独立精细原生表情、完整抬臂挥手与袖口/发束最终美术验收仍未全部完成，不能称完整美术正式版，也未宣称达到参考作者同等完成度。详见[交付记录](DELIVERY-0.7.15.md)。
 
@@ -69,3 +69,6 @@ npm run desktop
 角色与参考素材的权利和SDK许可见[第三方说明](THIRD-PARTY-NOTICES.md)。仓库可见性不改变素材许可。
 
 各版本分别留档，下载与源码来源见[版本索引](VERSION-ARCHIVES.md)。旧tag和Release附件不覆盖，新版本使用新的版本号。
+
+
+维护入口：[资产清单](docs/repository-audit/ASSET-INVENTORY.md) · [依赖图](docs/repository-audit/DEPENDENCY-MAP.md) · [许可范围](LICENSE-SCOPE.md) · [发行检查表](docs/RELEASE-CHECKLIST.md)。

@@ -1,9 +1,3 @@
 {
-  "files": [
-    {
-      "path": "authoring/ChangliReferenceRepair-v71-verified.cmo3",
-      "sha256": "849400cb201df17964af540a8dbe6cb0d00b9ec36ea077c6f7dfb3d39c793366",
-      "reason": "Pre-existing public source; migration requires verified independent backups and build/reference checks."
-    }
-  ]
+  "files": []
 }

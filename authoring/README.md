@@ -1,9 +1,11 @@
-# 当前 Cubism 原生源
+# Editable source preservation
 
-`ChangliReferenceRepair-v71-verified.cmo3` 是与当前 v71 MOC3 对应、已验证的 Cubism 工程源。
+`ChangliReferenceRepair-v71-verified.cmo3` (55,314,208 bytes) is the verified editable source corresponding to the active v71 export. It has been removed from current public HEAD after source-only dependency checks and two independent recoverable backups: access-controlled private Git storage (cloned back) and persistent local storage. Both match SHA256:
 
-SHA256：`849400CB201DF17964AF540A8DBE6CB0D00B9EC36EA077C6F7DFB3D39C793366`。
+`849400cb201df17964af540a8dbe6cb0d00b9ec36ea077c6f7dfb3d39c793366`
 
-0.7.3 的手部轮廓裁切、尾羽加长、大头弹性和火苗弯曲在程序运行时实现，配置位于 `public/models/changli/model.json`，代码位于 `src/renderer/live2d/` 和 `src/pet/`。它们尚未烘焙成新的 Cubism 源或 MOC3。
+The maintainer retains the editable file for Cubism editing/re-export/recovery. Access is private; ordinary app users and public source builds do not need it. No role/character or third-party license is granted by possession or private storage. This does **not** remove the previously public source from Git history, forks, clones, source archives or old Releases.
 
-未验收的工作源与历代模型留在本机，未作为已验证工程上传。历史制作脚本可能依赖本机旧模型或制作环境；当前程序构建只需要仓库内的 v71 模型。
+Runtime MOC3, model3, motions, expressions, physics, textures, cropped art, icon and download URLs remain unchanged. The current application builds entirely from those runtime resources. Runtime hand contour, tail/head elasticity and flame changes remain in `public/models/changli/model.json` and `src/renderer/live2d/` / `src/pet/`; they are not a new CMO3 export. Historical authoring tools may still require local sources.
+
+Restoration: obtain the preserved file from the maintainer/private vault and verify its size/SHA256 before opening Cubism; no need to restore it to public Git. Reverting the source migration commit is an engineering rollback that would make the historical file public in HEAD again, so use that route only if needed. Historical baseline metadata is retained in [assets.json](../docs/repository-audit/assets.json); exact migration facts in [source-migration.json](../docs/repository-audit/source-migration.json).

@@ -1,6 +1,6 @@
 # 公测安全与隐私说明
 
-当前安全检查日期：2026-10-12，版本 0.7.12（继承0.7.10依赖修复）。安全检查是有范围的检查，不是“绝对安全”保证。
+历史安全检查日期：2026-10-12，版本 0.7.12（继承0.7.10依赖修复）。安全检查是有范围的检查，不是“绝对安全”保证。
 
 - 完整 Git 历史以 Gitleaks 8.30.1 扫描；唯一排除是公开的 localStorage 名 `changli-companion-v1`，不是凭据。检测报告保留在本机，避免把报告中的个人信息发布出去。
 - npm 依赖中的 source-map-js 已固定升级为 1.2.2，修复 [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)。更新后的 npm audit 为 0 项已知漏洞。
@@ -18,3 +18,8 @@ GitHub公开仓库已开启密钥扫描、密钥推送保护、依赖告警和�
 发现敏感数据泄漏时请不要把秘密贴在公开 issue；使用[私密漏洞报告入口](https://github.com/HABAI182/changli-companion/security/advisories/new)。一般界面/模型问题可以提交 issue，请遮挡截图中的个人信息，附版本、Windows 版本、缩放比例与复现步骤。
 
 SDK 与素材许可见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 和 [LICENSE-RUNTIME.txt](LICENSE-RUNTIME.txt)。视觉素材来源依据用户声明，项目不代表角色权利人或参考作者。
+
+
+## 2026-10-17 工程治理复核
+
+本轮针对当前源码运行 npm ci（audit 为 0 已知漏洞）、102 个前端测试、类型检查和生产构建，并核对打包资源、CSP 与固定 GitHub 入口。另对已克隆可达历史的 2MB 以下文本 blob 进行了四类凭据标记与本机路径检查；四类凭据未命中，历史本机路径有命中，详细原值不公开。该检查不是完整 Gitleaks/熵检测或新的全平台安全认证，也不把上方 0.7.12 的 Rust/Gitleaks 记录改写成 0.7.16 复审。新增最小权限 CI 与源资产 allowlist；后续原生/依赖验证以实际报告为准。
